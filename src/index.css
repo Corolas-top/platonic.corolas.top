@@ -1,0 +1,90 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 0%;
+    --foreground: 0 0% 100%;
+    --card: 0 0% 3%;
+    --card-foreground: 0 0% 100%;
+    --popover: 0 0% 2%;
+    --popover-foreground: 0 0% 100%;
+    --primary: 328 100% 54%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 0 0% 8%;
+    --secondary-foreground: 0 0% 100%;
+    --muted: 0 0% 12%;
+    --muted-foreground: 0 0% 60%;
+    --accent: 328 100% 54%;
+    --accent-foreground: 0 0% 100%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 0 0% 14%;
+    --input: 0 0% 14%;
+    --ring: 328 100% 54%;
+    --radius: 0.75rem;
+    --sidebar-background: 0 0% 2%;
+    --sidebar-foreground: 0 0% 100%;
+    --sidebar-primary: 328 100% 54%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 0 0% 10%;
+    --sidebar-accent-foreground: 0 0% 100%;
+    --sidebar-border: 0 0% 14%;
+    --sidebar-ring: 328 100% 54%;
+
+    --pink-primary: #FF1493;
+    --pink-soft: #FFB6C1;
+    --pink-bright: #FF69B4;
+    --red-deep: #FF0000;
+    --purple-melancholy: #8B008B;
+    --purple-longing: #C71585;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  html {
+    scroll-behavior: smooth;
+  }
+  body {
+    @apply bg-black text-white antialiased;
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  }
+}
+
+@layer components {
+  .glass-dark {
+    @apply bg-white/5 backdrop-blur-xl border border-white/10;
+  }
+  .glass-pink {
+    @apply bg-[#FF1493]/5 backdrop-blur-xl border border-[#FF1493]/20;
+  }
+  .text-gradient-pink {
+    @apply bg-gradient-to-r from-[#FF1493] via-[#FF69B4] to-[#FFB6C1] bg-clip-text text-transparent;
+  }
+  .btn-magnetic {
+    @apply relative overflow-hidden transition-all duration-300 ease-out;
+  }
+  .input-glow:focus {
+    @apply outline-none ring-1 ring-[#FF1493]/50 shadow-[0_0_20px_rgba(255,20,147,0.15)];
+  }
+}
+
+@layer utilities {
+  .ambient-breathe {
+    animation: ambientBreathe var(--breathe-duration, 4s) ease-in-out infinite;
+  }
+  @keyframes ambientBreathe {
+    0%, 100% {
+      transform: scale(1);
+      opacity: var(--breathe-opacity-min, 0.03);
+    }
+    50% {
+      transform: scale(1.05);
+      opacity: var(--breathe-opacity-max, 0.08);
+    }
+  }
+}
