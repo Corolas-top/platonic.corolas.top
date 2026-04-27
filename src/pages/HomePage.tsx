@@ -114,7 +114,7 @@ export default function HomePage() {
                 {companion?.avatar_url ? (
                   <img src={companion.avatar_url} alt="" className="w-full h-full object-cover" />
                 ) : (
-                  <img src="/platonic-logo.png" alt="" className="w-10 h-10 object-contain" />
+                  <img src="/platonic-logo.png" alt="" className="w-14 h-14 object-contain" />
                 )}
               </div>
               <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-[#FF1493] rounded-full border-2 border-black animate-pulse" />

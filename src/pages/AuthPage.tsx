@@ -6,7 +6,7 @@ import { useStore } from "../store";
 import { useLang } from "../context/LangContext";
 import {
   Mail, ArrowLeft, Eye, EyeOff, Shield, CheckCircle,
-  AlertTriangle, Lock, Loader2, X, FileText,
+  AlertTriangle, Lock, Loader2, X, FileText, User,
 } from "lucide-react";
 
 function validatePassword(pwd: string): { valid: boolean; errors: string[] } {
@@ -166,10 +166,14 @@ export default function AuthPage() {
     }
   };
 
+  const [username, setUsername] = useState("");
+
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
     if (!validateEmail(email)) { setError(t("errorEmail")); return; }
+    if (!username.trim()) { setError(t("errorUsername")); return; }
+    if (username.trim().length < 2 || username.trim().length > 20) { setError(t("errorUsernameLen")); return; }
     const pwdCheck = validatePassword(password);
     if (!pwdCheck.valid) { setError(`${t("errorPwdStrength")}: ${pwdCheck.errors.join(", ")}`); return; }
     if (password !== confirmPassword) { setError(t("errorPwdMatch")); return; }
@@ -193,9 +197,16 @@ export default function AuthPage() {
         return;
       }
 
-      // Create user_preferences record with email_verified=false
+      // Create user_preferences record + save username
       if (data.user) {
         await supabase.rpc("ensure_user_prefs", { p_user_id: data.user.id });
+        // Save username to profile
+        await supabase.from("profiles").upsert({
+          id: data.user.id,
+          username: username.trim(),
+          display_name: username.trim(),
+          updated_at: new Date().toISOString(),
+        }, { onConflict: "id" });
       }
 
       setNeedsEmailVerify(true);
@@ -240,7 +251,7 @@ export default function AuthPage() {
   };
 
   const resetAll = () => {
-    setEmail(""); setPassword(""); setConfirmPassword("");
+    setEmail(""); setPassword(""); setConfirmPassword(""); setUsername("");
     setAgreedTerms(false); setAgreedPrivacy(false); setError("");
     setNeedsEmailVerify(false);
   };
@@ -359,6 +370,13 @@ export default function AuthPage() {
           <AnimatePresence>
             {mode === "register" && (
               <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }} className="overflow-hidden space-y-3">
+                <div>
+                  <label className="flex items-center gap-1 text-white/40 text-[10px] mb-1 ml-1"><User className="w-3 h-3" />{t("username")}</label>
+                  <input type="text" value={username} onChange={(e) => setUsername(e.target.value)}
+                    placeholder={t("usernamePlaceholder")}
+                    className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2.5 text-sm text-white placeholder:text-white/20 focus:outline-none focus:border-[#FF1493]/50 transition-all" required />
+                  <p className="text-[9px] text-white/20 mt-1 ml-1">{t("usernameHint")}</p>
+                </div>
                 <div>
                   <label className="flex items-center gap-1 text-white/40 text-[10px] mb-1 ml-1"><Lock className="w-3 h-3" />{t("confirmPassword")}</label>
                   <input type={showPassword ? "text" : "password"} value={confirmPassword}

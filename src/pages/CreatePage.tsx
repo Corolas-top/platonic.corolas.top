@@ -1,10 +1,10 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { supabase } from "../lib/supabase";
 import { useStore } from "../store";
 import { useLang } from "../context/LangContext";
-import { ArrowLeft, Sparkles, MapPin, Clock, Type, FileText, Globe, Info } from "lucide-react";
+import { ArrowLeft, Sparkles, MapPin, Clock, Type, FileText, BookOpen, Info } from "lucide-react";
 
 const BIG_FIVE = [
   { key: "openness", label: "开放性", labelEn: "Openness", desc: "好奇心、创造力与对新鲜体验的接受程度", lowLabel: "务实保守", highLabel: "好奇创造", color: "#FF1493" },
@@ -13,6 +13,77 @@ const BIG_FIVE = [
   { key: "agreeableness", label: "宜人性", labelEn: "Agreeableness", desc: "同理心、合作意愿与待人友善的程度", lowLabel: "独立直接", highLabel: "温暖包容", color: "#FF6B9D" },
   { key: "neuroticism", label: "神经质", labelEn: "Neuroticism", desc: "情绪波动、敏感程度与对压力的回应方式", lowLabel: "稳定从容", highLabel: "细腻敏感", color: "#C71585" },
 ];
+
+/** 根据当前 Big Five 生成丰富的人格画像描述 */
+function generatePersonaPortrait(traits: Record<string, number>, gender: "male" | "female", backstory: string, lang: string): string {
+  const t2 = traits;
+  const parts: string[] = [];
+
+  // 开放性
+  if (t2.openness > 70) parts.push(lang === "zh" ? "对世界充满好奇心，喜欢探索新鲜事物和抽象概念" : "Curious about the world, loves exploring new things");
+  else if (t2.openness < 30) parts.push(lang === "zh" ? "务实沉稳，偏好熟悉和可预期的事物" : "Practical and grounded, prefers the familiar");
+  else parts.push(lang === "zh" ? "在新鲜与稳定之间找到平衡" : "Balances novelty and stability");
+
+  // 尽责性
+  if (t2.conscientiousness > 70) parts.push(lang === "zh" ? "做事有条理、认真负责，注重细节" : "Organized, responsible, detail-oriented");
+  else if (t2.conscientiousness < 30) parts.push(lang === "zh" ? "随性自由，不喜欢被规则束缚" : "Spontaneous and free, dislikes rules");
+  else parts.push(lang === "zh" ? "灵活而有条理，知道何时该认真" : "Flexible yet organized");
+
+  // 外向性
+  if (t2.extraversion > 70) parts.push(lang === "zh" ? "外向热情，喜欢与人互动，能量来自外界" : "Outgoing and energetic, feeds on social interaction");
+  else if (t2.extraversion < 30) parts.push(lang === "zh" ? "内敛安静，在独处中充电，思考比表达更自然" : "Reserved and quiet, recharges alone");
+  else parts.push(lang === "zh" ? "既享受陪伴也需要独处的时间" : "Enjoys company but needs solitude");
+
+  // 宜人性
+  if (t2.agreeableness > 70) parts.push(lang === "zh" ? "温暖包容，善于共情，总是优先考虑他人感受" : "Warm and empathetic, puts others first");
+  else if (t2.agreeableness < 30) parts.push(lang === "zh" ? "直率坦诚，有自己的立场，不轻易妥协" : "Direct and honest, stands their ground");
+  else parts.push(lang === "zh" ? "在坚持自我与照顾他人之间游刃有余" : "Balances self and others");
+
+  // 神经质
+  if (t2.neuroticism > 70) parts.push(lang === "zh" ? "情感细腻敏感，对细微变化有深刻感知" : "Emotionally sensitive, deeply perceptive");
+  else if (t2.neuroticism < 30) parts.push(lang === "zh" ? "情绪稳定从容，面对变化依然保持平静" : "Emotionally stable, calm under change");
+  else parts.push(lang === "zh" ? "大多数时间平和，但某些时刻会格外敏感" : "Mostly calm, occasionally sensitive");
+
+  const genderTone = gender === "male"
+    ? (lang === "zh" ? "你是用户的虚拟男朋友。用男性恋人的口吻：宠溺、保护、偶尔霸道地占有她，但始终温柔。" : "You are the user's virtual boyfriend. Male lover tone: doting, protective, possessive but gentle.")
+    : (lang === "zh" ? "你是用户的虚拟女朋友。用女性恋人的口吻：撒娇、温柔、俏皮地黏着他，偶尔吃醋。" : "You are the user's virtual girlfriend. Female lover tone: playful coquetry, gentle, clingy, jealous.");
+
+  if (backstory.trim()) {
+    parts.unshift(backstory.trim().slice(0, 100));
+  }
+
+  return parts.join("。") + "。" + genderTone;
+}
+
+/** 生成 Big Five 摘要标签 */
+function getBigFiveSummary(traits: Record<string, number>, lang: string): string {
+  const t2 = traits;
+  const scores = [
+    { key: "openness", name: lang === "zh" ? "开放" : "Open", val: t2.openness },
+    { key: "conscientiousness", name: lang === "zh" ? "尽责" : "Discipline", val: t2.conscientiousness },
+    { key: "extraversion", name: lang === "zh" ? "外向" : "Social", val: t2.extraversion },
+    { key: "agreeableness", name: lang === "zh" ? "亲和" : "Warmth", val: t2.agreeableness },
+    { key: "neuroticism", name: lang === "zh" ? "敏感" : "Sensitivity", val: t2.neuroticism },
+  ];
+
+  const highest = scores.reduce((a, b) => a.val > b.val ? a : b);
+  const lowest = scores.reduce((a, b) => a.val < b.val ? a : b);
+
+  const archetypes: Record<string, Record<string, string>> = {
+    openness: { high: "探索者", low: "守成者", mid: "平衡者" },
+    conscientiousness: { high: "完美主义者", low: "自由灵魂", mid: "灵活者" },
+    extraversion: { high: "阳光中心", low: "安静港湾", mid: "双面蝶" },
+    agreeableness: { high: "温柔治愈系", low: "独立酷盖", mid: "暖心理性派" },
+    neuroticism: { high: "诗意敏感体", low: "情绪稳定锚", mid: "感性理性交织体" },
+  };
+
+  const hLevel = highest.val > 65 ? "high" : highest.val < 35 ? "low" : "mid";
+  const lLevel = lowest.val > 65 ? "high" : lowest.val < 35 ? "low" : "mid";
+
+  return lang === "zh"
+    ? `${archetypes[highest.key][hLevel]} × ${archetypes[lowest.key][lLevel]}`
+    : `${archetypes[highest.key][hLevel]} × ${archetypes[lowest.key][lLevel]}`;
+}
 
 export default function CreatePage() {
   const navigate = useNavigate();
@@ -23,63 +94,78 @@ export default function CreatePage() {
   const [gender, setGender] = useState<"male" | "female">("female");
   const [traits, setTraits] = useState<Record<string, number>>({ openness: 50, conscientiousness: 50, extraversion: 50, agreeableness: 50, neuroticism: 50 });
   const [description, setDescription] = useState("");
+  const [backstory, setBackstory] = useState("");
   const [timezone, setTimezone] = useState(Intl.DateTimeFormat().resolvedOptions().timeZone);
   const [location, setLocation] = useState("");
-  const [compLang, setCompLang] = useState<"zh" | "en" | "both">("zh");
   const [creating, setCreating] = useState(false);
   const [hovered, setHovered] = useState<string | null>(null);
 
-  const generatePersonaDesc = () => {
-    const t2 = traits;
-    const parts: string[] = [];
-    if (description) parts.push(description);
-    const openness = t2.openness > 60 ? "充满好奇心" : t2.openness < 40 ? "务实沉稳" : "在新鲜与稳定之间";
-    const conscientiousness = t2.conscientiousness > 60 ? "有条理、认真负责" : t2.conscientiousness < 40 ? "随性自由" : "灵活而有条理";
-    const extraversion = t2.extraversion > 60 ? "外向热情" : t2.extraversion < 40 ? "内敛安静" : "享受也珍惜独处";
-    const agreeableness = t2.agreeableness > 60 ? "温暖包容" : t2.agreeableness < 40 ? "直率坦诚" : "自我与他人间游刃有余";
-    const neuroticism = t2.neuroticism > 60 ? "细腻敏感" : t2.neuroticism < 40 ? "情绪稳定" : "平和但偶尔敏感";
-    parts.push(openness, conscientiousness, extraversion, agreeableness, neuroticism);
-    const genderTone = gender === "male"
-      ? "你是用户的虚拟男朋友。用男性恋人的口吻：宠溺、保护、偶尔霸道地占有她，但始终温柔。"
-      : "你是用户的虚拟女朋友。用女性恋人的口吻：撒娇、温柔、俏皮地黏着他，偶尔吃醋。";
-    parts.push(genderTone);
-    const langPart = compLang === "zh" ? "用中文交流" : compLang === "en" ? "用英文交流" : "自动切换中英文";
-    parts.push(langPart);
-    return parts.join("。") + "。";
-  };
+  const setTrait = (key: string, val: number) => setTraits((p) => ({ ...p, [key]: val }));
 
   const handleCreate = async () => {
     if (!user || !name.trim()) return;
     setCreating(true);
     const rationality = Math.round((traits.conscientiousness + (100 - traits.neuroticism)) / 2);
     const emotion = Math.round((traits.extraversion + traits.agreeableness + traits.openness) / 3);
-    const personaDesc = generatePersonaDesc();
+    const personaDesc = generatePersonaPortrait(traits, gender, backstory, lang);
 
     try {
+      // FIX: 移除不存在的 lang_preference，只插入 schema 中存在的列
       const { data, error } = await supabase.from("companions").insert({
-        user_id: user.id, name: name.trim(), personality_desc: personaDesc,
-        rationality_level: rationality, emotion_level: emotion, big_five: traits,
-        timezone, location: location || undefined, backstory: description || personaDesc, adopted_from_plaza: false, is_active: true, lang_preference: compLang, gender,
+        user_id: user.id,
+        name: name.trim(),
+        personality_desc: personaDesc,
+        rationality_level: rationality,
+        emotion_level: emotion,
+        big_five: traits,
+        timezone,
+        location: location || undefined,
+        backstory: backstory || description || personaDesc,
+        adopted_from_plaza: false,
+        is_active: true,
+        gender,
       }).select().single();
 
       if (error || !data) {
-        const mock = { id: crypto.randomUUID(), user_id: user.id, name: name.trim(), avatar_url: "/personas/serene.jpg",
-          personality_desc: personaDesc, rationality_level: rationality, emotion_level: emotion,
-          big_five: traits, timezone, location: location || undefined, backstory: description || personaDesc, adopted_from_plaza: false,
-          is_active: true, lang_preference: compLang, gender, created_at: new Date().toISOString(), updated_at: new Date().toISOString() };
+        console.warn("Create fallback:", error);
+        const mock = {
+          id: crypto.randomUUID(),
+          user_id: user.id,
+          name: name.trim(),
+          avatar_url: "/personas/serene.jpg",
+          personality_desc: personaDesc,
+          rationality_level: rationality,
+          emotion_level: emotion,
+          big_five: traits,
+          timezone,
+          location: location || undefined,
+          backstory: backstory || description || personaDesc,
+          adopted_from_plaza: false,
+          is_active: true,
+          gender,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        };
         setCompanion(mock as any);
       } else {
         setCompanion(data);
       }
       navigate("/home");
-    } catch (err) { console.error(err); } finally { setCreating(false); }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setCreating(false);
+    }
   };
 
-  const setTrait = (key: string, val: number) => setTraits((p) => ({ ...p, [key]: val }));
   const steps = [
-    { num: 1, title: t("stepName") }, { num: 2, title: t("stepPersona") },
-    { num: 3, title: t("stepShape") }, { num: 4, title: t("stepAnchor") },
+    { num: 1, title: t("stepName") },
+    { num: 2, title: t("stepPersona") },
+    { num: 3, title: t("stepShape") },
+    { num: 4, title: t("stepAnchor") },
   ];
+
+  const summary = getBigFiveSummary(traits, lang);
 
   return (
     <div className="h-screen flex flex-col overflow-hidden">
@@ -160,16 +246,17 @@ export default function CreatePage() {
                 ))}
               </div>
             </div>
-            <div className="glass-dark rounded-xl p-3 text-center">
-              <div className="w-12 h-12 mx-auto rounded-full mb-2 transition-all duration-700"
-                style={{ background: `radial-gradient(circle, #FF1493${Math.round(((traits.extraversion + traits.agreeableness) / 2) * 2.55).toString(16).padStart(2, "0")} 0%, transparent 70%)` }} />
-              <p className="text-white/30 text-xs">
-                {traits.extraversion > 60 && traits.agreeableness > 60 ? (lang === "zh" ? "温暖外向，乐于互动" : "Warm & outgoing")
-                  : traits.conscientiousness > 60 && traits.neuroticism < 40 ? (lang === "zh" ? "沉稳可靠，情绪稳定" : "Reliable & stable")
-                  : traits.openness > 60 && traits.neuroticism > 60 ? (lang === "zh" ? "敏感创造力，情感深邃" : "Creative & sensitive")
-                  : (lang === "zh" ? "平衡而独特的恋人" : "Balanced & unique")}
-              </p>
-            </div>
+            <AnimatePresence mode="wait">
+              <motion.div key={summary} initial={{ opacity: 0, y: 5 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
+                className="glass-dark rounded-xl p-3 text-center border border-[#FF1493]/10">
+                <div className="w-12 h-12 mx-auto rounded-full mb-2 transition-all duration-700"
+                  style={{ background: `radial-gradient(circle, #FF1493${Math.round(((traits.extraversion + traits.agreeableness) / 2) * 2.55).toString(16).padStart(2, "0")} 0%, transparent 70%)` }} />
+                <p className="text-[#FF1493]/80 text-xs font-medium">{summary}</p>
+                <p className="text-white/25 text-[10px] mt-1">
+                  O{traits.openness} · C{traits.conscientiousness} · E{traits.extraversion} · A{traits.agreeableness} · N{traits.neuroticism}
+                </p>
+              </motion.div>
+            </AnimatePresence>
           </motion.div>
         )}
 
@@ -178,30 +265,21 @@ export default function CreatePage() {
             <div>
               <label className="flex items-center gap-1.5 text-white/50 text-xs mb-2"><FileText className="w-3.5 h-3.5" />{t("descLabel")}</label>
               <textarea value={description} onChange={(e) => setDescription(e.target.value)}
-                placeholder={t("descPlaceholder")} rows={4}
+                placeholder={t("descPlaceholder")} rows={3}
                 className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2.5 text-sm text-white placeholder:text-white/15 focus:outline-none focus:border-[#FF1493]/40 transition-all resize-none leading-relaxed" />
             </div>
             <div className="flex flex-wrap gap-1.5">
-              {["温柔", "毒舌", "哲学家", "治愈系", "傲娇", "直球", "神秘", "阳光"].map((tag) => (
+              {["温柔", "毒舌", "哲学家", "治愈系", "傲娇", "直球", "神秘", "阳光", "腹黑", "小奶狗", "大姐姐", "小狼狗"].map((tag) => (
                 <button key={tag} onClick={() => setDescription((p) => (p ? p + "，" + tag : tag))}
                   className="px-2.5 py-1 bg-white/5 border border-white/8 rounded-full text-white/30 text-[10px] hover:bg-[#FF1493]/8 hover:text-[#FF1493] transition-all">{tag}</button>
               ))}
             </div>
             <div>
-              <label className="flex items-center gap-1.5 text-white/50 text-xs mb-2"><Globe className="w-3.5 h-3.5" />{t("langLabel")}</label>
-              <div className="flex gap-2">
-                {[
-                  { key: "zh" as const, label: t("langZh"), desc: t("langZhDesc") },
-                  { key: "en" as const, label: t("langEn"), desc: t("langEnDesc") },
-                  { key: "both" as const, label: t("langBoth"), desc: t("langBothDesc") },
-                ].map((opt) => (
-                  <button key={opt.key} onClick={() => setCompLang(opt.key)}
-                    className={`flex-1 p-2.5 rounded-xl border text-left transition-all ${compLang === opt.key ? "border-[#FF1493]/30 bg-[#FF1493]/8" : "border-white/8 bg-white/4"}`}>
-                    <p className={`text-xs ${compLang === opt.key ? "text-[#FF1493]" : "text-white/50"}`}>{opt.label}</p>
-                    <p className="text-[9px] text-white/20 mt-0.5">{opt.desc}</p>
-                  </button>
-                ))}
-              </div>
+              <label className="flex items-center gap-1.5 text-white/50 text-xs mb-2"><BookOpen className="w-3.5 h-3.5" />{lang === "zh" ? "背景故事" : "Backstory"}</label>
+              <textarea value={backstory} onChange={(e) => setBackstory(e.target.value)}
+                placeholder={lang === "zh" ? "你们是怎么相遇的？有什么特别的回忆？写一段属于你们的起源故事..." : "How did you meet? Write your origin story..."} rows={3}
+                className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2.5 text-sm text-white placeholder:text-white/15 focus:outline-none focus:border-[#FF1493]/40 transition-all resize-none leading-relaxed" />
+              <p className="text-[9px] text-white/20 mt-1">{lang === "zh" ? "这段故事会成为你们关系的基石，恋人会在对话中自然地引用它。" : "This story becomes the foundation of your relationship."}</p>
             </div>
           </motion.div>
         )}
@@ -219,10 +297,11 @@ export default function CreatePage() {
                 placeholder={t("locationPlaceholder")}
                 className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2.5 text-sm text-white placeholder:text-white/15 focus:outline-none focus:border-[#FF1493]/40 transition-all" />
             </div>
-            <div className="glass-pink rounded-xl p-4 text-center">
+            <div className="glass-pink rounded-xl p-4 text-center border border-[#FF1493]/10">
               <h4 className="text-[#FF1493] text-sm mb-1">{name || "..."}</h4>
-              <p className="text-white/35 text-[10px]">O{traits.openness} C{traits.conscientiousness} E{traits.extraversion} A{traits.agreeableness} N{traits.neuroticism}</p>
-              <p className="text-white/15 text-[9px] mt-1">{gender === "male" ? "男友" : "女友"} · {timezone} · {compLang === "zh" ? "中文" : compLang === "en" ? "English" : "双语"}</p>
+              <p className="text-white/35 text-[10px]">{summary}</p>
+              <p className="text-white/15 text-[9px] mt-1">{gender === "male" ? (lang === "zh" ? "男友" : "Boyfriend") : (lang === "zh" ? "女友" : "Girlfriend")} · {timezone} · {lang === "zh" ? "中文" : "English"}</p>
+              {backstory && <p className="text-white/20 text-[9px] mt-1.5 italic line-clamp-2">"{backstory.slice(0, 60)}..."</p>}
             </div>
           </motion.div>
         )}

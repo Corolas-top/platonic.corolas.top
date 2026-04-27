@@ -6,13 +6,16 @@ export type Mood =
   | "desire"
   | "melancholy"
   | "excited"
-  | "protective";
+  | "protective"
+  | "possessive"
+  | "shy"
+  | "playful_angry";
 
 export interface EmotionState {
   mood: Mood;
-  intensity: number; // 0-1
-  valence: number; // -1 to 1 (negative to positive)
-  arousal: number; // 0 to 1 (calm to excited)
+  intensity: number;
+  valence: number;
+  arousal: number;
 }
 
 export interface Companion {
@@ -33,7 +36,6 @@ export interface Companion {
   timezone: string;
   location?: string;
   backstory?: string;
-  lang_preference?: "zh" | "en" | "both";
   gender?: "male" | "female";
   created_at: string;
   updated_at: string;
@@ -82,7 +84,7 @@ export interface Memory {
   user_id: string;
   content: string;
   memory_type: "short_term" | "long_term" | "milestone";
-  importance_score: number; // 0-1
+  importance_score: number;
   embedding?: number[];
   source_message_id?: string;
   created_at: string;
@@ -92,9 +94,9 @@ export interface RelationshipStats {
   id: string;
   companion_id: string;
   user_id: string;
-  bond_level: number; // 1-100
-  intimacy_score: number; // 0-100
-  trust_score: number; // 0-100
+  bond_level: number;
+  intimacy_score: number;
+  trust_score: number;
   total_messages: number;
   days_together: number;
   first_interaction: string;
@@ -118,13 +120,13 @@ export interface RelationshipEvent {
     | "shared_memory";
   description: string;
   bond_delta: number;
+  metadata?: Record<string, any>;
   created_at: string;
 }
 
 export interface UserProfile {
   id: string;
   email?: string;
-  phone?: string;
   display_name?: string;
   avatar_url?: string;
   created_at: string;
@@ -137,4 +139,12 @@ export interface AmbientProfile {
   opacityMin: number;
   opacityMax: number;
   particleChaos: number;
+}
+
+// 记忆日历条目
+export interface MemoryCalendarEntry {
+  date: string;
+  count: number;
+  hasMilestone: boolean;
+  preview: string;
 }
