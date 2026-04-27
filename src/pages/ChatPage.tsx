@@ -158,7 +158,6 @@ export default function ChatPage() {
 
     const trimmedInput = input.trim();
 
-    // 1. 乐观更新：立即显示用户消息
     const userMsg: Message = {
       id: crypto.randomUUID(),
       companion_id: companion.id,
@@ -177,16 +176,14 @@ export default function ChatPage() {
     let emotion: EmotionState = { mood: "calm", intensity: 0.4, valence: 0.5, arousal: 0.4 };
     let edgeFunctionSuccess = false;
 
-    // 2. 请求 Edge Function
     try {
       const { data: efData, error: efErr } = await supabase.functions.invoke("chat", {
         body: {
           message: trimmedInput,
           companionId: companion.id,
-          // 不再传 userId，由后端从 JWT 解析
           companionName: companion.name,
           personalityDesc: companion.personality_desc,
-          lang, // <-- 新增：传递当前语言
+          lang,
           history: messages.slice(-10).map((m) => ({
             role: m.role === "companion" ? "assistant" : "user",
             content: m.content,
@@ -194,42 +191,34 @@ export default function ChatPage() {
         },
       });
 
-      // 关键修复 A：HTTP/网络层错误（4xx/5xx 都会进这里）
+      // HTTP/网络层错误（4xx/5xx）
       if (efErr) {
-        console.error("Edge Function HTTP/Network error:", efErr);
+        console.error("Edge Function HTTP error:", efErr);
         throw new Error("EDGE_FUNCTION_FAILED");
       }
 
-      // 关键修复 B：业务层错误（双重保险，防止后端意外返回 200 + error payload）
+      // 业务层错误（虽然后端已改为非 2xx，但双重保险）
       if (efData?.error) {
-        console.error("Edge Function business error:", efData.error, efData.detail);
+        console.error("Edge Function business error:", efData.error);
         throw new Error("EDGE_FUNCTION_BUSINESS_ERROR");
       }
 
-      // 成功
       if (efData?.response) {
         responseText = efData.response;
         emotion = efData.emotion || emotion;
         edgeFunctionSuccess = true;
-
-        // 同步伴侣情绪到本地 store
-        if (efData.emotion) {
-          updateFromEmotion(efData.emotion);
-        }
+        if (efData.emotion) updateFromEmotion(efData.emotion);
       } else {
         throw new Error("EMPTY_RESPONSE");
       }
     } catch (err) {
-      // 3. 安全降级：只用本地模拟池，绝不暴露 API Key
       console.warn("Edge Function failed, using simulation fallback:", err);
       responseText = getSimResponse(trimmedInput);
       emotion = emotionFromText(responseText);
     }
 
-    // 4. 模拟打字延迟（保持体验）
     await new Promise((r) => setTimeout(r, 800 + Math.random() * 1200));
 
-    // 5. 显示 AI 回复
     const companionMsg: Message = {
       id: crypto.randomUUID(),
       companion_id: companion.id,
@@ -244,18 +233,15 @@ export default function ChatPage() {
     updateFromEmotion(emotion);
     setIsTyping(false);
 
-    // 6. 兜底：如果 Edge Function 完全失败，前端补存到数据库
-    //    如果 EF 成功，它已保存过；由于 id 是前端生成的 UUID，
-    //    若与后端重复，RLS + 主键冲突会阻止或报错，这里静默处理即可
+    // 只有 EF 完全失败时才前端补存
     if (!edgeFunctionSuccess) {
       try {
         await supabase.from("messages").insert([userMsg, companionMsg]);
       } catch (saveErr) {
-        console.error("Fallback save to DB failed:", saveErr);
+        console.error("Fallback save failed:", saveErr);
       }
     }
   }, [input, companion, user, isTyping, messages, addMessage, updateFromEmotion, lang, ghostMessage]);
-
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleSend(); }
   };
