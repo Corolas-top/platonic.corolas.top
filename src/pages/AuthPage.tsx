@@ -183,7 +183,10 @@ export default function AuthPage() {
     try {
       const { data, error: signUpErr } = await supabase.auth.signUp({
         email, password,
-        options: { emailRedirectTo: `${window.location.origin}/auth?verified=true` },
+        options: {
+          emailRedirectTo: `${window.location.origin}/auth?verified=true`,
+          data: { username: username.trim() },
+        },
       });
 
       if (signUpErr) {
@@ -199,8 +202,8 @@ export default function AuthPage() {
 
       // Create user_preferences record + save username
       if (data.user) {
-        await supabase.rpc("ensure_user_prefs", { p_user_id: data.user.id });
-        // Save username to profile
+        // 用户名已通过 signUp options 存入 raw_user_meta_data，trigger 会自动创建 profile
+        // 这里只做额外保险：如果 trigger 没成功，手动补建
         await supabase.from("profiles").upsert({
           id: data.user.id,
           username: username.trim(),
