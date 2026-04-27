@@ -1,0 +1,13 @@
+/* SPA fallback for static hosts */
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Platonic</title>
+  <script>
+    sessionStorage.setItem('platonic-redirect', location.pathname + location.search + location.hash);
+    location.replace('/');
+  </script>
+</head>
+<body></body>
+</html>

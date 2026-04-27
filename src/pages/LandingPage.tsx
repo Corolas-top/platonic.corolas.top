@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Heart, Sparkles } from "lucide-react";
+import { Sparkles } from "lucide-react";
 import { useLang } from "../context/LangContext";
 
 export default function LandingPage() {
@@ -25,8 +25,8 @@ export default function LandingPage() {
       <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 2, ease: "easeOut" }} className="text-center z-10 px-4">
         <motion.div className="mb-6 flex justify-center" animate={{ scale: [1, 1.05, 1] }} transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}>
           <div className="relative">
-            <div className="w-20 h-20 rounded-full border border-[#FF1493]/30 flex items-center justify-center">
-              <Heart className="w-8 h-8 text-[#FF1493]" strokeWidth={1.5} />
+            <div className="w-20 h-20 rounded-full border border-[#FF1493]/30 flex items-center justify-center overflow-hidden bg-black">
+              <img src="/platonic-logo.png" alt="Platonic" className="w-14 h-14 object-contain" />
             </div>
             <motion.div className="absolute inset-0 rounded-full border border-[#FF1493]/20" animate={{ scale: [1, 1.3, 1], opacity: [0.5, 0, 0.5] }} transition={{ duration: 3, repeat: Infinity }} />
           </div>

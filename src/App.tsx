@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { HashRouter, Routes, Route, Navigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { supabase } from "./lib/supabase";
 import { useStore } from "./store";
@@ -39,7 +39,6 @@ function App() {
             updated_at: session.user.updated_at || new Date().toISOString(),
           });
 
-          // Fetch companion if email verified
           if (session.user.email_confirmed_at) {
             try {
               const { data, error: ce } = await supabase
@@ -75,7 +74,6 @@ function App() {
           created_at: session.user.created_at || new Date().toISOString(),
           updated_at: session.user.updated_at || new Date().toISOString(),
         });
-        // Don't auto-fetch companion here - let App render handle redirect
       } else if (event === "SIGNED_OUT") {
         setUser(null); setSession(null); setCompanion(null);
       }
@@ -94,7 +92,7 @@ function App() {
 
   return (
     <LangProvider>
-      <BrowserRouter>
+      <HashRouter>
         <div className="relative h-screen bg-black text-white overflow-hidden">
           <AmbientBreath />
           <div className="relative z-10 h-screen">
@@ -113,7 +111,7 @@ function App() {
             </Routes>
           </div>
         </div>
-      </BrowserRouter>
+      </HashRouter>
     </LangProvider>
   );
 }

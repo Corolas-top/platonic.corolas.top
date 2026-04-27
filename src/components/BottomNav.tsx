@@ -1,10 +1,14 @@
 import { useNavigate, useLocation } from "react-router-dom";
 import { motion } from "framer-motion";
 import { useLang } from "../context/LangContext";
-import { Heart, Brain, Sparkles, Settings } from "lucide-react";
+import { Brain, Sparkles, Settings } from "lucide-react";
+
+const LogoNavIcon = ({ className }: { className?: string; strokeWidth?: number }) => (
+  <img src="/platonic-logo.png" alt="" className={className} />
+);
 
 const tabs = [
-  { path: "/chat", icon: Heart, labelKey: "chatTitle" },
+  { path: "/chat", icon: LogoNavIcon, labelKey: "chatTitle" },
   { path: "/memory", icon: Brain, labelKey: "memory" },
   { path: "/bond", icon: Sparkles, labelKey: "bond" },
   { path: "/settings", icon: Settings, labelKey: "settings" },
