@@ -51,7 +51,18 @@ export default function BondPage() {
     { label: t("intimacy"), value: stats.intimacy_score, icon: Sparkles, color: "#FF69B4", max: 100 },
     { label: t("trust"), value: stats.trust_score, icon: TrendingUp, color: "#FFB6C1", max: 100 },
   ];
-  const eventIcons: Record<string, any> = { first_meet: Star, adoption: Heart, deep_conversation: MessageCircle, milestone: Sparkles };
+  const eventIcons: Record<string, any> = {
+    first_meet: Star,
+    adoption: Heart,
+    deep_conversation: MessageCircle,
+    milestone: Sparkles,
+    first_day: Calendar,
+    week: Calendar,
+    month: Calendar,
+    hundred_days: Star,
+    companion_initiated: Heart,
+    user_shared: TrendingUp,
+  };
 
   return (
     <div className="h-screen flex flex-col overflow-hidden">
