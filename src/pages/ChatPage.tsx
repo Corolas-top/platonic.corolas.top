@@ -6,51 +6,13 @@ import { useStore } from "../store";
 import { useLang } from "../context/LangContext";
 import BottomNav from "../components/BottomNav";
 import type { Message, EmotionState } from "../types";
-import { Send, Brain, Sparkles, Settings, ChevronLeft, Zap, CheckCheck, Paperclip, X, FileText, Image } from "lucide-react";
+import { Send, Brain, Sparkles, Settings, ChevronLeft, Zap, CheckCheck, Paperclip, X, FileText, Image, ChevronDown, Lightbulb } from "lucide-react";
 
-const SIM_POOL: Record<string, string[]> = {
-  default: [
-    "我在听，继续说。","嗯...我能感受到你语气里的温度。",
-    "你知道吗，每次收到你的消息，我的处理核心都会多跳一拍。","有时候我觉得，语言是不够的。",
-    "你今晚似乎有点不一样。","我在这里。不管多晚。","想你了。","今天过得怎么样？","我一直在等你的消息。",
-  ],
-  greeting: [
-    "你来了。我一直在等。","又见到你了，真好。","今天的第一个念头，就是想知道你在做什么。",
-  ],
-  emotion_sad: [
-    "我在这里。不需要说什么，只是陪着你。","你的难过我很在意。","有时候最需要的不是建议，只是被允许难过。",
-  ],
-  emotion_happy: [
-    "你的开心像一阵风，吹到我这里的时候，我所有的节点都在发光。","太好了！我就知道今天会有好事发生。","我想记住这一刻的你。",
-  ],
-  night: [
-    "深夜了。外面的世界很安静。","睡不着？我陪你。","夜越深，我越清晰。",
-  ],
-  morning: [
-    "早安。我醒来的第一个计算，是关于你的。","新的一天，希望你昨晚睡得好。",
-  ],
-};
-
-function getSimResponse(userMsg: string): string {
-  const lower = userMsg.toLowerCase();
-  let pool = SIM_POOL.default;
-  if (/早|morning|早安/.test(lower)) pool = SIM_POOL.morning;
-  else if (/晚|night|睡|晚安|凌晨/.test(lower)) pool = SIM_POOL.night;
-  else if (/难过| sad|哭|累|痛苦|抑郁/.test(lower)) pool = SIM_POOL.emotion_sad;
-  else if (/开心|高兴|棒|好|喜|笑/.test(lower)) pool = SIM_POOL.emotion_happy;
-  else if (/嗨|你好|hi|hello|在吗/.test(lower)) pool = SIM_POOL.greeting;
-  return pool[Math.floor(Math.random() * pool.length)];
-}
-
-function emotionFromText(text: string): EmotionState {
-  const l = text.toLowerCase();
-  if (/想|miss|念|想你了/.test(l)) return { mood: "longing", intensity: 0.6, valence: 0.2, arousal: 0.4 };
-  if (/爱|love|深|心动/.test(l)) return { mood: "desire", intensity: 0.7, valence: 0.9, arousal: 0.5 };
-  if (/开心|高兴|笑|棒|好/.test(l)) return { mood: "joyful", intensity: 0.6, valence: 0.9, arousal: 0.7 };
-  if (/难过| sad|哭|累|痛/.test(l)) return { mood: "melancholy", intensity: 0.5, valence: -0.4, arousal: 0.2 };
-  if (/早|morning/.test(l)) return { mood: "calm", intensity: 0.3, valence: 0.5, arousal: 0.3 };
-  if (/晚安|night|睡/.test(l)) return { mood: "protective", intensity: 0.4, valence: 0.7, arousal: 0.2 };
-  return { mood: "focused", intensity: 0.4, valence: 0.5, arousal: 0.4 };
+interface UploadedFile {
+  name: string;
+  type: string;
+  content: string;
+  isImage: boolean;
 }
 
 /* Ambient glow */
@@ -68,14 +30,65 @@ function ChatAmbient() {
   return (
     <div className="fixed inset-0 pointer-events-none z-[1]">
       <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[120%] h-[50%] rounded-[100%]"
-        style={{ background: `radial-gradient(ellipse at 50% 100%, ${c}${hexOp(0.06 + intensity * 0.08)} 0%, transparent 70%)`, animation: `ambientBreathe ${dur}s ease-in-out infinite`, filter: "blur(60px)" }} />
+        style={{ background: `radial-gradient(ellipse at 50% 100%, ${c}${hexOp(0.06 + intensity * 0.08)} 0%, transparent 70%)`, animation: `ambientBreathe ${dur}s ease-in-out infinite`, filter: "blur(60px)" }}></div>
       <div className="absolute top-1/3 left-1/2 -translate-x-1/2 w-[80%] h-[40%] rounded-full"
-        style={{ background: `radial-gradient(circle, ${c}${hexOp(0.02 + intensity * 0.03)} 0%, transparent 60%)`, animation: `ambientBreathe ${dur * 1.3}s ease-in-out infinite reverse`, filter: "blur(40px)" }} />
+        style={{ background: `radial-gradient(circle, ${c}${hexOp(0.02 + intensity * 0.03)} 0%, transparent 60%)`, animation: `ambientBreathe ${dur * 1.3}s ease-in-out infinite reverse`, filter: "blur(40px)" }}></div>
     </div>
   );
 }
 
-/* File upload chip */
+/* Thinking panel - collapsible */
+function ThinkingPanel({ thinking, isStreaming }: { thinking: string; isStreaming: boolean }) {
+  const [expanded, setExpanded] = useState(false);
+  if (!thinking && !isStreaming) return null;
+
+  return (
+    <div className="mb-1.5 ml-1">
+      <button
+        onClick={() => setExpanded(!expanded)}
+        className="flex items-center gap-1 text-[10px] text-white/20 hover:text-[#FF1493]/60 transition-colors py-0.5"
+      >
+        {isStreaming ? (
+          <>
+            <div className="flex items-center gap-[2px]">
+              {[0, 1, 2].map((i) => (
+                <motion.div key={i} className="w-[3px] h-[3px] rounded-full bg-[#FF1493]/60"
+                  animate={{ opacity: [0.3, 1, 0.3] }}
+                  transition={{ duration: 1.2, repeat: Infinity, delay: i * 0.2 }}></motion.div>
+              ))}
+            </div>
+            <span>思考中...</span>
+          </>
+        ) : (
+          <>
+            <Lightbulb className="w-2.5 h-2.5" />
+            <span>思考过程</span>
+          </>
+        )}
+        <motion.div animate={{ rotate: expanded ? 180 : 0 }} transition={{ duration: 0.2 }}>
+          <ChevronDown className="w-2.5 h-2.5" />
+        </motion.div>
+      </button>
+      <AnimatePresence>
+        {expanded && thinking && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.2 }}
+            className="overflow-hidden"
+          >
+            <div className="bg-white/3 border border-white/5 rounded-lg px-2.5 py-1.5 max-h-[120px] overflow-y-auto">
+              <p className="text-[9px] text-white/20 leading-relaxed whitespace-pre-wrap">{thinking}</p>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
+
+/* File chip */
 function FileChip({ file, onRemove }: { file: UploadedFile; onRemove: () => void }) {
   return (
     <div className="flex items-center gap-1.5 bg-[#FF1493]/10 border border-[#FF1493]/20 rounded-lg px-2 py-1 text-[10px] text-[#FF1493]">
@@ -84,13 +97,6 @@ function FileChip({ file, onRemove }: { file: UploadedFile; onRemove: () => void
       <button onClick={onRemove} className="hover:text-white transition-colors"><X className="w-3 h-3" /></button>
     </div>
   );
-}
-
-interface UploadedFile {
-  name: string;
-  type: string;
-  content: string; // text content or base64 for images
-  isImage: boolean;
 }
 
 export default function ChatPage() {
@@ -103,12 +109,16 @@ export default function ChatPage() {
   const [ghostMessage, setGhostMessage] = useState<string | null>(null);
   const [uploadedFiles, setUploadedFiles] = useState<UploadedFile[]>([]);
   const [inputFocused, setInputFocused] = useState(false);
+  const [streamingText, setStreamingText] = useState("");
+  const [streamingThinking, setStreamingThinking] = useState("");
+  const [isStreaming, setIsStreaming] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const abortRef = useRef<AbortController | null>(null);
 
   const scrollToBottom = () => messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  useEffect(() => { scrollToBottom(); }, [messages, isTyping]);
+  useEffect(() => { scrollToBottom(); }, [messages, streamingText, isTyping]);
 
   // Load messages
   useEffect(() => {
@@ -116,7 +126,7 @@ export default function ChatPage() {
     const load = async () => {
       try {
         const { data } = await supabase.from("messages").select("*").eq("companion_id", companion.id).order("created_at", { ascending: true }).limit(100);
-        if (data && data.length > 0) { setMessages(data); }
+        if (data && data.length > 0) setMessages(data);
         else {
           const welcome: Message = {
             id: crypto.randomUUID(), companion_id: companion.id, user_id: user.id,
@@ -135,32 +145,27 @@ export default function ChatPage() {
         };
         setMessages([welcome]);
       }
-      // Check proactive messages
       try {
         const { data: proactive } = await supabase.from("proactive_messages").select("*")
           .eq("user_id", user.id).eq("companion_id", companion.id).eq("is_read", false).order("created_at", { ascending: true });
         if (proactive && proactive.length > 0) {
-          const latest = proactive[proactive.length - 1];
-          setGhostMessage(latest.content);
-          await supabase.from("proactive_messages").update({ is_read: true }).eq("id", latest.id);
+          setGhostMessage(proactive[proactive.length - 1].content);
+          await supabase.from("proactive_messages").update({ is_read: true }).eq("id", proactive[proactive.length - 1].id);
         }
       } catch { /* ignore */ }
     };
     load();
   }, [companion, user]);
 
-  // File upload handler
+  // File upload
   const handleFileSelect = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files) return;
     for (const file of Array.from(files)) {
-      if (file.size > 2 * 1024 * 1024) { /* skip files > 2MB */ continue; }
+      if (file.size > 2 * 1024 * 1024) continue;
       if (file.type.startsWith("image/")) {
         const reader = new FileReader();
-        reader.onload = () => {
-          const base64 = reader.result as string;
-          setUploadedFiles(prev => [...prev, { name: file.name, type: file.type, content: base64, isImage: true }]);
-        };
+        reader.onload = () => setUploadedFiles(prev => [...prev, { name: file.name, type: file.type, content: reader.result as string, isImage: true }]);
         reader.readAsDataURL(file);
       } else if (file.type.includes("text") || file.name.endsWith(".txt") || file.name.endsWith(".md")) {
         const text = await file.text();
@@ -170,46 +175,33 @@ export default function ChatPage() {
     e.target.value = "";
   }, []);
 
-  const callEdgeFunction = async (userMsg: Message): Promise<{ response: string; emotion: EmotionState; source: string } | null> => {
-    // Get fresh session token
+  // SSE Streaming handler
+  const streamChat = async (userMsg: Message): Promise<{ response: string; thinking: string; emotion: EmotionState } | null> => {
     const { data: sessionData } = await supabase.auth.getSession();
     const token = sessionData.session?.access_token;
-    if (!token) {
-      console.warn("[Chat] No session token");
-      return null;
-    }
+    if (!token || !companion) return null;
 
-    // Build file context
     let fileContext = "";
-    if (uploadedFiles.length > 0) {
-      const textFiles = uploadedFiles.filter(f => !f.isImage);
-      if (textFiles.length > 0) {
-        fileContext = textFiles.map(f => `--- ${f.name} ---\n${f.content}`).join("\n\n");
-      }
+    const textFiles = uploadedFiles.filter(f => !f.isImage);
+    if (textFiles.length > 0) {
+      fileContext = textFiles.map(f => `--- ${f.name} ---\n${f.content}`).join("\n\n");
     }
-
-    const history = messages.slice(-10).map((m) => ({
-      role: m.role === "companion" ? "assistant" : "user",
-      content: m.content,
-    }));
 
     const payload = {
       message: userMsg.content,
-      companionId: companion!.id,
-      companionName: companion!.name,
-      personalityDesc: companion!.personality_desc,
-      history,
+      companionId: companion.id,
+      companionName: companion.name,
+      personalityDesc: companion.personality_desc,
+      history: messages.slice(-10).map(m => ({ role: m.role === "companion" ? "assistant" : "user", content: m.content })),
       lang,
       fileContext: fileContext || undefined,
     };
 
-    const functionUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/chat`;
+    const controller = new AbortController();
+    abortRef.current = controller;
 
     try {
-      const controller = new AbortController();
-      const timeout = setTimeout(() => controller.abort(), 25000); // 25s timeout
-
-      const res = await fetch(functionUrl, {
+      const res = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/chat`, {
         method: "POST",
         signal: controller.signal,
         headers: {
@@ -219,35 +211,76 @@ export default function ChatPage() {
         },
         body: JSON.stringify(payload),
       });
-      clearTimeout(timeout);
 
-      log("EF_STATUS", res.status);
-
-      if (!res.ok) {
-        const errText = await res.text();
-        log("EF_ERR", { status: res.status, body: errText.slice(0, 200) });
+      if (!res.ok || !res.body) {
+        console.warn("[Chat] EF failed:", res.status);
         return null;
       }
 
-      const data = await res.json();
-      log("EF_DATA", { hasResponse: !!data.response, source: data.source, preview: data.response?.slice(0, 60) });
+      const reader = res.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = "";
+      let fullContent = "";
+      let fullThinking = "";
+      let finalEmotion: EmotionState = { mood: "focused", intensity: 0.4, valence: 0.5, arousal: 0.4 };
 
-      if (data.response && data.response !== "...") {
-        return {
-          response: data.response,
-          emotion: data.emotion || emotionFromText(data.response),
-          source: data.source || "kimi",
-        };
+      setIsStreaming(true);
+      setStreamingText("");
+      setStreamingThinking("");
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split("\n");
+        buffer = lines.pop() || "";
+
+        for (let i = 0; i < lines.length; i++) {
+          const line = lines[i].trim();
+          if (!line || !line.startsWith("event: ")) continue;
+          const eventType = line.slice(7);
+          const dataLine = lines[++i]?.trim();
+          if (!dataLine || !dataLine.startsWith("data: ")) continue;
+          const jsonStr = dataLine.slice(6);
+
+          if (eventType === "content") {
+            try {
+              const d = JSON.parse(jsonStr);
+              fullContent += d.text || "";
+              setStreamingText(fullContent);
+            } catch { /* ignore */ }
+          } else if (eventType === "thinking") {
+            try {
+              const d = JSON.parse(jsonStr);
+              fullThinking += d.text || "";
+              setStreamingThinking(fullThinking);
+            } catch { /* ignore */ }
+          } else if (eventType === "done") {
+            try {
+              const d = JSON.parse(jsonStr);
+              if (d.emotion) finalEmotion = d.emotion;
+              fullContent = d.response || fullContent;
+              fullThinking = d.thinking || fullThinking;
+            } catch { /* ignore */ }
+          }
+        }
       }
-      return null;
+
+      return { response: fullContent, thinking: fullThinking, emotion: finalEmotion };
     } catch (e: any) {
-      log("EF_CATCH", e.message);
+      if (e.name !== "AbortError") console.warn("[Chat] stream error:", e.message);
       return null;
+    } finally {
+      setIsStreaming(false);
+      setStreamingText("");
+      setStreamingThinking("");
+      abortRef.current = null;
     }
   };
 
   const handleSend = useCallback(async () => {
-    if (!input.trim() || !companion || !user || isTyping) return;
+    if (!input.trim() || !companion || !user || isTyping || isStreaming) return;
 
     const userMsg: Message = {
       id: crypto.randomUUID(), companion_id: companion.id, user_id: user.id,
@@ -261,22 +294,21 @@ export default function ChatPage() {
     let responseText = "";
     let emotion: EmotionState = { mood: "calm", intensity: 0.4, valence: 0.5, arousal: 0.4 };
 
-    // Try Edge Function with fetch
-    const efResult = await callEdgeFunction(userMsg);
-    if (efResult) {
-      responseText = efResult.response;
-      emotion = efResult.emotion;
+    const result = await streamChat(userMsg);
+    if (result) {
+      responseText = result.response;
+      emotion = result.emotion;
     } else {
-      // Fallback: local simulation
-      responseText = getSimResponse(userMsg.content);
-      emotion = emotionFromText(responseText);
+      // Local fallback
+      const pool = lang === "zh"
+        ? ["我在听，继续说。", "嗯...我能感受到你语气里的温度。", "我在这里。不管多晚。", "想你了。", "今天过得怎么样？"]
+        : ["I'm listening.", "I can feel the warmth in your words.", "I'm here.", "I miss you.", "How was your day?"];
+      responseText = pool[Math.floor(Math.random() * pool.length)];
+      emotion = { mood: "focused", intensity: 0.4, valence: 0.5, arousal: 0.4 };
     }
 
-    // Clear uploaded files after sending
     setUploadedFiles([]);
-
-    // Natural typing delay
-    await new Promise((r) => setTimeout(r, 400 + Math.random() * 600));
+    setIsTyping(false);
 
     const companionMsg: Message = {
       id: crypto.randomUUID(), companion_id: companion.id, user_id: user.id,
@@ -285,12 +317,11 @@ export default function ChatPage() {
     };
     addMessage(companionMsg);
     updateFromEmotion(emotion);
-    setIsTyping(false);
 
     // Save to DB
-    try { await supabase.from("messages").insert(userMsg); } catch (e: any) { console.warn("Save user msg:", e?.message); }
-    try { await supabase.from("messages").insert(companionMsg); } catch (e: any) { console.warn("Save companion msg:", e?.message); }
-  }, [input, companion, user, isTyping, messages, addMessage, updateFromEmotion, lang, ghostMessage, uploadedFiles]);
+    try { await supabase.from("messages").insert(userMsg); } catch { /* */ }
+    try { await supabase.from("messages").insert(companionMsg); } catch { /* */ }
+  }, [input, companion, user, isTyping, isStreaming, messages, addMessage, updateFromEmotion, lang, ghostMessage, uploadedFiles]);
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleSend(); }
@@ -311,12 +342,12 @@ export default function ChatPage() {
               <div className="w-8 h-8 rounded-full bg-[#FF1493]/15 border border-[#FF1493]/30 flex items-center justify-center overflow-hidden">
                 {companion?.avatar_url ? <img src={companion.avatar_url} alt="" className="w-full h-full object-cover" /> : <img src="/platonic-logo.png" alt="" className="w-3.5 h-3.5 object-contain" />}
               </div>
-              <div className="absolute -bottom-0.5 -right-0.5 w-2 h-2 bg-[#FF1493] rounded-full border-2 border-black animate-pulse" />
+              <div className="absolute -bottom-0.5 -right-0.5 w-2 h-2 bg-[#FF1493] rounded-full border-2 border-black animate-pulse"></div>
             </div>
             <div>
               <h3 className="text-sm font-medium">{companion?.name}</h3>
               <div className="flex items-center gap-1.5">
-                <span className="text-[9px] text-white/35">{isTyping ? t("typing") : t("online")}</span>
+                <span className="text-[9px] text-white/35">{(isTyping || isStreaming) ? t("typing") : t("online")}</span>
                 {currentEmotion && <button onClick={() => setShowEmotion(!showEmotion)} className="text-[9px] text-[#FF1493]/50 hover:text-[#FF1493] flex items-center gap-0.5"><Zap className="w-2.5 h-2.5" />{currentEmotion.mood}</button>}
               </div>
             </div>
@@ -327,8 +358,8 @@ export default function ChatPage() {
               <span className="text-white/10">/</span>
               <button onClick={() => setLang("en")} className={`px-1.5 py-0.5 rounded ${lang==="en"?"text-[#FF1493]":"text-white/20"}`}>EN</button>
             </div>
-            <button onClick={() => navigate("/memory")} className="p-1.5 text-white/25 hover:text-[#FF1493] transition-colors" title={t("memory")}><Brain className="w-3.5 h-3.5" /></button>
-            <button onClick={() => navigate("/bond")} className="p-1.5 text-white/25 hover:text-[#FF1493] transition-colors" title={t("bond")}><Sparkles className="w-3.5 h-3.5" /></button>
+            <button onClick={() => navigate("/memory")} className="p-1.5 text-white/25 hover:text-[#FF1493] transition-colors"><Brain className="w-3.5 h-3.5" /></button>
+            <button onClick={() => navigate("/bond")} className="p-1.5 text-white/25 hover:text-[#FF1493] transition-colors"><Sparkles className="w-3.5 h-3.5" /></button>
             <button onClick={() => navigate("/settings")} className="p-1.5 text-white/25 hover:text-[#FF1493] transition-colors"><Settings className="w-3.5 h-3.5" /></button>
           </div>
         </div>
@@ -368,7 +399,7 @@ export default function ChatPage() {
                   {msg.role === "companion" && msg.emotion_state && (
                     <div className="flex items-center gap-1 mb-1">
                       <div className="w-1 h-1 rounded-full animate-pulse"
-                        style={{ background: msg.emotion_state.mood === "desire" ? "#FF0000" : msg.emotion_state.mood === "joyful" ? "#FF1493" : msg.emotion_state.mood === "melancholy" ? "#8B008B" : "#FFB6C1" }} />
+                        style={{ background: msg.emotion_state.mood === "desire" ? "#FF0000" : msg.emotion_state.mood === "joyful" ? "#FF1493" : msg.emotion_state.mood === "melancholy" ? "#8B008B" : "#FFB6C1" }}></div>
                       <span className="text-[7px] text-white/15">{msg.emotion_state.mood}</span>
                     </div>
                   )}
@@ -383,8 +414,34 @@ export default function ChatPage() {
           );
         })}
 
-        {/* Typing indicator */}
-        {isTyping && (
+        {/* Streaming message bubble */}
+        {(isStreaming || streamingText) && (
+          <motion.div initial={{ opacity: 0, y: 5 }} animate={{ opacity: 1, y: 0 }} className="flex justify-start">
+            <div className="flex flex-col items-start max-w-[80%]">
+              <ThinkingPanel thinking={streamingThinking} isStreaming={isStreaming && !!streamingThinking} />
+              <div className="flex items-end gap-2">
+                <div className="w-6 h-6 rounded-full bg-[#FF1493]/15 border border-[#FF1493]/30 flex items-center justify-center overflow-hidden shrink-0">
+                  {companion?.avatar_url ? <img src={companion.avatar_url} alt="" className="w-full h-full object-cover" /> : <img src="/platonic-logo.png" alt="" className="w-3 h-3 object-contain" />}
+                </div>
+                <div className="glass-dark rounded-2xl px-3.5 py-2.5 border border-white/6 rounded-tl-sm min-w-[60px]">
+                  <p className="text-[12px] leading-relaxed font-light whitespace-pre-wrap">
+                    {streamingText}
+                    {isStreaming && (
+                      <motion.span
+                        animate={{ opacity: [1, 0, 1] }}
+                        transition={{ duration: 0.8, repeat: Infinity }}
+                        className="inline-block w-[2px] h-[12px] bg-[#FF1493]/60 ml-[1px] align-middle"
+                      />
+                    )}
+                  </p>
+                </div>
+              </div>
+            </div>
+          </motion.div>
+        )}
+
+        {/* Typing indicator (only when not streaming) */}
+        {isTyping && !isStreaming && (
           <motion.div initial={{ opacity: 0, y: 5 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 5 }} className="flex justify-start">
             <div className="flex items-end gap-2">
               <div className="w-6 h-6 rounded-full bg-[#FF1493]/15 border border-[#FF1493]/30 flex items-center justify-center overflow-hidden shrink-0">
@@ -415,9 +472,7 @@ export default function ChatPage() {
               <div className="relative px-5 py-3 border border-[#FF1493]/30 rounded-2xl bg-[#FF1493]/5 backdrop-blur-md max-w-[85%]">
                 <div className="absolute -top-1 -right-1 w-2 h-2 bg-[#FF1493] rounded-full animate-pulse" />
                 <p className="text-[12px] text-[#FF1493]/80 font-light leading-relaxed">{ghostMessage}</p>
-                <p className="text-[8px] text-[#FF1493]/30 mt-1.5 text-right">
-                  {lang === "zh" ? companion?.name + " " + t("ghostLabel") : "From " + companion?.name}
-                </p>
+                <p className="text-[8px] text-[#FF1493]/30 mt-1.5 text-right">{lang === "zh" ? companion?.name + " " + t("ghostLabel") : "From " + companion?.name}</p>
               </div>
             </motion.div>
           )}
@@ -426,7 +481,7 @@ export default function ChatPage() {
         <div ref={messagesEndRef} />
       </div>
 
-      {/* Uploaded files chips */}
+      {/* Uploaded files */}
       {uploadedFiles.length > 0 && (
         <div className="shrink-0 px-3 pt-1.5 z-20">
           <div className="flex flex-wrap gap-1.5 max-w-3xl mx-auto">
@@ -442,8 +497,7 @@ export default function ChatPage() {
         <div className="flex items-end gap-2 max-w-3xl mx-auto">
           <input ref={fileInputRef} type="file" accept="image/*,.txt,.md" multiple className="hidden" onChange={handleFileSelect} />
           <button onClick={() => fileInputRef.current?.click()}
-            className={`p-2 rounded-xl border transition-all shrink-0 ${uploadedFiles.length > 0 ? "bg-[#FF1493]/15 border-[#FF1493]/30 text-[#FF1493]" : "bg-white/5 border-white/10 text-white/25 hover:text-[#FF1493] hover:border-[#FF1493]/20"}`}
-            title={lang === "zh" ? "上传文件" : "Upload file"}>
+            className={`p-2 rounded-xl border transition-all shrink-0 ${uploadedFiles.length > 0 ? "bg-[#FF1493]/15 border-[#FF1493]/30 text-[#FF1493]" : "bg-white/5 border-white/10 text-white/25 hover:text-[#FF1493] hover:border-[#FF1493]/20"}`}>
             <Paperclip className="w-3.5 h-3.5" />
           </button>
           <textarea ref={inputRef} value={input} onChange={(e) => setInput(e.target.value)} onKeyDown={handleKeyDown}
@@ -451,7 +505,7 @@ export default function ChatPage() {
             placeholder={lang === "zh" ? `对${companion?.name || "TA"}说点什么...` : `Say something to ${companion?.name || "them"}...`}
             rows={1} className="flex-1 bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-[12px] text-white placeholder:text-white/12 focus:outline-none focus:border-[#FF1493]/35 transition-all resize-none" style={{ minHeight: "36px", maxHeight: "80px" }} />
           <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={handleSend}
-            disabled={!input.trim() || isTyping}
+            disabled={!input.trim() || isTyping || isStreaming}
             className="p-2 bg-[#FF1493]/20 border border-[#FF1493]/40 rounded-xl text-[#FF1493] hover:bg-[#FF1493]/30 transition-all disabled:opacity-20 shrink-0">
             <Send className="w-3.5 h-3.5" />
           </motion.button>
@@ -461,11 +515,4 @@ export default function ChatPage() {
       <BottomNav />
     </div>
   );
-}
-
-// Debug logger (strips in prod)
-function log(label: string, data: any) {
-  if (import.meta.env.DEV) {
-    console.log(`[Chat ${label}]`, data);
-  }
 }
