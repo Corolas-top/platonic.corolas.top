@@ -104,6 +104,13 @@ export default function CreatePage() {
 
   const handleCreate = async () => {
     if (!user || !name.trim()) return;
+    // 防御性检查：确保 user.id 是有效 UUID
+    if (!user.id || user.id.length < 30) {
+      console.error("[Create] Invalid user.id:", user.id);
+      alert(lang === "zh" ? "用户会话无效，请重新登录" : "Invalid session, please log in again");
+      return;
+    }
+    console.log("[Create] Creating companion for user_id:", user.id);
     setCreating(true);
     const rationality = Math.round((traits.conscientiousness + (100 - traits.neuroticism)) / 2);
     const emotion = Math.round((traits.extraversion + traits.agreeableness + traits.openness) / 3);
@@ -127,8 +134,8 @@ export default function CreatePage() {
       }).select().single();
 
       if (error || !data) {
-        console.error("Create companion failed:", error);
-        alert(lang === "zh" ? "创建失败，请重试" : "Creation failed, please try again");
+        console.error("[Create] Companion insert failed:", JSON.stringify(error));
+        alert(lang === "zh" ? "创建失败: " + (error?.message || "未知错误") : "Creation failed: " + (error?.message || "Unknown error"));
         setCreating(false);
         return;
       }
@@ -299,9 +306,18 @@ export default function CreatePage() {
             <button onClick={() => setStep(step + 1)} className="flex-1 py-2 bg-[#FF1493]/20 border border-[#FF1493]/40 rounded-xl text-[#FF1493] text-xs hover:bg-[#FF1493]/30 transition-all">{t("next")}</button>
           ) : (
             <button onClick={handleCreate} disabled={creating || !name.trim()}
-              className="flex-1 py-2 bg-[#FF1493]/30 border border-[#FF1493]/50 rounded-xl text-[#FF1493] text-xs hover:bg-[#FF1493]/40 transition-all disabled:opacity-50 flex items-center justify-center gap-1">
-              <Sparkles className="w-3 h-3" />
-              {creating ? t("injecting") : t("injectSoul")}
+              className="flex-1 py-2 bg-[#FF1493] border border-[#FF1493]/50 rounded-xl text-white text-xs hover:bg-[#FF1493]/80 transition-all disabled:opacity-40 flex items-center justify-center gap-1.5">
+              {creating ? (
+                <>
+                  <div className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  {t("injecting")}
+                </>
+              ) : (
+                <>
+                  <Sparkles className="w-3.5 h-3.5" />
+                  {t("injectSoul")}
+                </>
+              )}
             </button>
           )}
         </div>
