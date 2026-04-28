@@ -1,9 +1,10 @@
 import { useNavigate, useLocation } from "react-router-dom";
 import { motion } from "framer-motion";
 import { useLang } from "../context/LangContext";
+import { useStore } from "../store";
 import { Brain, Sparkles, Settings } from "lucide-react";
 
-const LogoNavIcon = ({ className }: { className?: string; strokeWidth?: number }) => (
+const LogoNavIcon = ({ className, strokeWidth: _sw }: { className?: string; strokeWidth?: number }) => (
   <img src="/platonic-logo.png" alt="" className={className} />
 );
 
@@ -18,7 +19,9 @@ export default function BottomNav() {
   const navigate = useNavigate();
   const location = useLocation();
   const { t } = useLang();
+  const { messages } = useStore();
   const current = location.pathname;
+  const unreadCount = messages.filter((m) => m.role === "companion").length % 100;
 
   return (
     <div className="shrink-0 glass-dark border-t border-white/5 px-2 py-1.5 z-30">
@@ -39,12 +42,17 @@ export default function BottomNav() {
                   transition={{ type: "spring", stiffness: 300, damping: 30 }}
                 />
               )}
-              <Icon
-                className={`w-[18px] h-[18px] relative z-10 transition-colors ${
-                  active ? "text-[#FF1493]" : "text-white/25"
-                }`}
-                strokeWidth={active ? 2 : 1.5}
-              />
+              <div className="relative z-10">
+                <Icon
+                  className={`w-[18px] h-[18px] transition-colors ${
+                    active ? "text-[#FF1493]" : "text-white/25"
+                  }`}
+                  strokeWidth={active ? 2 : 1.5}
+                />
+                {tab.path === "/chat" && unreadCount > 0 && (
+                  <span className="absolute -top-1 -right-2 min-w-[14px] h-[14px] rounded-full bg-[#FF1493] text-[8px] text-white flex items-center justify-center px-1">{unreadCount > 9 ? "9+" : unreadCount}</span>
+                )}
+              </div>
               <span
                 className={`text-[9px] relative z-10 transition-colors ${
                   active ? "text-[#FF1493]" : "text-white/25"

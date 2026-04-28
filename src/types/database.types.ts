@@ -21,6 +21,9 @@ export interface Database {
           timezone: string;
           location: string | null;
           backstory: string | null;
+          big_five: Record<string, number> | null;
+          gender: string | null;
+          current_emotion: Record<string, unknown> | null;
           created_at: string;
           updated_at: string;
           adopted_from_plaza: boolean | null;
@@ -38,6 +41,9 @@ export interface Database {
           timezone?: string;
           location?: string | null;
           backstory?: string | null;
+          big_five?: Record<string, number> | null;
+          gender?: string | null;
+          current_emotion?: Record<string, unknown> | null;
           created_at?: string;
           updated_at?: string;
           adopted_from_plaza?: boolean | null;
@@ -55,6 +61,9 @@ export interface Database {
           timezone?: string;
           location?: string | null;
           backstory?: string | null;
+          big_five?: Record<string, number> | null;
+          gender?: string | null;
+          current_emotion?: Record<string, unknown> | null;
           created_at?: string;
           updated_at?: string;
           adopted_from_plaza?: boolean | null;

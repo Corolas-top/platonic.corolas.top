@@ -82,6 +82,7 @@ export default function PlazaPage() {
           rationality_level: rationality,
           emotion_level: emotion,
           big_five: persona.big_five_preset || {},
+          gender: persona.gender || "female",
           backstory: persona.backstory,
           adopted_from_plaza: true,
           plaza_persona_id: persona.id,
@@ -91,26 +92,17 @@ export default function PlazaPage() {
         .maybeSingle();
 
       if (compErr || !comp) {
-        // Fallback: create client-side companion
-        const mock = {
-          id: crypto.randomUUID(),
-          user_id: user.id,
-          name: persona.name,
-          avatar_url: persona.avatar_url,
-          personality_desc: persona.description,
-          rationality_level: rationality,
-          emotion_level: emotion,
-          big_five: persona.big_five_preset,
-          backstory: persona.backstory,
-          adopted_from_plaza: true,
-          is_active: true,
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-        };
-        setCompanion(mock as any);
-      } else {
-        setCompanion(comp);
+        // Rollback plaza adoption
+        await supabase
+          .from("plaza_personas")
+          .update({ adopted_by: null, is_visible: true })
+          .eq("id", persona.id);
+        setError(compErr?.message || "Failed to create companion");
+        setAdoptingId(null);
+        return;
       }
+
+      setCompanion(comp);
 
       // 4. Navigate to home
       navigate("/home");

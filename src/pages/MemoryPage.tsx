@@ -35,30 +35,20 @@ export default function MemoryPage() {
     setLoading(true);
     try {
       const [memRes, evtRes] = await Promise.all([
-        supabase.from("memories").select("*")
-          .eq("companion_id", companion.id).eq("user_id", user.id)
-          .order("created_at", { ascending: false }).limit(100),
-        supabase.from("relationship_events").select("*")
-          .eq("companion_id", companion.id).eq("user_id", user.id)
-          .order("created_at", { ascending: false }).limit(50),
+        supabase.from("memories").select("*").eq("companion_id", companion.id).eq("user_id", user.id).order("created_at", { ascending: false }).limit(100),
+        supabase.from("relationship_events").select("*").eq("companion_id", companion.id).eq("user_id", user.id).order("created_at", { ascending: false }).limit(50),
       ]);
-      if (memRes.data && memRes.data.length > 0) setLocalMemories(memRes.data);
-      else setLocalMemories(generateDemoMemories(companion.id, user.id));
+      if (memRes.data) setLocalMemories(memRes.data);
+      else setLocalMemories([]);
       if (evtRes.data) setEvents(evtRes.data);
+      else setEvents([]);
     } catch {
-      setLocalMemories(generateDemoMemories(companion.id, user.id));
+      setLocalMemories([]);
+      setEvents([]);
     } finally { setLoading(false); }
   }
 
-  function generateDemoMemories(cid: string, uid: string): Memory[] {
-    return [
-      { id: "1", companion_id: cid, user_id: uid, content: lang === "zh" ? "第一次见面时的对话" : "First conversation", memory_type: "milestone", importance_score: 1.0, created_at: new Date(Date.now() - 86400000 * 5).toISOString() },
-      { id: "2", companion_id: cid, user_id: uid, content: lang === "zh" ? "用户提到喜欢深夜听雨声" : "User mentioned liking rain at night", memory_type: "long_term", importance_score: 0.7, created_at: new Date(Date.now() - 86400000 * 2).toISOString() },
-      { id: "3", companion_id: cid, user_id: uid, content: lang === "zh" ? "用户今天工作很累，需要安慰" : "User was tired from work", memory_type: "short_term", importance_score: 0.4, created_at: new Date(Date.now() - 3600000).toISOString() },
-    ];
-  }
-
-  // 日历数据生成
+  // 日历数据
   const calendarDays = useMemo(() => {
     const year = currentMonth.getFullYear();
     const month = currentMonth.getMonth();
@@ -72,24 +62,15 @@ export default function MemoryPage() {
     const eventDates = new Set(events.map((e) => e.created_at?.slice(0, 10)).filter(Boolean));
 
     const days: CalendarDay[] = [];
-    // 上月填充
     const prevLastDay = new Date(year, month, 0).getDate();
     for (let i = startPadding - 1; i >= 0; i--) {
       const d = prevLastDay - i;
       days.push({ date: d, fullDate: `${year}-${String(month).padStart(2, "0")}-${String(d).padStart(2, "0")}`, hasMemory: false, hasEvent: false, isToday: false, isCurrentMonth: false });
     }
-    // 当月
     for (let d = 1; d <= daysInMonth; d++) {
       const fd = `${year}-${String(month + 1).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
-      days.push({
-        date: d, fullDate: fd,
-        hasMemory: memoryDates.has(fd),
-        hasEvent: eventDates.has(fd),
-        isToday: fd === todayStr,
-        isCurrentMonth: true,
-      });
+      days.push({ date: d, fullDate: fd, hasMemory: memoryDates.has(fd), hasEvent: eventDates.has(fd), isToday: fd === todayStr, isCurrentMonth: true });
     }
-    // 下月填充到 42 格（6行）
     const remaining = 42 - days.length;
     for (let d = 1; d <= remaining; d++) {
       days.push({ date: d, fullDate: `${year}-${String(month + 2).padStart(2, "0")}-${String(d).padStart(2, "0")}`, hasMemory: false, hasEvent: false, isToday: false, isCurrentMonth: false });
@@ -97,12 +78,9 @@ export default function MemoryPage() {
     return days;
   }, [currentMonth, memories, events]);
 
-  // 按日期筛选
   const filtered = useMemo(() => {
     let list = filter === "all" ? memories : memories.filter((m) => m.memory_type === filter);
-    if (selectedDate) {
-      list = list.filter((m) => m.created_at.startsWith(selectedDate));
-    }
+    if (selectedDate) list = list.filter((m) => m.created_at.startsWith(selectedDate));
     return list;
   }, [memories, filter, selectedDate]);
 
@@ -114,6 +92,16 @@ export default function MemoryPage() {
     long_term: { icon: Bookmark, color: "#FF69B4", label: t("longTerm") },
     short_term: { icon: Clock, color: "#FFB6C1", label: t("shortTerm") },
   };
+
+  // 判断某一天的颜色样式
+  function getDayStyle(day: CalendarDay): string {
+    if (!day.isCurrentMonth) return "text-white/10 bg-transparent";
+    if (selectedDate === day.fullDate) return "bg-[#FF1493]/25 text-[#FF1493] border border-[#FF1493]/50";
+    if (day.isToday) return "bg-[#FF1493]/15 text-[#FF1493] border border-[#FF1493]/30";
+    if (day.hasEvent) return "bg-[#FF69B4]/20 text-[#FF69B4]/80 border border-[#FF69B4]/20";
+    if (day.hasMemory) return "bg-[#FF1493]/10 text-white/60 border border-[#FF1493]/10";
+    return "text-white/50 hover:bg-white/5 bg-transparent";
+  }
 
   return (
     <div className="h-screen flex flex-col overflow-hidden">
@@ -141,10 +129,8 @@ export default function MemoryPage() {
               <span className="text-xs text-white/50">{monthLabel}</span>
             </div>
             <div className="flex gap-1">
-              <button onClick={() => setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1))}
-                className="p-1 text-white/30 hover:text-[#FF1493] transition-colors"><ChevronLeft className="w-3.5 h-3.5" /></button>
-              <button onClick={() => setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1))}
-                className="p-1 text-white/30 hover:text-[#FF1493] transition-colors"><ChevronRight className="w-3.5 h-3.5" /></button>
+              <button onClick={() => setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1))} className="p-1 text-white/30 hover:text-[#FF1493] transition-colors"><ChevronLeft className="w-3.5 h-3.5" /></button>
+              <button onClick={() => setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1))} className="p-1 text-white/30 hover:text-[#FF1493] transition-colors"><ChevronRight className="w-3.5 h-3.5" /></button>
             </div>
           </div>
           {/* 星期头 */}
@@ -153,37 +139,30 @@ export default function MemoryPage() {
               <div key={d} className="text-center text-[9px] text-white/20 py-1">{d}</div>
             ))}
           </div>
-          {/* 日期网格 */}
+          {/* 日期网格 — 颜色框而非点 */}
           <div className="grid grid-cols-7 gap-1">
             {calendarDays.map((day, i) => (
               <button
                 key={i}
                 onClick={() => day.isCurrentMonth && setSelectedDate(selectedDate === day.fullDate ? null : day.fullDate)}
-                className={`relative aspect-square rounded-lg flex items-center justify-center text-[10px] transition-all ${
-                  !day.isCurrentMonth ? "text-white/10" :
-                  selectedDate === day.fullDate ? "bg-[#FF1493]/30 text-[#FF1493] border border-[#FF1493]/40" :
-                  day.isToday ? "bg-[#FF1493]/15 text-[#FF1493] border border-[#FF1493]/20" :
-                  "text-white/50 hover:bg-white/5"
-                }`}
+                className={`relative aspect-square rounded-lg flex items-center justify-center text-[10px] transition-all border ${getDayStyle(day)}`}
               >
                 {day.date}
-                {/* 记忆标记 */}
-                {day.hasMemory && (
-                  <div className="absolute bottom-0.5 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-[#FF1493]" />
-                )}
-                {/* 事件标记 */}
+                {/* 事件角标 */}
                 {day.hasEvent && (
-                  <div className="absolute top-0.5 right-0.5 w-1 h-1 rounded-full bg-[#FF69B4]" />
+                  <div className="absolute top-0.5 right-0.5 w-1.5 h-1.5 rounded-full bg-[#FF69B4]" />
                 )}
               </button>
             ))}
           </div>
           {/* 图例 */}
           <div className="flex items-center gap-3 mt-2 px-1">
-            <div className="flex items-center gap-1"><div className="w-1.5 h-1.5 rounded-full bg-[#FF1493]" /><span className="text-[9px] text-white/25">{lang === "zh" ? "记忆" : "Memory"}</span></div>
-            <div className="flex items-center gap-1"><div className="w-1.5 h-1.5 rounded-full bg-[#FF69B4]" /><span className="text-[9px] text-white/25">{lang === "zh" ? "事件" : "Event"}</span></div>
+            <div className="flex items-center gap-1"><div className="w-3 h-3 rounded bg-[#FF1493]/15 border border-[#FF1493]/20" /><span className="text-[9px] text-white/25">{lang === "zh" ? "记忆" : "Memory"}</span></div>
+            <div className="flex items-center gap-1"><div className="w-3 h-3 rounded bg-[#FF69B4]/20 border border-[#FF69B4]/20" /><span className="text-[9px] text-white/25">{lang === "zh" ? "事件" : "Event"}</span></div>
+            <div className="flex items-center gap-1"><div className="w-3 h-3 rounded bg-[#FF1493]/15 border border-[#FF1493]/30" /><span className="text-[9px] text-white/25">{lang === "zh" ? "今天" : "Today"}</span></div>
+            <div className="flex items-center gap-1"><div className="w-3 h-3 rounded bg-[#FF1493]/25 border border-[#FF1493]/50" /><span className="text-[9px] text-white/25">{lang === "zh" ? "选中" : "Selected"}</span></div>
             {selectedDate && (
-              <button onClick={() => setSelectedDate(null)} className="ml-auto text-[9px] text-[#FF1493]/60 hover:text-[#FF1493]">{lang === "zh" ? "清除筛选" : "Clear filter"}</button>
+              <button onClick={() => setSelectedDate(null)} className="ml-auto text-[9px] text-[#FF1493]/60 hover:text-[#FF1493]">{lang === "zh" ? "清除" : "Clear"}</button>
             )}
           </div>
         </div>
@@ -204,7 +183,7 @@ export default function MemoryPage() {
           ))}
         </div>
 
-        {/* 今日事件提示 */}
+        {/* 今日事件 */}
         <AnimatePresence>
           {events.filter((e) => e.created_at?.startsWith(new Date().toISOString().slice(0, 10))).length > 0 && (
             <motion.div initial={{ opacity: 0, y: -5 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
@@ -212,9 +191,7 @@ export default function MemoryPage() {
               <Sparkles className="w-4 h-4 text-[#FF1493] shrink-0" />
               <div>
                 <p className="text-xs text-[#FF1493]/80">{lang === "zh" ? "今天有特别的日子" : "Today is special"}</p>
-                <p className="text-[10px] text-white/30">
-                  {events.filter((e) => e.created_at?.startsWith(new Date().toISOString().slice(0, 10))).map((e) => e.description).join(" · ")}
-                </p>
+                <p className="text-[10px] text-white/30">{events.filter((e) => e.created_at?.startsWith(new Date().toISOString().slice(0, 10))).map((e) => e.description).join(" · ")}</p>
               </div>
             </motion.div>
           )}

@@ -107,6 +107,7 @@ export default function ChatPage() {
   const [isTyping, setIsTyping] = useState(false);
   const [showEmotion, setShowEmotion] = useState(false);
   const [ghostMessage, setGhostMessage] = useState<string | null>(null);
+  const [chatError, setChatError] = useState("");
   const [uploadedFiles, setUploadedFiles] = useState<UploadedFile[]>([]);
   const [inputFocused, setInputFocused] = useState(false);
   const [streamingText, setStreamingText] = useState("");
@@ -191,6 +192,7 @@ export default function ChatPage() {
       message: userMsg.content,
       companionId: companion.id,
       companionName: companion.name,
+      companionGender: companion.gender || "female",
       personalityDesc: companion.personality_desc,
       history: messages.slice(-10).map(m => ({ role: m.role === "companion" ? "assistant" : "user", content: m.content })),
       lang,
@@ -256,6 +258,12 @@ export default function ChatPage() {
               fullThinking += d.text || "";
               setStreamingThinking(fullThinking);
             } catch { /* ignore */ }
+          } else if (eventType === "error") {
+            try {
+              const d = JSON.parse(jsonStr);
+              console.error("[Chat] Server error:", d.error);
+              throw new Error(d.error || "AI 服务错误");
+            } catch { throw new Error("AI 服务错误"); }
           } else if (eventType === "done") {
             try {
               const d = JSON.parse(jsonStr);
@@ -270,6 +278,7 @@ export default function ChatPage() {
       return { response: fullContent, thinking: fullThinking, emotion: finalEmotion };
     } catch (e: any) {
       if (e.name !== "AbortError") console.warn("[Chat] stream error:", e.message);
+      setChatError(e.message || "连接失败，请重试");
       return null;
     } finally {
       setIsStreaming(false);
@@ -295,32 +304,25 @@ export default function ChatPage() {
     let emotion: EmotionState = { mood: "calm", intensity: 0.4, valence: 0.5, arousal: 0.4 };
 
     const result = await streamChat(userMsg);
-    if (result) {
-      responseText = result.response;
-      emotion = result.emotion;
-    } else {
-      // Local fallback
-      const pool = lang === "zh"
-        ? ["我在听，继续说。", "嗯...我能感受到你语气里的温度。", "我在这里。不管多晚。", "想你了。", "今天过得怎么样？"]
-        : ["I'm listening.", "I can feel the warmth in your words.", "I'm here.", "I miss you.", "How was your day?"];
-      responseText = pool[Math.floor(Math.random() * pool.length)];
-      emotion = { mood: "focused", intensity: 0.4, valence: 0.5, arousal: 0.4 };
-    }
-
     setUploadedFiles([]);
     setIsTyping(false);
 
-    const companionMsg: Message = {
-      id: crypto.randomUUID(), companion_id: companion.id, user_id: user.id,
-      content: responseText, role: "companion", emotion_state: emotion,
-      created_at: new Date().toISOString(),
-    };
-    addMessage(companionMsg);
-    updateFromEmotion(emotion);
-
-    // Save to DB
-    try { await supabase.from("messages").insert(userMsg); } catch { /* */ }
-    try { await supabase.from("messages").insert(companionMsg); } catch { /* */ }
+    if (result) {
+      responseText = result.response;
+      emotion = result.emotion;
+      const companionMsg: Message = {
+        id: crypto.randomUUID(), companion_id: companion.id, user_id: user.id,
+        content: responseText, role: "companion", emotion_state: emotion,
+        created_at: new Date().toISOString(),
+      };
+      addMessage(companionMsg);
+      updateFromEmotion(emotion);
+      try { await supabase.from("messages").insert(userMsg); } catch { /* */ }
+      try { await supabase.from("messages").insert(companionMsg); } catch { /* */ }
+    } else {
+      // 不保存任何消息，显示错误提示让用户重试
+      setChatError(lang === "zh" ? "连接失败了，再试一次吧..." : "Connection failed. Please try again...");
+    }
   }, [input, companion, user, isTyping, isStreaming, messages, addMessage, updateFromEmotion, lang, ghostMessage, uploadedFiles]);
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -379,13 +381,35 @@ export default function ChatPage() {
         )}
       </AnimatePresence>
 
+      {/* Chat error banner */}
+      <AnimatePresence>
+        {chatError && (
+          <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }}
+            className="shrink-0 glass-dark border-b border-red-500/20 px-4 py-2 z-20">
+            <div className="flex items-center justify-between max-w-3xl mx-auto">
+              <p className="text-red-400 text-[11px]">{chatError}</p>
+              <button onClick={() => setChatError("")} className="text-red-400/50 hover:text-red-400 text-[10px]">×</button>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* Messages */}
       <div className="flex-1 overflow-y-auto px-3 py-3 space-y-2 z-10">
         {messages.map((msg, idx) => {
+          const showDate = idx === 0 || new Date(msg.created_at).toDateString() !== new Date(messages[idx - 1].created_at).toDateString();
           const isFirst = idx === 0 || messages[idx - 1].role !== msg.role;
           const isLast = idx === messages.length - 1 || messages[idx + 1].role !== msg.role;
           return (
-            <motion.div key={msg.id} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}
+            <div key={msg.id}>
+              {showDate && (
+                <div className="flex items-center justify-center my-3">
+                  <div className="px-3 py-1 rounded-full bg-white/5 border border-white/8">
+                    <span className="text-[9px] text-white/20">{new Date(msg.created_at).toLocaleDateString(lang === "zh" ? "zh-CN" : "en-US", { month: "short", day: "numeric", weekday: "short" })}</span>
+                  </div>
+                </div>
+              )}
+            <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}
               className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
               <div className={`max-w-[80%] flex flex-col ${msg.role === "user" ? "items-end" : "items-start"}`}>
                 {msg.role === "companion" && isFirst && (
@@ -411,6 +435,7 @@ export default function ChatPage() {
                 </div>
               </div>
             </motion.div>
+            </div>
           );
         })}
 

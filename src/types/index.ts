@@ -65,6 +65,7 @@ export interface PlazaPersona {
   adopted_by?: string | null;
   created_at: string;
   is_unique: boolean;
+  is_visible: boolean;
 }
 
 export interface Message {

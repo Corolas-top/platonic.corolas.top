@@ -1,8 +1,10 @@
-import { HashRouter, Routes, Route, Navigate } from "react-router-dom";
+import { HashRouter, Routes, Route, Navigate, useLocation } from "react-router-dom";
+import { motion, AnimatePresence } from "framer-motion";
 import { useEffect, useState } from "react";
 import { supabase } from "./lib/supabase";
 import { useStore } from "./store";
 import { LangProvider } from "./context/LangContext";
+import { ToastProvider } from "./context/ToastContext";
 import AmbientBreath from "./components/AmbientBreath";
 import LandingPage from "./pages/LandingPage";
 import AuthPage from "./pages/AuthPage";
@@ -14,6 +16,35 @@ import ChatPage from "./pages/ChatPage";
 import MemoryPage from "./pages/MemoryPage";
 import BondPage from "./pages/BondPage";
 import SettingsPage from "./pages/SettingsPage";
+
+function AnimatedRoutes({ user, companion }: { user: any; companion: any }) {
+  const location = useLocation();
+  return (
+    <AnimatePresence mode="wait">
+      <motion.div key={location.pathname}
+        initial={{ opacity: 0, x: 20 }}
+        animate={{ opacity: 1, x: 0 }}
+        exit={{ opacity: 0, x: -20 }}
+        transition={{ duration: 0.25, ease: "easeInOut" }}
+        className="h-full"
+      >
+        <Routes location={location}>
+          <Route path="/" element={<LandingPage />} />
+          <Route path="/auth" element={<AuthPage />} />
+          <Route path="/onboard" element={user ? (companion ? <Navigate to="/home" replace /> : <OnboardPage />) : <Navigate to="/auth" replace />} />
+          <Route path="/plaza" element={user ? <PlazaPage /> : <Navigate to="/auth" replace />} />
+          <Route path="/create" element={user ? <CreatePage /> : <Navigate to="/auth" replace />} />
+          <Route path="/home" element={user && companion ? <HomePage /> : <Navigate to={user ? "/onboard" : "/auth"} replace />} />
+          <Route path="/chat" element={user && companion ? <ChatPage /> : <Navigate to={user ? "/onboard" : "/auth"} replace />} />
+          <Route path="/memory" element={user && companion ? <MemoryPage /> : <Navigate to={user ? "/onboard" : "/auth"} replace />} />
+          <Route path="/bond" element={user && companion ? <BondPage /> : <Navigate to={user ? "/onboard" : "/auth"} replace />} />
+          <Route path="/settings" element={user ? <SettingsPage /> : <Navigate to="/auth" replace />} />
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </motion.div>
+    </AnimatePresence>
+  );
+}
 
 function App() {
   const { setUser, setSession, setCompanion, user, companion } = useStore();
@@ -92,26 +123,16 @@ function App() {
 
   return (
     <LangProvider>
-      <HashRouter>
+      <ToastProvider>
+        <HashRouter>
         <div className="relative h-screen bg-black text-white overflow-hidden">
           <AmbientBreath />
           <div className="relative z-10 h-screen">
-            <Routes>
-              <Route path="/" element={<LandingPage />} />
-              <Route path="/auth" element={<AuthPage />} />
-              <Route path="/onboard" element={user ? (companion ? <Navigate to="/home" replace /> : <OnboardPage />) : <Navigate to="/auth" replace />} />
-              <Route path="/plaza" element={user ? <PlazaPage /> : <Navigate to="/auth" replace />} />
-              <Route path="/create" element={user ? <CreatePage /> : <Navigate to="/auth" replace />} />
-              <Route path="/home" element={user && companion ? <HomePage /> : <Navigate to={user ? "/onboard" : "/auth"} replace />} />
-              <Route path="/chat" element={user && companion ? <ChatPage /> : <Navigate to={user ? "/onboard" : "/auth"} replace />} />
-              <Route path="/memory" element={user && companion ? <MemoryPage /> : <Navigate to={user ? "/onboard" : "/auth"} replace />} />
-              <Route path="/bond" element={user && companion ? <BondPage /> : <Navigate to={user ? "/onboard" : "/auth"} replace />} />
-              <Route path="/settings" element={user ? <SettingsPage /> : <Navigate to="/auth" replace />} />
-              <Route path="*" element={<Navigate to="/" replace />} />
-            </Routes>
+            <AnimatedRoutes user={user} companion={companion} />
           </div>
         </div>
       </HashRouter>
+      </ToastProvider>
     </LangProvider>
   );
 }

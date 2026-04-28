@@ -127,29 +127,12 @@ export default function CreatePage() {
       }).select().single();
 
       if (error || !data) {
-        console.warn("Create fallback:", error);
-        const mock = {
-          id: crypto.randomUUID(),
-          user_id: user.id,
-          name: name.trim(),
-          avatar_url: "/personas/serene.jpg",
-          personality_desc: personaDesc,
-          rationality_level: rationality,
-          emotion_level: emotion,
-          big_five: traits,
-          timezone,
-          location: location || undefined,
-          backstory: backstory || description || personaDesc,
-          adopted_from_plaza: false,
-          is_active: true,
-          gender,
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-        };
-        setCompanion(mock as any);
-      } else {
-        setCompanion(data);
+        console.error("Create companion failed:", error);
+        alert(lang === "zh" ? "创建失败，请重试" : "Creation failed, please try again");
+        setCreating(false);
+        return;
       }
+      setCompanion(data);
       navigate("/home");
     } catch (err) {
       console.error(err);
