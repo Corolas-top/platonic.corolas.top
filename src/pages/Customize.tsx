@@ -1,8 +1,7 @@
 import { useState, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import {
-  User,
+import {User,
   Sparkles,
   BookOpen,
   Check,
@@ -12,9 +11,7 @@ import {
   CheckSquare,
   Users,
   Heart,
-  CloudRain,
-  X,
-} from 'lucide-react';
+  CloudRain} from 'lucide-react';
 
 /* ──────────── Types ──────────── */
 interface BigFive {
@@ -597,7 +594,7 @@ export default function Customize() {
 
                     {/* Big Five Sliders */}
                     <motion.div variants={staggerContainer} initial="initial" animate="animate">
-                      {traitConfig.map((trait, index) => (
+                      {traitConfig.map((trait, _idx) => (
                         <motion.div key={trait.key} variants={staggerItem} className="mb-7 last:mb-0">
                           <div className="flex items-center justify-between mb-2">
                             <div className="flex items-center gap-2">

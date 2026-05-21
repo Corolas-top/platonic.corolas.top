@@ -1,19 +1,10 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import {
-  ChevronLeft,
+import {ChevronLeft,
   Send,
   Plus,
   Settings,
-  MoreVertical,
-  Image,
-  Smile,
-  Mic,
-  Heart,
-  Calendar,
-  Paperclip,
-  ChevronDown,
-} from 'lucide-react';
+  MoreVertical,ChevronDown} from 'lucide-react';
 
 interface ChatMessage {
   id: string;
@@ -144,7 +135,7 @@ const StreamingCursor = React.memo(function StreamingCursor() {
     <motion.span
       className="inline-block w-2 h-4 bg-pink-400 ml-0.5 align-middle"
       animate={{ opacity: [1, 0] }}
-      transition={{ duration: 0.5, repeat: Infinity, ease: 'steps(2)' }}
+      transition={{ duration: 0.5, repeat: Infinity, ease: 'linear' }}
     />
   );
 });
@@ -191,14 +182,14 @@ export default function Chat() {
   // SSE streaming simulation
   const streamResponse = useCallback((text: string) => {
     streamingRef.current = true;
-    let index = 0;
+    let idx = 0;
     setStreamingText('');
 
     const streamChar = () => {
       if (!streamingRef.current) return;
-      if (index < text.length) {
-        setStreamingText(text.slice(0, index + 1));
-        index++;
+      if (idx < text.length) {
+        setStreamingText(text.slice(0, idx + 1));
+        idx++;
         // Variable speed: slightly random 20-50ms per character
         const delay = 20 + Math.random() * 35;
         setTimeout(streamChar, delay);
@@ -388,7 +379,7 @@ export default function Chat() {
 
         {/* Messages */}
         <AnimatePresence initial={false}>
-          {messages.map((msg, index) =>
+          {messages.map((msg, _idx) =>
             msg.role === 'companion' ? (
               <motion.div
                 key={msg.id}
