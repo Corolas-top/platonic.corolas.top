@@ -1,10 +1,1012 @@
+import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
+import {
+  Sparkles,
+  Heart,
+  Zap,
+  TrendingUp,
+  Bell,
+  ChevronRight,
+  Users,
+  MessageCircle,
+  BookOpen,
+  Star,
+  Check,
+  Battery,
+  PawPrint,
+  ChevronDown,
+} from 'lucide-react';
+import { cn } from '@/lib/utils';
+
+/* ─── Types ─── */
+interface TraitData {
+  name: string;
+  nameEn: string;
+  value: number;
+  description: string;
+}
+
+interface Stage {
+  num: number;
+  name: string;
+  nameEn: string;
+  description: string;
+}
+
+/* ─── Mock Data ─── */
+const bigFiveData: TraitData[] = [
+  { name: '开放性', nameEn: 'Openness', value: 75, description: '富有想象力，喜欢尝试新事物' },
+  { name: '尽责性', nameEn: 'Conscientiousness', value: 60, description: '自律、有条理、追求成就' },
+  { name: '外向性', nameEn: 'Extraversion', value: 45, description: '社交活跃，精力充沛' },
+  { name: '宜人性', nameEn: 'Agreeableness', value: 80, description: '友善、合作、富有同情心' },
+  { name: '神经质', nameEn: 'Neuroticism', value: 30, description: '情绪稳定，抗压能力强' },
+];
+
+const stages: Stage[] = [
+  { num: 1, name: '初次相遇', nameEn: 'First Meeting', description: '你们第一次相遇，彼此还很陌生。' },
+  { num: 2, name: '渐生情愫', nameEn: 'Growing Feelings', description: '你们开始互相了解，产生了一些好感。' },
+  { num: 3, name: '暗生情愫', nameEn: 'Silent Understanding', description: '你们开始产生默契，她能理解你的情绪波动。' },
+  { num: 4, name: '心意相通', nameEn: 'Heart Connection', description: '你们心灵相通，彼此深深吸引。' },
+  { num: 5, name: '灵魂伴侣', nameEn: 'Soulmate', description: '你们已经成为彼此的灵魂伴侣。' },
+];
+
+const currentStageNum = 3;
+const currentProgress = 53;
+
+// Generate 24h mood data (sine wave + noise)
+function generateMoodData(): number[] {
+  const points: number[] = [];
+  for (let i = 0; i < 24; i++) {
+    const base = Math.sin((i / 24) * Math.PI * 2 - Math.PI / 2) * 30 + 50;
+    const noise = (Math.random() - 0.5) * 20;
+    points.push(Math.max(10, Math.min(90, base + noise)));
+  }
+  return points;
+}
+
+const moodData = generateMoodData();
+const moodLabels = ['悲伤', '平静', '开心', '兴奋', '狂喜'];
+const timeLabels = ['00:00', '06:00', '12:00', '18:00', '24:00'];
+
+/* ─── Animation Variants ─── */
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: { staggerChildren: 0.1, delayChildren: 0.1 },
+  },
+};
+
+const cardVariants = {
+  hidden: { opacity: 0, y: 30 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.5, ease: [0.25, 0.1, 0.25, 1] as [number, number, number, number] },
+  },
+};
+
+/* ─── Big Five Radar Chart ─── */
+function BigFiveRadar() {
+  const [hoveredTrait, setHoveredTrait] = useState<number | null>(null);
+  const [animated, setAnimated] = useState(false);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setAnimated(true), 300);
+    return () => clearTimeout(timer);
+  }, []);
+
+  const size = 300;
+  const center = size / 2;
+  const radius = 110;
+  const levels = 5;
+
+  const getPoint = useCallback((index: number, value: number, maxVal: number) => {
+    const angle = (Math.PI * 2 * index) / 5 - Math.PI / 2;
+    const r = (value / maxVal) * radius;
+    return {
+      x: center + r * Math.cos(angle),
+      y: center + r * Math.sin(angle),
+    };
+  }, [center, radius]);
+
+  const gridPolygons = useMemo(() => {
+    const polygons: string[] = [];
+    for (let level = 1; level <= levels; level++) {
+      const points: string[] = [];
+      for (let i = 0; i < 5; i++) {
+        const p = getPoint(i, level * 20, 100);
+        points.push(`${p.x},${p.y}`);
+      }
+      polygons.push(points.join(' '));
+    }
+    return polygons;
+  }, [getPoint]);
+
+  const dataPoints = bigFiveData.map((trait, i) =>
+    getPoint(i, animated ? trait.value : 0, 100)
+  );
+
+  const dataPolygon = dataPoints.map((p) => `${p.x},${p.y}`).join(' ');
+
+  const labelPositions = bigFiveData.map((_, i) => {
+    const angle = (Math.PI * 2 * i) / 5 - Math.PI / 2;
+    const labelRadius = radius + 32;
+    return {
+      x: center + labelRadius * Math.cos(angle),
+      y: center + labelRadius * Math.sin(angle),
+    };
+  });
+
+  const scorePositions = bigFiveData.map((trait, i) => {
+    const angle = (Math.PI * 2 * i) / 5 - Math.PI / 2;
+    const scoreRadius = ((animated ? trait.value : 0) / 100) * radius + 16;
+    return {
+      x: center + scoreRadius * Math.cos(angle),
+      y: center + scoreRadius * Math.sin(angle),
+    };
+  });
+
+  return (
+    <motion.div
+      className="card-gradient rounded-2xl border border-pink-100 p-7 shadow-md"
+      variants={cardVariants}
+    >
+      {/* Card Header */}
+      <div className="flex items-center justify-between mb-1">
+        <div className="flex items-center gap-2">
+          <Sparkles size={16} className="text-pink-400" />
+          <h3 className="font-body text-[22px] font-bold text-[#2D1B2E]">人格画像</h3>
+        </div>
+        <div className="flex items-center gap-2">
+          <span className="text-[13px] text-pink-500 font-body">小樱</span>
+          <img src="/companion-1.jpg" alt="小樱" className="w-6 h-6 rounded-full object-cover" />
+        </div>
+      </div>
+      <p className="text-[12px] text-[#A093A5] font-body mb-5">基于 Big Five 人格模型</p>
+
+      {/* Radar Chart */}
+      <div className="flex justify-center relative">
+        <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
+          {/* Grid pentagons */}
+          {gridPolygons.map((points, idx) => (
+            <motion.polygon
+              key={idx}
+              points={points}
+              fill="none"
+              stroke="#FFE4EC"
+              strokeWidth={1}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.3, delay: idx * 0.05 }}
+            />
+          ))}
+          {/* Axis lines */}
+          {bigFiveData.map((_, i) => {
+            const end = getPoint(i, 100, 100);
+            return (
+              <motion.line
+                key={i}
+                x1={center}
+                y1={center}
+                x2={end.x}
+                y2={end.y}
+                stroke="#FFE4EC"
+                strokeWidth={1}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.3, delay: 0.1 }}
+              />
+            );
+          })}
+          {/* Data polygon */}
+          <motion.polygon
+            points={dataPolygon}
+            fill="rgba(255,182,193,0.25)"
+            stroke="#FF69B4"
+            strokeWidth={2.5}
+            strokeLinejoin="round"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: animated ? 1 : 0 }}
+            transition={{ duration: 0.8, ease: [0.25, 0.1, 0.25, 1] as [number, number, number, number] }}
+          />
+          {/* Data points */}
+          {dataPoints.map((p, i) => (
+            <motion.circle
+              key={i}
+              cx={p.x}
+              cy={p.y}
+              r={6}
+              fill="#FF69B4"
+              stroke="white"
+              strokeWidth={2}
+              initial={{ scale: 0 }}
+              animate={{ scale: animated ? 1 : 0 }}
+              transition={{
+                duration: 0.3,
+                delay: 0.8 + i * 0.1,
+                ease: [0.68, -0.3, 0.32, 1.3] as [number, number, number, number],
+              }}
+              onMouseEnter={() => setHoveredTrait(i)}
+              onMouseLeave={() => setHoveredTrait(null)}
+              className="cursor-pointer"
+            />
+          ))}
+          {/* Center dot */}
+          <circle cx={center} cy={center} r={3} fill="#FF9EB5" />
+          {/* Labels */}
+          {bigFiveData.map((trait, i) => (
+            <text
+              key={i}
+              x={labelPositions[i].x}
+              y={labelPositions[i].y}
+              textAnchor="middle"
+              dominantBaseline="middle"
+              className="text-[12px] font-body fill-[#6B5B6E]"
+            >
+              {trait.name}
+            </text>
+          ))}
+          {/* Score numbers */}
+          {bigFiveData.map((trait, i) => (
+            <motion.text
+              key={`score-${i}`}
+              x={scorePositions[i].x}
+              y={scorePositions[i].y}
+              textAnchor="middle"
+              dominantBaseline="middle"
+              className="text-[13px] font-number font-semibold fill-[#E850A0]"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: animated ? 1 : 0 }}
+              transition={{ duration: 0.4, delay: 1 + i * 0.08 }}
+            >
+              {animated ? trait.value : 0}
+            </motion.text>
+          ))}
+        </svg>
+
+        {/* Tooltip */}
+        <AnimatePresence>
+          {hoveredTrait !== null && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.9 }}
+              transition={{ duration: 0.15 }}
+              className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white/95 backdrop-blur-sm rounded-xl shadow-lg px-4 py-3 pointer-events-none z-10 border border-pink-100"
+            >
+              <p className="text-sm font-body font-semibold text-[#2D1B2E]">
+                {bigFiveData[hoveredTrait].name} ({bigFiveData[hoveredTrait].nameEn})
+              </p>
+              <p className="text-xs text-[#E850A0] font-number font-semibold mt-0.5">
+                {bigFiveData[hoveredTrait].value}/100
+              </p>
+              <p className="text-xs text-[#6B5B6E] font-body mt-1">
+                {bigFiveData[hoveredTrait].description}
+              </p>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+
+      {/* Legend */}
+      <div className="flex justify-center gap-3 mt-4">
+        {bigFiveData.map((trait, i) => (
+          <div key={i} className="flex items-center gap-1.5">
+            <div className="w-1 h-5 rounded-full bg-gradient-to-b from-pink-200 to-pink-400" />
+            <span className="text-[12px] text-[#6B5B6E] font-body">{trait.name}</span>
+          </div>
+        ))}
+      </div>
+
+      {/* Personality Summary */}
+      <div className="mt-4 pl-3 border-l-[3px] border-[#E8A0BF]">
+        <p className="text-[13px] text-[#6B5B6E] font-body italic leading-relaxed">
+          小樱是一位开朗、友善且富有创造力的伴侣。她热情外向，善于倾听，总能带给你温暖与欢乐。
+        </p>
+      </div>
+    </motion.div>
+  );
+}
+
+/* ─── Milestone Progress Card ─── */
+function MilestoneProgress() {
+  const [animated, setAnimated] = useState(false);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setAnimated(true), 400);
+    return () => clearTimeout(timer);
+  }, []);
+
+  const currentStage = stages.find((s) => s.num === currentStageNum)!;
+
+  return (
+    <motion.div
+      className="card-gradient rounded-2xl border border-pink-100 p-7 shadow-md flex flex-col"
+      variants={cardVariants}
+    >
+      {/* Header */}
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center gap-2">
+          <Heart size={16} className="text-[#E8A0BF]" />
+          <h3 className="font-body text-[22px] font-bold text-[#2D1B2E]">好感度旅程</h3>
+        </div>
+        <span className="px-3 py-1 rounded-full bg-[#FEF3C7] text-[#D4A574] text-[12px] font-body font-semibold">
+          阶段 {currentStageNum}/5
+        </span>
+      </div>
+
+      {/* Current Stage */}
+      <div className="mb-4">
+        <h2 className="font-body text-[28px] font-bold text-[#2D1B2E]">{currentStage.name}</h2>
+        <p className="text-[13px] text-[#A093A5] font-body italic">{currentStage.nameEn}</p>
+        <p className="text-[13px] text-[#6B5B6E] font-body mt-2 leading-relaxed">
+          {currentStage.description}
+        </p>
+      </div>
+
+      {/* Progress Bar */}
+      <div className="mb-5">
+        <p className="text-[13px] text-[#6B5B6E] font-body mb-2">
+          {currentProgress}% — 距离下一阶段还需 {100 - currentProgress} 点好感度
+        </p>
+        <div className="h-3 bg-pink-50 rounded-full overflow-hidden">
+          <motion.div
+            className="h-full rounded-full accent-gradient"
+            initial={{ width: 0 }}
+            animate={{ width: animated ? `${currentProgress}%` : 0 }}
+            transition={{ duration: 1.2, ease: [0.25, 0.1, 0.25, 1] as [number, number, number, number], delay: 0.3 }}
+          />
+        </div>
+      </div>
+
+      {/* Stage Timeline */}
+      <div className="relative flex-1">
+        {/* Vertical line */}
+        <div className="absolute left-[11px] top-2 bottom-2 w-[2px] bg-pink-100" />
+
+        <div className="flex flex-col gap-3">
+          {stages.map((stage, i) => {
+            const isCompleted = stage.num < currentStageNum;
+            const isCurrent = stage.num === currentStageNum;
+            const isFuture = stage.num > currentStageNum;
+
+            return (
+              <motion.div
+                key={stage.num}
+                className="flex items-center gap-3 relative z-10"
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{
+                  duration: 0.3,
+                  delay: 0.6 + i * 0.08,
+                  ease: [0.68, -0.3, 0.32, 1.3] as [number, number, number, number],
+                }}
+              >
+                <div
+                  className={cn(
+                    'w-6 h-6 rounded-full flex items-center justify-center text-[11px] font-number',
+                    isCompleted && 'bg-[#D4A574] text-white',
+                    isCurrent && 'bg-pink-400 text-white relative',
+                    isFuture && 'bg-pink-100 text-[#A093A5]'
+                  )}
+                >
+                  {isCompleted ? (
+                    <Check size={14} />
+                  ) : (
+                    stage.num
+                  )}
+                  {isCurrent && (
+                    <span className="absolute inset-0 rounded-full animate-ring-pulse bg-pink-400/30" />
+                  )}
+                </div>
+                <span
+                  className={cn(
+                    'text-[13px] font-body',
+                    isCompleted && 'text-[#D4A574] font-medium',
+                    isCurrent && 'text-pink-500 font-semibold',
+                    isFuture && 'text-[#A093A5]'
+                  )}
+                >
+                  {stage.name}
+                </span>
+              </motion.div>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Recent Milestone */}
+      <div className="mt-4 pt-3 border-t border-pink-50 flex items-center gap-1.5">
+        <Star size={14} className="text-[#D4A574]" />
+        <span className="text-[12px] font-body text-[#D4A574] font-semibold">
+          最近达成：渐生情愫 — 2024.12.15
+        </span>
+      </div>
+    </motion.div>
+  );
+}
+
+/* ─── Energy Balance Card ─── */
+function EnergyCard() {
+  const [count, setCount] = useState(0);
+  const [animated, setAnimated] = useState(false);
+  const navigate = useNavigate();
+
+  const target = 12800;
+
+  useEffect(() => {
+    const timer = setTimeout(() => setAnimated(true), 600);
+    return () => clearTimeout(timer);
+  }, []);
+
+  useEffect(() => {
+    if (!animated) return;
+    let start = 0;
+    const duration = 1500;
+    const startTime = performance.now();
+
+    const animate = (now: number) => {
+      const elapsed = now - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      const eased = 1 - Math.pow(1 - progress, 3);
+      start = Math.floor(eased * target);
+      setCount(start);
+      if (progress < 1) requestAnimationFrame(animate);
+    };
+
+    requestAnimationFrame(animate);
+  }, [animated, target]);
+
+  return (
+    <motion.div
+      className="card-gradient rounded-2xl border border-pink-100 p-6 shadow-md"
+      variants={cardVariants}
+    >
+      {/* Header */}
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center gap-2">
+          <Zap size={16} className="text-[#D4A574]" />
+          <h3 className="font-body text-[22px] font-bold text-[#2D1B2E]">电量余额</h3>
+        </div>
+        <div className="group relative">
+          <div className="w-5 h-5 rounded-full border border-pink-200 flex items-center justify-center cursor-help">
+            <span className="text-[11px] text-[#A093A5]">?</span>
+          </div>
+          <div className="absolute right-0 bottom-full mb-2 w-48 bg-white rounded-xl shadow-lg border border-pink-100 p-3 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-20">
+            <p className="text-[12px] text-[#6B5B6E] font-body">电量用于与伴侣对话和解锁功能</p>
+          </div>
+        </div>
+      </div>
+
+      {/* Balance Display */}
+      <div className="flex items-baseline gap-2 mb-1">
+        <span className="text-[42px] font-number font-bold text-[#2D1B2E] leading-none tracking-tight">
+          {count.toLocaleString()}
+        </span>
+        <Zap size={24} className="text-[#D4A574]" />
+      </div>
+      <p className="text-[13px] text-[#A093A5] font-body mb-4">剩余电量</p>
+
+      {/* Usage Bar */}
+      <div className="mb-3">
+        <p className="text-[12px] text-[#6B5B6E] font-body mb-1">今日已用 45%</p>
+        <div className="h-1 bg-pink-50 rounded-full overflow-hidden">
+          <motion.div
+            className="h-full rounded-full accent-gradient"
+            initial={{ width: 0 }}
+            animate={{ width: animated ? '45%' : 0 }}
+            transition={{ duration: 0.8, delay: 0.4, ease: [0.25, 0.1, 0.25, 1] as [number, number, number, number] }}
+          />
+        </div>
+      </div>
+
+      {/* Recharge Button */}
+      <motion.button
+        onClick={() => navigate('/payment')}
+        className="mt-2 px-5 py-2 rounded-xl accent-gradient text-white text-[13px] font-body font-semibold hover:brightness-110 transition-all duration-150"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: animated ? 1 : 0 }}
+        transition={{ duration: 0.3, delay: 1.5 }}
+      >
+        立即充值
+      </motion.button>
+    </motion.div>
+  );
+}
+
+/* ─── 24h Mood Sparkline ─── */
+function MoodSparkline() {
+  const [animated, setAnimated] = useState(false);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setAnimated(true), 700);
+    return () => clearTimeout(timer);
+  }, []);
+
+  const width = 340;
+  const height = 140;
+  const padding = { left: 40, right: 10, top: 10, bottom: 24 };
+  const chartWidth = width - padding.left - padding.right;
+  const chartHeight = height - padding.top - padding.bottom;
+
+  const points = moodData.map((val, i) => ({
+    x: padding.left + (i / 23) * chartWidth,
+    y: padding.top + chartHeight - (val / 100) * chartHeight,
+  }));
+
+  // Smooth curve using cubic bezier
+  const linePath = points.reduce((path, p, i) => {
+    if (i === 0) return `M ${p.x} ${p.y}`;
+    const prev = points[i - 1];
+    const cpx1 = prev.x + (p.x - prev.x) / 3;
+    const cpx2 = prev.x + (2 * (p.x - prev.x)) / 3;
+    return `${path} C ${cpx1} ${prev.y}, ${cpx2} ${p.y}, ${p.x} ${p.y}`;
+  }, '');
+
+  const areaPath = `${linePath} L ${points[points.length - 1].x} ${padding.top + chartHeight} L ${padding.left} ${padding.top + chartHeight} Z`;
+
+  const currentHour = new Date().getHours();
+
+  return (
+    <motion.div
+      className="card-gradient rounded-2xl border border-pink-100 p-6 shadow-md"
+      variants={cardVariants}
+    >
+      {/* Header */}
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center gap-2">
+          <TrendingUp size={16} className="text-pink-400" />
+          <h3 className="font-body text-[22px] font-bold text-[#2D1B2E]">情绪波动</h3>
+        </div>
+        <div className="flex items-center gap-1.5">
+          <span className="w-2 h-2 rounded-full bg-green-400" />
+          <span className="text-[13px] text-[#6B5B6E] font-body">开心</span>
+        </div>
+      </div>
+
+      {/* Sparkline */}
+      <svg width="100%" height={height} viewBox={`0 0 ${width} ${height}`} preserveAspectRatio="none">
+        {/* Grid lines */}
+        {[0, 0.25, 0.5, 0.75, 1].map((t, i) => (
+          <line
+            key={i}
+            x1={padding.left}
+            y1={padding.top + chartHeight * t}
+            x2={width - padding.right}
+            y2={padding.top + chartHeight * t}
+            stroke="#FFF5F7"
+            strokeWidth={1}
+          />
+        ))}
+        {/* Y-axis labels */}
+        {moodLabels.map((label, i) => (
+          <text
+            key={i}
+            x={padding.left - 6}
+            y={padding.top + chartHeight * (1 - i / 4) + 4}
+            textAnchor="end"
+            className="text-[10px] font-body fill-[#A093A5]"
+          >
+            {label}
+          </text>
+        ))}
+        {/* Area fill */}
+        <motion.path
+          d={areaPath}
+          fill="rgba(255,182,193,0.2)"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: animated ? 1 : 0 }}
+          transition={{ duration: 0.5, delay: 1.5 }}
+        />
+        {/* Line */}
+        <motion.path
+          d={linePath}
+          fill="none"
+          stroke="#FF69B4"
+          strokeWidth={2}
+          strokeLinecap="round"
+          initial={{ pathLength: 0 }}
+          animate={{ pathLength: animated ? 1 : 0 }}
+          transition={{ duration: 1.5, ease: [0.25, 0.1, 0.25, 1] as [number, number, number, number] }}
+        />
+        {/* Data points */}
+        {points.map((p, i) => (
+          <motion.circle
+            key={i}
+            cx={p.x}
+            cy={p.y}
+            r={3}
+            fill="#FF69B4"
+            initial={{ scale: 0 }}
+            animate={{ scale: animated ? 1 : 0 }}
+            transition={{ duration: 0.2, delay: 1.2 + i * 0.03 }}
+          />
+        ))}
+        {/* Current time marker */}
+        {(() => {
+          const cx = padding.left + (currentHour / 23) * chartWidth;
+          return (
+            <motion.line
+              x1={cx}
+              y1={padding.top}
+              x2={cx}
+              y2={padding.top + chartHeight}
+              stroke="#E8A0BF"
+              strokeWidth={1}
+              strokeDasharray="4 2"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: animated ? 1 : 0 }}
+              transition={{ duration: 0.3, delay: 1.8 }}
+            />
+          );
+        })()}
+        {/* X-axis labels */}
+        {timeLabels.map((label, i) => (
+          <text
+            key={i}
+            x={padding.left + (i / 4) * chartWidth}
+            y={height - 4}
+            textAnchor="middle"
+            className="text-[10px] font-body fill-[#A093A5]"
+          >
+            {label}
+          </text>
+        ))}
+      </svg>
+
+      {/* Mood Summary */}
+      <div className="mt-3 flex items-center justify-between text-[12px] font-body text-[#6B5B6E]">
+        <span>平均心情：开心</span>
+        <div className="flex gap-3">
+          <span className="text-[#A093A5]">最高：兴奋 (14:00)</span>
+          <span className="text-[#A093A5]">最低：平静 (03:00)</span>
+        </div>
+      </div>
+    </motion.div>
+  );
+}
+
+/* ─── Quick Action Buttons ─── */
+function QuickActions() {
+  const navigate = useNavigate();
+  const showAdvancedDrama = currentStageNum >= 3;
+
+  const actions = [
+    {
+      label: '开始对话',
+      icon: <MessageCircle size={28} />,
+      desc: '与你的伴侣开始一段温暖对话',
+      gradient: true,
+      onClick: () => navigate('/chat'),
+    },
+    {
+      label: '去广场',
+      icon: <Users size={28} />,
+      desc: '发现更多有趣的灵魂伴侣',
+      gradient: false,
+      onClick: () => navigate('/plaza'),
+    },
+    {
+      label: '甜蜜记忆',
+      icon: <Heart size={28} />,
+      desc: '回顾你们的美好回忆',
+      gradient: false,
+      onClick: () => navigate('/memory'),
+    },
+    ...(showAdvancedDrama
+      ? [
+          {
+            label: '高级剧情',
+            icon: <BookOpen size={28} />,
+            desc: '解锁专属的深度剧情体验',
+            gradient: false,
+            onClick: () => navigate('/drama'),
+          },
+        ]
+      : []),
+  ];
+
+  return (
+    <motion.div
+      className="grid grid-cols-2 gap-5"
+      variants={cardVariants}
+    >
+      {actions.map((action, i) => (
+        <motion.button
+          key={action.label}
+          onClick={action.onClick}
+          className={cn(
+            'flex items-center gap-4 p-5 rounded-2xl border text-left transition-all duration-200 group',
+            action.gradient
+              ? 'accent-gradient text-white border-transparent shadow-md hover:shadow-glow hover:brightness-110'
+              : 'card-gradient border-pink-100 shadow-md hover:shadow-lg hover:-translate-y-0.5'
+          )}
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{
+            duration: 0.5,
+            delay: 0.8 + i * 0.1,
+            ease: [0.25, 0.1, 0.25, 1] as [number, number, number, number],
+          }}
+        >
+          <div
+            className={cn(
+              'w-14 h-14 rounded-full flex items-center justify-center shrink-0 transition-transform duration-200 group-hover:scale-105',
+              action.gradient
+                ? 'bg-white/20 text-white'
+                : 'bg-pink-50 text-pink-400'
+            )}
+          >
+            {action.icon}
+          </div>
+          <div className="flex-1 min-w-0">
+            <h4
+              className={cn(
+                'text-[18px] font-body font-semibold mb-0.5',
+                action.gradient ? 'text-white' : 'text-[#2D1B2E]'
+              )}
+            >
+              {action.label}
+            </h4>
+            <p
+              className={cn(
+                'text-[13px] font-body leading-relaxed',
+                action.gradient ? 'text-white/80' : 'text-[#6B5B6E]'
+              )}
+            >
+              {action.desc}
+            </p>
+          </div>
+          <ChevronRight
+            size={24}
+            className={cn(
+              'shrink-0 transition-transform duration-200 group-hover:translate-x-1',
+              action.gradient ? 'text-white' : 'text-pink-400'
+            )}
+          />
+        </motion.button>
+      ))}
+    </motion.div>
+  );
+}
+
+/* ─── Preview Panel ─── */
+function PreviewPanel() {
+  const [currentTime, setCurrentTime] = useState('');
+
+  useEffect(() => {
+    const update = () => {
+      const now = new Date();
+      setCurrentTime(
+        `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`
+      );
+    };
+    update();
+    const interval = setInterval(update, 60000);
+    return () => clearInterval(interval);
+  }, []);
+
+  return (
+    <motion.div
+      className="w-[375px] min-h-[100dvh] bg-pink-50 border-l border-pink-100 p-5 flex flex-col gap-4 overflow-y-auto"
+      initial={{ opacity: 0, x: 30 }}
+      animate={{ opacity: 1, x: 0 }}
+      transition={{ duration: 0.5, delay: 0.3, ease: [0.25, 0.1, 0.25, 1] as [number, number, number, number] }}
+    >
+      {/* Live2D Preview */}
+      <motion.div
+        className="flex-1 min-h-0"
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.4, delay: 0.5 }}
+      >
+        <div className="w-full h-full min-h-[420px] rounded-[32px] border-[10px] border-[#1A1025] bg-white shadow-lg overflow-hidden relative flex flex-col">
+          {/* Status bar */}
+          <div className="flex items-center justify-between px-5 py-2 text-[11px] text-[#A093A5] font-body">
+            <span>{currentTime}</span>
+            <div className="flex items-center gap-1">
+              <Battery size={14} />
+            </div>
+          </div>
+
+          {/* Content */}
+          <div className="flex-1 relative breathing-gradient flex flex-col items-center justify-center p-4">
+            {/* Floating sparkles */}
+            <div className="absolute inset-0 overflow-hidden pointer-events-none">
+              {[0, 1, 2, 3].map((i) => (
+                <motion.div
+                  key={i}
+                  className="absolute w-1.5 h-1.5 rounded-full bg-pink-300"
+                  style={{
+                    left: `${20 + i * 20}%`,
+                    top: `${15 + (i % 2) * 30}%`,
+                  }}
+                  animate={{
+                    y: [0, -15, 0],
+                    x: [0, 8, -4, 0],
+                    opacity: [0.3, 0.6, 0.3],
+                  }}
+                  transition={{
+                    duration: 4 + i,
+                    repeat: Infinity,
+                    delay: i * 0.8,
+                    ease: 'easeInOut',
+                  }}
+                />
+              ))}
+            </div>
+
+            {/* Avatar */}
+            <motion.div
+              className="relative mb-4"
+              animate={{ y: [0, -5, 0] }}
+              transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
+            >
+              <img
+                src="/companion-1.jpg"
+                alt="小樱"
+                className="w-40 h-40 object-cover rounded-2xl shadow-lg"
+              />
+              <div className="absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-green-400 border-2 border-white" />
+            </motion.div>
+
+            {/* Name */}
+            <div className="flex items-center gap-1.5 mb-1">
+              <h4 className="font-body text-[18px] font-semibold text-[#2D1B2E]">小樱</h4>
+              <motion.div
+                animate={{ scale: [1, 1.2, 1] }}
+                transition={{ duration: 1.5, repeat: Infinity }}
+              >
+                <Heart size={14} className="text-pink-400 fill-pink-400" />
+              </motion.div>
+            </div>
+            <p className="text-[12px] text-[#A093A5] font-body">在线</p>
+
+            {/* Placeholder text */}
+            <div className="mt-4 px-4 py-2 bg-white/60 backdrop-blur-sm rounded-xl">
+              <p className="text-[11px] text-[#6B5B6E] font-body text-center">即将上线</p>
+            </div>
+          </div>
+        </div>
+      </motion.div>
+
+      {/* Pet Preview */}
+      <motion.div
+        className="h-[280px] shrink-0"
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.4, delay: 0.7 }}
+      >
+        <div className="w-full h-full rounded-[32px] border-[10px] border-[#1A1025] bg-white shadow-lg overflow-hidden relative flex flex-col">
+          {/* Status bar */}
+          <div className="flex items-center justify-between px-5 py-2 text-[11px] text-[#A093A5] font-body">
+            <span>{currentTime}</span>
+            <div className="flex items-center gap-1">
+              <Battery size={14} />
+            </div>
+          </div>
+
+          {/* Content */}
+          <div className="flex-1 bg-gradient-to-br from-orange-50 to-pink-50 flex flex-col items-center justify-center p-4 relative">
+            {/* Pet placeholder */}
+            <motion.div
+              className="w-24 h-24 rounded-full bg-gradient-to-br from-orange-200 to-pink-200 flex items-center justify-center mb-3 relative"
+              animate={{ y: [0, -3, 0] }}
+              transition={{ duration: 2.5, repeat: Infinity, ease: 'easeInOut' }}
+            >
+              <PawPrint size={40} className="text-white" />
+              <motion.div
+                className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-green-400 border-2 border-white"
+                animate={{ scale: [1, 1.3, 1] }}
+                transition={{ duration: 2, repeat: Infinity }}
+              />
+            </motion.div>
+
+            <h4 className="font-body text-[18px] font-semibold text-[#2D1B2E] mb-3">小咪</h4>
+
+            {/* Status bars */}
+            <div className="w-full max-w-[200px] space-y-2">
+              <div className="flex items-center gap-2">
+                <span className="text-[10px] font-body w-6">饱食</span>
+                <div className="flex-1 h-1 bg-white/60 rounded-full overflow-hidden">
+                  <div className="h-full w-[70%] rounded-full bg-gradient-to-r from-orange-300 to-orange-400" />
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-[10px] font-body w-6">精力</span>
+                <div className="flex-1 h-1 bg-white/60 rounded-full overflow-hidden">
+                  <div className="h-full w-[85%] rounded-full bg-gradient-to-r from-pink-300 to-pink-400" />
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-[10px] font-body w-6">心情</span>
+                <div className="flex-1 h-1 bg-white/60 rounded-full overflow-hidden">
+                  <div className="h-full w-[90%] rounded-full bg-gradient-to-r from-green-300 to-green-400" />
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </motion.div>
+    </motion.div>
+  );
+}
+
+/* ─── Main Dashboard Page ─── */
 export default function Dashboard() {
   return (
-    <div className="min-h-[100dvh] flex items-center justify-center">
-      <div className="text-center">
-        <h1 className="text-2xl font-bold text-plum-900">Dashboard</h1>
-        <p className="text-plum-800 mt-2">Main console</p>
+    <div className="flex min-h-[100dvh]">
+      {/* Main Content */}
+      <div className="flex-1 p-6 overflow-y-auto">
+        <motion.div
+          variants={containerVariants}
+          initial="hidden"
+          animate="visible"
+          className="max-w-[900px] mx-auto space-y-5"
+        >
+          {/* Top Bar */}
+          <motion.div
+            className="flex items-center justify-between h-14"
+            variants={cardVariants}
+          >
+            <motion.h2
+              className="font-body text-[28px] font-bold text-[#2D1B2E]"
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.3 }}
+            >
+              控制台
+            </motion.h2>
+            <motion.div
+              className="flex items-center gap-3"
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.3, delay: 0.1 }}
+            >
+              <button className="relative p-2 rounded-xl hover:bg-pink-100 transition-colors duration-150">
+                <Bell size={20} className="text-[#6B5B6E]" />
+                <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full" />
+              </button>
+              <button className="flex items-center gap-2 p-1.5 rounded-xl hover:bg-pink-100 transition-colors duration-150">
+                <img
+                  src="/default-avatar.jpg"
+                  alt="User"
+                  className="w-8 h-8 rounded-full object-cover"
+                />
+                <ChevronDown size={16} className="text-[#A093A5]" />
+              </button>
+            </motion.div>
+          </motion.div>
+
+          {/* Grid: 2 columns */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+            {/* Left column */}
+            <div className="space-y-5">
+              <BigFiveRadar />
+              <EnergyCard />
+            </div>
+
+            {/* Right column */}
+            <div className="space-y-5">
+              <MilestoneProgress />
+              <MoodSparkline />
+            </div>
+          </div>
+
+          {/* Quick Actions */}
+          <QuickActions />
+
+          {/* Bottom spacing */}
+          <div className="h-4" />
+        </motion.div>
+      </div>
+
+      {/* Preview Panel - Desktop only */}
+      <div className="hidden xl:flex">
+        <PreviewPanel />
       </div>
     </div>
-  )
+  );
 }
