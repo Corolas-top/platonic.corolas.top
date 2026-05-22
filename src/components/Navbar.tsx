@@ -132,7 +132,7 @@ export default function Navbar({
         className="flex items-center gap-2 px-5 py-6 cursor-pointer"
         onClick={() => navigate('/')}
       >
-        <Sparkles size={24} className="text-pink-200" />
+        <img src="/platonic.png" alt="Logo" className="w-8 h-8 rounded-lg object-cover ring-1 ring-pink-400/40" />
         <span className="text-pink-200 text-lg font-bold tracking-tight">
           Corolas | Platonic
         </span>

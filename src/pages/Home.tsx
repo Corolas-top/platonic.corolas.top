@@ -104,9 +104,10 @@ function FloatingNav() {
       `}
     >
       <button onClick={() => navigate('/')} className="flex items-center gap-2 group">
-        <SparklesIcon
-          size={20}
-          className="text-pink-400 group-hover:animate-[spin_3s_linear_infinite] transition-transform"
+        <img
+          src="/platonic.png"
+          alt="Logo"
+          className="w-6 h-6 rounded-md object-cover ring-1 ring-pink-400/40 group-hover:animate-[spin_3s_linear_infinite] transition-transform"
         />
         <span className="text-pink-400 text-lg font-bold tracking-tight">Corolas | Platonic</span>
       </button>
