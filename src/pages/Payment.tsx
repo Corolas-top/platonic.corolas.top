@@ -23,11 +23,12 @@ import { useNavigate } from 'react-router-dom';
 interface RechargePlan {
   id: string;
   name: string;
-  energy: number;
-  bonus: number;
-  price: string;
-  badge?: string;
-  badgeColor?: string;
+  description: string | null;
+  energy_amount: number;
+  price_cents: number;
+  currency: string;
+  sort_order: number;
+  is_active: boolean | null;
 }
 
 interface Transaction {
@@ -38,31 +39,22 @@ interface Transaction {
   status: 'completed' | 'pending';
 }
 
-/* ------------------------------------------------------------------ */
-/*  Constants                                                          */
-/* ------------------------------------------------------------------ */
-
-const PLANS: RechargePlan[] = [
-  { id: 'basic', name: '入门', energy: 100, bonus: 0, price: '¥1.99' },
-  { id: 'starter', name: '基础', energy: 300, bonus: 20, price: '¥4.99' },
-  { id: 'standard', name: '标准', energy: 500, bonus: 50, price: '¥9.99', badge: '最受欢迎', badgeColor: 'bg-gold' },
-  { id: 'advanced', name: '高级', energy: 1000, bonus: 150, price: '¥18.99' },
-  { id: 'deluxe', name: '豪华', energy: 3000, bonus: 600, price: '¥49.99' },
-  { id: 'premium', name: '至尊', energy: 10000, bonus: 2500, price: '¥149.99', badge: '超值', badgeColor: 'bg-pink-500' },
-];
-
 const PER_UNIT_PRICE = '~¥0.02/次';
 
 // Supabase table row types
 interface EnergyAccount {
+  id: string;
+  companion_id: string;
   balance: number;
 }
 
 interface EnergyTransactionRow {
   id: string;
   created_at: string;
-  plan_name: string;
+  txn_type: string;
+  description: string | null;
   amount: number;
+  balance_after: number;
   status: string;
 }
 
@@ -184,13 +176,14 @@ export default function Payment() {
   const [showQrModal, setShowQrModal] = useState(false);
   const [paymentStatus, setPaymentStatus] = useState<'waiting' | 'success'>('waiting');
   const [qrKey, setQrKey] = useState(0);
+  const [qrCodeUrl, setQrCodeUrl] = useState<string | null>(null);
   const [energy, setEnergy] = useState(0);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [plans, setPlans] = useState<RechargePlan[]>([]);
   const [paying, setPaying] = useState(false);
-  const [qrCodeUrl, setQrCodeUrl] = useState<string | null>(null);
   const { isAuthenticated } = useAuth();
 
-  const selectedPlanData = PLANS.find((p) => p.id === selectedPlan);
+  const selectedPlanData = plans.find((p) => p.id === selectedPlan);
 
   // Load real energy data on mount
   useEffect(() => {
@@ -203,17 +196,38 @@ export default function Payment() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
-      // Query energy account
-      const { data: acct } = await supabase.from('energy_accounts')
-        .select('balance')
+      // Get companion first (energy_accounts links via companion_id)
+      const { data: companion } = await supabase
+        .from('companions')
+        .select('id')
         .eq('user_id', user.id)
         .single();
-      if (acct) setEnergy(acct.balance);
 
-      // Query transaction records
-      const { data: txns } = await supabase.from('energy_transactions')
-        .select('id, created_at, plan_name, amount, status')
-        .eq('user_id', user.id)
+      const companionId = companion?.id;
+
+      // Load pricing plans
+      const { data: plansData } = await supabase
+        .from('pricing_plans')
+        .select('*')
+        .eq('is_active', true)
+        .order('sort_order');
+      if (plansData) setPlans(plansData as RechargePlan[]);
+
+      if (!companionId) return;
+
+      // Query energy account
+      const { data: acct } = await supabase
+        .from('energy_accounts')
+        .select('*')
+        .eq('companion_id', companionId)
+        .single();
+      if (acct) setEnergy((acct as EnergyAccount).balance);
+
+      // Query transaction records (linked via account_id = companion_id)
+      const { data: txns } = await supabase
+        .from('energy_transactions')
+        .select('id, created_at, txn_type, description, amount, balance_after, status')
+        .eq('account_id', companionId)
         .order('created_at', { ascending: false })
         .limit(20);
 
@@ -221,8 +235,8 @@ export default function Payment() {
         setTransactions(txns.map((t: EnergyTransactionRow) => ({
           id: t.id,
           date: new Date(t.created_at).toLocaleString('zh-CN'),
-          plan: t.plan_name,
-          amount: `¥${t.amount.toFixed(2)}`,
+          plan: t.description || t.txn_type,
+          amount: `¥${(Math.abs(t.amount) / 100).toFixed(2)}`,
           status: t.status as 'completed' | 'pending',
         })));
       }
@@ -250,14 +264,12 @@ export default function Payment() {
       });
       const data = await response.json();
 
-      if (data.payment_url) {
-        // Open Zpay payment page in new window
-        window.open(data.payment_url, '_blank');
-        // Show QR modal with payment URL
-        setQrCodeUrl(data.payment_url);
-        setPaymentStatus('waiting');
-        setQrKey((k) => k + 1);
-        setShowQrModal(true);
+      if (data.pay_url) {
+        // Redirect to payment page
+        window.location.href = data.pay_url;
+      } else if (data.payment_url) {
+        // Fallback for older API format
+        window.location.href = data.payment_url;
       } else {
         toast.error('获取支付链接失败');
       }
@@ -278,17 +290,7 @@ export default function Payment() {
     setQrKey((k) => k + 1);
   };
 
-  // Simulate payment polling after 8 seconds (fallback for demo)
-  useEffect(() => {
-    if (showQrModal && paymentStatus === 'waiting') {
-      const timer = setTimeout(() => {
-        setPaymentStatus('success');
-        // Refresh energy data after successful payment
-        loadEnergyData();
-      }, 8000);
-      return () => clearTimeout(timer);
-    }
-  }, [showQrModal, paymentStatus]);
+
 
   if (!isAuthenticated) {
     return (
@@ -417,8 +419,9 @@ export default function Payment() {
         </motion.h2>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 mb-8">
-          {PLANS.map((plan, i) => {
+          {plans.map((plan, i) => {
             const isSelected = selectedPlan === plan.id;
+            const priceYuan = (plan.price_cents / 100).toFixed(2);
             return (
               <motion.button
                 key={plan.id}
@@ -451,38 +454,25 @@ export default function Payment() {
                   {isSelected && <Check size={10} className="text-white absolute inset-0 m-auto" strokeWidth={3} />}
                 </div>
 
-                {/* Badge */}
-                {plan.badge && (
-                  <span
-                    className={`
-                      absolute -top-0 -right-0 px-3 py-1 rounded-bl-xl rounded-tr-xl
-                      text-[11px] font-semibold text-white font-body
-                      ${plan.badgeColor ?? 'bg-pink-500'}
-                    `}
-                  >
-                    {plan.badge}
-                  </span>
-                )}
-
                 {/* Energy Amount */}
                 <div className="flex items-baseline justify-center gap-1 mb-1 mt-2">
                   <span className="font-number text-[36px] font-bold text-plum-900">
-                    {plan.energy.toLocaleString()}
+                    {plan.energy_amount.toLocaleString()}
                   </span>
                   <Zap size={20} className="text-gold" />
                 </div>
 
-                {/* Bonus */}
-                {plan.bonus > 0 && (
-                  <span className="inline-block px-3 py-0.5 rounded-full accent-gradient text-white text-[12px] font-semibold font-body mb-3">
-                    +{plan.bonus.toLocaleString()} 赠送
+                {/* Description */}
+                {plan.description && (
+                  <span className="inline-block px-3 py-0.5 rounded-full bg-pink-50 text-pink-500 text-[12px] font-semibold font-body mb-3">
+                    {plan.description}
                   </span>
                 )}
-                {plan.bonus === 0 && <div className="h-6 mb-3" />}
+                {!plan.description && <div className="h-6 mb-3" />}
 
                 {/* Price */}
                 <p className="font-body text-[22px] font-bold text-pink-500 mb-1">
-                  {plan.price}
+                  ¥{priceYuan}
                 </p>
                 <p className="font-body text-[12px] text-muted-plum">
                   ≈ {PER_UNIT_PRICE}
@@ -506,15 +496,10 @@ export default function Payment() {
                 {/* Summary */}
                 <div className="text-center mb-5">
                   <p className="font-body text-[15px] text-plum-900 mb-2">
-                    已选择: {selectedPlanData.energy.toLocaleString()}⚡
-                    {selectedPlanData.bonus > 0 && (
-                      <span>
-                        {' '}+ {selectedPlanData.bonus.toLocaleString()}⚡赠送
-                      </span>
-                    )}
+                    已选择: {selectedPlanData.energy_amount.toLocaleString()}⚡
                   </p>
                   <p className="font-body text-[22px] font-bold text-pink-500">
-                    应付金额: {selectedPlanData.price}
+                    应付金额: ¥{(selectedPlanData.price_cents / 100).toFixed(2)}
                   </p>
                 </div>
 
@@ -661,9 +646,8 @@ export default function Payment() {
                     支付宝扫码支付
                   </h3>
                   <p className="font-body text-[13px] text-muted-plum text-center mb-5">
-                    {selectedPlanData?.energy.toLocaleString()}⚡
-                    {selectedPlanData && selectedPlanData.bonus > 0 && ` + ${selectedPlanData.bonus.toLocaleString()}⚡赠送`}
-                    {' '}· {selectedPlanData?.price}
+                    {selectedPlanData?.energy_amount.toLocaleString()}⚡
+                    {' '}· ¥{selectedPlanData ? (selectedPlanData.price_cents / 100).toFixed(2) : '0.00'}
                   </p>
 
                   {/* QR placeholder */}

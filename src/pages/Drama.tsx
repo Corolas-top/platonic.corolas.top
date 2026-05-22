@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   BookOpen,
@@ -15,15 +15,15 @@ import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import { useAuth } from '@/hooks/useAuth';
 import { useNavigate } from 'react-router-dom';
-import { getStorageUrl } from '@/lib/supabase';
+import { supabase, getStorageUrl } from '@/lib/supabase';
 
 /* ─── Types ─── */
 interface DramaItem {
   id: string;
-  title: string;
+  name: string;
   description: string;
-  coverImage: string;
-  storageCoverImage: string;
+  cover_image_path: string | null;
+  scene_setting: string | null;
   rating: number;
   ratingCount: string;
   genre: string;
@@ -36,7 +36,7 @@ interface DramaItem {
 interface MyStorySession {
   id: string;
   dramaId: string;
-  title: string;
+  name: string;
   coverImage: string;
   currentChapter: number;
   totalChapters: number;
@@ -44,130 +44,6 @@ interface MyStorySession {
   lastPlayed: string;
   affection: number;
 }
-
-/* ─── Mock Data ─── */
-const dramaData: DramaItem[] = [
-  {
-    id: '1',
-    title: '樱花树下的约定',
-    description: '春天的一个傍晚，你和她在盛开的樱花树下相遇。风轻轻吹过，花瓣飘落在她的发间...',
-    coverImage: '/drama-cover-1.jpg',
-    storageCoverImage: getStorageUrl('dramas/cover-1.jpg'),
-    rating: 4.9,
-    ratingCount: '2.3k',
-    genre: '浪漫',
-    tags: ['浪漫', '春日'],
-    isUnlocked: true,
-    unlockCondition: '免费',
-    difficulty: '简单',
-  },
-  {
-    id: '2',
-    title: '雨夜咖啡馆',
-    description: '一个下雨的夜晚，你们躲进了街角温馨的咖啡馆。窗外的雨滴和屋内的暖光交织...',
-    coverImage: '/drama-cover-2.jpg',
-    storageCoverImage: getStorageUrl('dramas/cover-2.jpg'),
-    rating: 4.7,
-    ratingCount: '1.8k',
-    genre: '日常',
-    tags: ['日常', '温馨'],
-    isUnlocked: true,
-    unlockCondition: '已解锁',
-    difficulty: '简单',
-  },
-  {
-    id: '3',
-    title: '星空下的告白',
-    description: '湖畔的夏夜，繁星点点。你们并肩坐在草地上，萤火虫在身旁飞舞...',
-    coverImage: '/drama-cover-3.jpg',
-    storageCoverImage: getStorageUrl('dramas/cover-3.jpg'),
-    rating: 4.8,
-    ratingCount: '3.1k',
-    genre: '浪漫',
-    tags: ['浪漫', '夜晚'],
-    isUnlocked: false,
-    unlockCondition: '需80好感度',
-    difficulty: '中等',
-  },
-  {
-    id: '4',
-    title: '花园茶会',
-    description: '维多利亚风格的花园中，一场优雅的茶会正在进行。玫瑰盛开，茶香四溢...',
-    coverImage: '/drama-cover-4.jpg',
-    storageCoverImage: getStorageUrl('dramas/cover-4.jpg'),
-    rating: 4.5,
-    ratingCount: '950',
-    genre: '日常',
-    tags: ['优雅', '古典'],
-    isUnlocked: false,
-    unlockCondition: '需60电量',
-    difficulty: '中等',
-  },
-  {
-    id: '5',
-    title: '迷雾庄园',
-    description: '一座古老的庄园笼罩在神秘的迷雾中。你们需要携手解开隐藏百年的秘密...',
-    coverImage: '/drama-cover-1.jpg',
-    storageCoverImage: getStorageUrl('dramas/cover-5.jpg'),
-    rating: 4.6,
-    ratingCount: '1.2k',
-    genre: '悬疑',
-    tags: ['悬疑', '冒险'],
-    isUnlocked: false,
-    unlockCondition: '需暗生情愫阶段',
-    difficulty: '困难',
-  },
-  {
-    id: '6',
-    title: '梦境奇旅',
-    description: '在奇幻的梦境世界中，你们化身为冒险者。独角兽、水晶城堡、彩虹桥...',
-    coverImage: '/drama-cover-3.jpg',
-    storageCoverImage: getStorageUrl('dramas/cover-6.jpg'),
-    rating: 4.8,
-    ratingCount: '1.5k',
-    genre: '奇幻',
-    tags: ['奇幻', '冒险'],
-    isUnlocked: true,
-    unlockCondition: '免费',
-    difficulty: '中等',
-  },
-];
-
-const myStorySessions: MyStorySession[] = [
-  {
-    id: 's1',
-    dramaId: '1',
-    title: '樱花树下的约定',
-    coverImage: '/drama-cover-1.jpg',
-    currentChapter: 3,
-    totalChapters: 8,
-    status: 'ongoing',
-    lastPlayed: '2天前',
-    affection: 45,
-  },
-  {
-    id: 's2',
-    dramaId: '2',
-    title: '雨夜咖啡馆',
-    coverImage: '/drama-cover-2.jpg',
-    currentChapter: 5,
-    totalChapters: 5,
-    status: 'completed',
-    lastPlayed: '1周前',
-    affection: 60,
-  },
-  {
-    id: 's3',
-    dramaId: '6',
-    title: '梦境奇旅',
-    coverImage: '/drama-cover-3.jpg',
-    currentChapter: 2,
-    totalChapters: 10,
-    status: 'ongoing',
-    lastPlayed: '3天前',
-    affection: 30,
-  },
-];
 
 const filterTabs = ['全部', '已解锁', '热门', '浪漫', '悬疑', '日常', '奇幻'];
 
@@ -177,14 +53,14 @@ const difficultyColors: Record<string, string> = {
   '困难': 'bg-red-100 text-red-700',
 };
 
-/* ─── Drama Cover Image with Storage fallback ─── */
+/* ─── Drama Cover Image with fallback ─── */
 function DramaCoverImage({ drama, className }: { drama: DramaItem; className?: string }) {
-  const [src, setSrc] = useState(drama.storageCoverImage);
+  const [src, setSrc] = useState(drama.cover_image_path || '/drama-cover-1.jpg');
   const [failed, setFailed] = useState(false);
 
   const handleError = () => {
     if (!failed) {
-      setSrc(drama.coverImage);
+      setSrc('/drama-cover-1.jpg');
       setFailed(true);
     }
   };
@@ -192,7 +68,7 @@ function DramaCoverImage({ drama, className }: { drama: DramaItem; className?: s
   return (
     <img
       src={src}
-      alt={drama.title}
+      alt={drama.name}
       className={className}
       onError={handleError}
     />
@@ -240,21 +116,80 @@ function AuthBanner() {
 export default function Drama() {
   const [activeView, setActiveView] = useState<'plaza' | 'my'>('plaza');
   const [activeFilter, setActiveFilter] = useState('全部');
+  const [dramas, setDramas] = useState<DramaItem[]>([]);
+  const [sessions, setSessions] = useState<MyStorySession[]>([]);
+  const [loading, setLoading] = useState(true);
   const { isAuthenticated } = useAuth();
+
+  // Load dramas from Supabase
+  useEffect(() => {
+    async function loadDramas() {
+      try {
+        setLoading(true);
+        const { data: rows, error } = await supabase
+          .from('drama_definitions')
+          .select('*')
+          .order('id');
+
+        if (error || !rows) {
+          setDramas([]);
+          return;
+        }
+
+        const mapped: DramaItem[] = rows.map((row: Record<string, unknown>) => ({
+          id: String(row.id),
+          name: String(row.name || ''),
+          description: String(row.description || ''),
+          cover_image_path: row.cover_image_path ? getStorageUrl(String(row.cover_image_path)) : null,
+          scene_setting: String(row.scene_setting || ''),
+          rating: Number(row.rating) || 4.5,
+          ratingCount: String(row.rating_count || '0'),
+          genre: String(row.genre || '浪漫'),
+          tags: Array.isArray(row.tags) ? row.tags : ['剧情'],
+          isUnlocked: Boolean(row.is_unlocked) || false,
+          unlockCondition: String(row.unlock_condition || ''),
+          difficulty: (String(row.difficulty) as '简单' | '中等' | '困难') || '简单',
+        }));
+
+        setDramas(mapped);
+      } catch (e) {
+        console.error('Drama load error:', e);
+        setDramas([]);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    loadDramas();
+  }, []);
+
+  // Load my story sessions (from localStorage for now, can be extended to Supabase)
+  useEffect(() => {
+    const stored = localStorage.getItem('drama_sessions');
+    if (stored) {
+      try {
+        setSessions(JSON.parse(stored));
+      } catch {
+        setSessions([]);
+      }
+    } else {
+      setSessions([]);
+    }
+  }, []);
 
   /* Filtered dramas */
   const filteredDramas = useMemo(() => {
-    if (activeFilter === '全部') return dramaData;
-    if (activeFilter === '已解锁') return dramaData.filter((d) => d.isUnlocked);
-    if (activeFilter === '热门') return [...dramaData].sort((a, b) => b.ratingCount.localeCompare(a.ratingCount));
-    return dramaData.filter((d) => d.genre === activeFilter);
-  }, [activeFilter]);
+    if (activeFilter === '全部') return dramas;
+    if (activeFilter === '已解锁') return dramas.filter((d) => d.isUnlocked);
+    if (activeFilter === '热门') return [...dramas].sort((a, b) => b.ratingCount.localeCompare(a.ratingCount));
+    return dramas.filter((d) => d.genre === activeFilter);
+  }, [activeFilter, dramas]);
 
   /* Unlocked count */
-  const unlockedCount = dramaData.filter((d) => d.isUnlocked).length;
+  const unlockedCount = dramas.filter((d) => d.isUnlocked).length;
 
   /* Handle enter drama */
-  const handleEnterDrama = (title: string) => {
+  const handleEnterDrama = (name: string) => {
     if (!isAuthenticated) {
       toast('请先登录以参与剧情', {
         description: '登录后可以解锁并体验剧情',
@@ -263,7 +198,7 @@ export default function Drama() {
       return;
     }
     toast('剧情空间即将开启...', {
-      description: `正在进入「${title}」的剧情世界`,
+      description: `正在进入「${name}」的剧情世界`,
       icon: <Sparkles size={16} className="text-pink-400" />,
     });
   };
@@ -310,7 +245,7 @@ export default function Drama() {
             animate={{ opacity: 1 }}
             transition={{ delay: 0.2 }}
           >
-            已解锁 {unlockedCount}/{dramaData.length}
+            已解锁 {unlockedCount}/{dramas.length}
           </motion.span>
         </motion.div>
 
@@ -366,15 +301,16 @@ export default function Drama() {
               transition={{ duration: 0.3 }}
             >
               {/* Featured Banner */}
+              {dramas.length > 0 && (
               <motion.div
                 className="relative w-full h-[240px] rounded-3xl overflow-hidden mb-6 group cursor-pointer"
                 initial={{ opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6 }}
-                onClick={() => handleEnterDrama('樱花树下的约定')}
+                onClick={() => handleEnterDrama(dramas[0].name)}
               >
                 <DramaCoverImage
-                  drama={dramaData[0]}
+                  drama={dramas[0]}
                   className="absolute inset-0 w-full h-full object-cover transition-transform duration-400 group-hover:scale-[1.03]"
                 />
                 <div
@@ -388,29 +324,29 @@ export default function Drama() {
                     推荐剧情
                   </span>
                   <h1 className="font-display text-[36px] text-white mb-2 leading-tight">
-                    樱花树下的约定
+                    {dramas[0].name}
                   </h1>
                   <p className="text-[15px] text-white/80 leading-relaxed mb-4 line-clamp-2">
-                    春天的一个傍晚，你和她在盛开的樱花树下相遇。风轻轻吹过，花瓣飘落在她的发间...
+                    {dramas[0].description}
                   </p>
                   <div className="flex items-center gap-4 text-[13px] text-white/70 mb-4">
                     <span className="flex items-center gap-1">
                       <Star size={14} className="text-[#D4AF37] fill-[#D4AF37]" />
-                      4.9
+                      {dramas[0].rating}
                     </span>
                     <span className="flex items-center gap-1">
                       <Users size={14} />
-                      2.3k 体验
+                      {dramas[0].ratingCount} 体验
                     </span>
                     <span className="flex items-center gap-1">
                       <Lock size={14} />
-                      免费解锁
+                      {dramas[0].isUnlocked ? '免费解锁' : dramas[0].unlockCondition}
                     </span>
                   </div>
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
-                      handleEnterDrama('樱花树下的约定');
+                      handleEnterDrama(dramas[0].name);
                     }}
                     className="px-6 py-2.5 rounded-xl bg-white text-pink-500 font-semibold text-[14px]
                       hover:bg-pink-50 transition-all duration-150 w-fit shadow-md active:scale-95"
@@ -419,6 +355,7 @@ export default function Drama() {
                   </button>
                 </div>
               </motion.div>
+              )}
 
               {/* Filter Tabs */}
               <motion.div
@@ -471,7 +408,7 @@ export default function Drama() {
                         className="relative aspect-[3/4] overflow-hidden cursor-pointer"
                         onClick={() =>
                           drama.isUnlocked
-                            ? handleEnterDrama(drama.title)
+                            ? handleEnterDrama(drama.name)
                             : handleLockedClick(drama.unlockCondition)
                         }
                       >
@@ -516,7 +453,7 @@ export default function Drama() {
                         {/* Info overlay at bottom */}
                         <div className="absolute bottom-0 left-0 right-0 p-4">
                           <h4 className="font-body text-[16px] font-semibold text-white leading-snug mb-1 line-clamp-2">
-                            {drama.title}
+                            {drama.name}
                           </h4>
                           <div className="flex items-center gap-2 text-white/70">
                             <Star size={12} className="text-[#D4AF37] fill-[#D4AF37]" />
@@ -544,7 +481,7 @@ export default function Drama() {
                           </div>
                           {drama.isUnlocked ? (
                             <button
-                              onClick={() => handleEnterDrama(drama.title)}
+                              onClick={() => handleEnterDrama(drama.name)}
                               className="px-4 py-1.5 rounded-lg text-[12px] font-semibold text-white
                                 accent-gradient hover:brightness-110 transition-all duration-150
                                 shadow-sm active:scale-95"
@@ -580,7 +517,7 @@ export default function Drama() {
                     <span className="text-[13px] text-[#6B5B6E]">总体验剧情</span>
                   </div>
                   <span className="font-number text-[32px] font-bold text-[#2D1B2E]">
-                    {myStorySessions.length}
+                    {sessions.length}
                   </span>
                 </div>
                 <div className="bg-white rounded-2xl border border-pink-100 p-5">
@@ -589,7 +526,7 @@ export default function Drama() {
                     <span className="text-[13px] text-[#6B5B6E]">已完成</span>
                   </div>
                   <span className="font-number text-[32px] font-bold text-[#2D1B2E]">
-                    {myStorySessions.filter((s) => s.status === 'completed').length}
+                    {sessions.filter((s) => s.status === 'completed').length}
                   </span>
                 </div>
                 <div className="bg-white rounded-2xl border border-pink-100 p-5">
@@ -598,14 +535,14 @@ export default function Drama() {
                     <span className="text-[13px] text-[#6B5B6E]">进行中</span>
                   </div>
                   <span className="font-number text-[32px] font-bold text-[#2D1B2E]">
-                    {myStorySessions.filter((s) => s.status === 'ongoing').length}
+                    {sessions.filter((s) => s.status === 'ongoing').length}
                   </span>
                 </div>
               </div>
 
               {/* Session list */}
               <div className="space-y-4">
-                {myStorySessions.map((session, idx) => {
+                {sessions.map((session, idx) => {
                   const progress = (session.currentChapter / session.totalChapters) * 100;
                   return (
                     <motion.div
@@ -620,7 +557,7 @@ export default function Drama() {
                       <div className="w-[100px] h-[130px] rounded-xl overflow-hidden shrink-0">
                         <img
                           src={session.coverImage}
-                          alt={session.title}
+                          alt={session.name}
                           className="w-full h-full object-cover"
                         />
                       </div>
@@ -630,7 +567,7 @@ export default function Drama() {
                         <div>
                           <div className="flex items-center gap-2 mb-1">
                             <h3 className="font-body text-[18px] font-semibold text-[#2D1B2E]">
-                              {session.title}
+                              {session.name}
                             </h3>
                             <span
                               className={cn(
@@ -671,7 +608,7 @@ export default function Drama() {
                         {/* Action */}
                         <div className="flex items-center gap-3">
                           <button
-                            onClick={() => handleEnterDrama(session.title)}
+                            onClick={() => handleEnterDrama(session.name)}
                             className="px-5 py-2 rounded-xl text-[13px] font-semibold text-white
                               accent-gradient hover:brightness-110 transition-all duration-150
                               shadow-sm active:scale-95 flex items-center gap-1.5"

@@ -16,6 +16,9 @@ import {
   Heart,
   CloudRain,
   Loader2,
+  Globe,
+  Gift,
+  PawPrint,
 } from 'lucide-react';
 
 /* ──────────── Types ──────────── */
@@ -27,20 +30,40 @@ interface BigFive {
   neuroticism: number;
 }
 
+interface FormData {
+  nickname: string;
+  gender: string;
+  age: number;
+  birthMonth: number;
+  birthDay: number;
+  language: string;
+  avatarUrl: string;
+  bfOpenness: number;
+  bfConscientiousness: number;
+  bfExtraversion: number;
+  bfAgreeableness: number;
+  bfNeuroticism: number;
+  background: string;
+  bio: string;
+  petName: string;
+  petType: string;
+}
+
 /* ──────────── Constants ──────────── */
 const traitConfig: {
   key: keyof BigFive;
   label: string;
+  fieldKey: keyof FormData;
   icon: React.ReactNode;
   color: string;
   leftLabel: string;
   rightLabel: string;
 }[] = [
-  { key: 'openness', label: '开放性', icon: <Lightbulb size={18} />, color: '#FF69B4', leftLabel: '务实保守', rightLabel: '好奇创新' },
-  { key: 'conscientiousness', label: '尽责性', icon: <CheckSquare size={18} />, color: '#E8A0BF', leftLabel: '随性自由', rightLabel: '严谨自律' },
-  { key: 'extraversion', label: '外向性', icon: <Users size={18} />, color: '#D4A574', leftLabel: '内向安静', rightLabel: '外向活跃' },
-  { key: 'agreeableness', label: '宜人性', icon: <Heart size={18} />, color: '#FF69B4', leftLabel: '理性独立', rightLabel: '温和友善' },
-  { key: 'neuroticism', label: '神经质', icon: <CloudRain size={18} />, color: '#C8A8E9', leftLabel: '情绪稳定', rightLabel: '敏感多变' },
+  { key: 'openness', label: '开放性', fieldKey: 'bfOpenness', icon: <Lightbulb size={18} />, color: '#FF69B4', leftLabel: '务实保守', rightLabel: '好奇创新' },
+  { key: 'conscientiousness', label: '尽责性', fieldKey: 'bfConscientiousness', icon: <CheckSquare size={18} />, color: '#E8A0BF', leftLabel: '随性自由', rightLabel: '严谨自律' },
+  { key: 'extraversion', label: '外向性', fieldKey: 'bfExtraversion', icon: <Users size={18} />, color: '#D4A574', leftLabel: '内向安静', rightLabel: '外向活跃' },
+  { key: 'agreeableness', label: '宜人性', fieldKey: 'bfAgreeableness', icon: <Heart size={18} />, color: '#FF69B4', leftLabel: '理性独立', rightLabel: '温和友善' },
+  { key: 'neuroticism', label: '神经质', fieldKey: 'bfNeuroticism', icon: <CloudRain size={18} />, color: '#C8A8E9', leftLabel: '情绪稳定', rightLabel: '敏感多变' },
 ];
 
 const bigFiveDescriptions: Record<keyof BigFive, string[]> = {
@@ -81,11 +104,6 @@ const storyPrompts = [
   '她是一位神秘的图书馆管理员，拥有不为人知的故事...',
 ];
 
-const topicOptions = [
-  '日常生活', '文学小说', '动漫游戏', '哲学思考', '情感交流',
-  '旅行探险', '美食烹饪', '音乐艺术', '科学知识', '时尚潮流',
-];
-
 const avatarOptions = [
   '/companion-1.jpg', '/companion-2.jpg', '/companion-3.jpg',
   '/companion-4.jpg', '/companion-5.jpg', '/companion-6.jpg',
@@ -94,8 +112,19 @@ const avatarOptions = [
 const genderOptions = [
   { value: 'female', label: '女性', color: 'hover:bg-pink-50', activeColor: 'border-pink-400 bg-pink-50 shadow-glow' },
   { value: 'male', label: '男性', color: 'hover:bg-blue-50', activeColor: 'border-blue-400 bg-blue-50 shadow-[0_0_24px_rgba(96,165,250,0.25)]' },
-  { value: 'neutral', label: '其他', color: 'hover:bg-purple-50', activeColor: 'border-purple-400 bg-purple-50 shadow-[0_0_24px_rgba(168,130,230,0.25)]' },
 ];
+
+const languageOptions = [
+  { value: 'zh', label: '中文' },
+  { value: 'en', label: 'English' },
+  { value: 'ja', label: '日本語' },
+  { value: 'ko', label: '한국어' },
+];
+
+const petTypeOptions = ['猫', '狗', '兔子', '鸟', '仓鼠', '龙猫', '狐狸', '自定义'];
+
+const months = Array.from({ length: 12 }, (_, i) => i + 1);
+const days = Array.from({ length: 31 }, (_, i) => i + 1);
 
 /* ──────────── Helpers ──────────── */
 function getTraitDescription(trait: keyof BigFive, value: number): string {
@@ -118,6 +147,16 @@ function generatePersonalityText(personality: BigFive): string {
   return `她是一位${getTraitDescription(top3[0][0], top3[0][1])}的伴侣，在${topTraits}等方面表现突出。与她相处，你会感受到${getTraitDescription(top3[1][0], top3[1][1])}的特质，而她的${getTraitDescription(top3[2][0], top3[2][1])}也会让你们的相处充满趣味。`;
 }
 
+function formToBigFive(form: FormData): BigFive {
+  return {
+    openness: form.bfOpenness,
+    conscientiousness: form.bfConscientiousness,
+    extraversion: form.bfExtraversion,
+    agreeableness: form.bfAgreeableness,
+    neuroticism: form.bfNeuroticism,
+  };
+}
+
 /* ──────────── Mini Radar Chart ──────────── */
 function MiniRadarChart({ personality, size = 180 }: { personality: BigFive; size?: number }) {
   const traits = Object.values(personality);
@@ -135,7 +174,18 @@ function MiniRadarChart({ personality, size = 180 }: { personality: BigFive; siz
 
   const polygonPoints = points.map((p) => `${p.x},${p.y}`).join(' ');
 
-  // Grid lines for levels 0.2, 0.4, 0.6, 0.8, 1.0
+  // Label positions
+  const labels = ['开放性', '尽责性', '外向性', '宜人性', '神经质'];
+  const labelPoints = labels.map((_, i) => {
+    const angle = startAngle + i * angleStep;
+    const labelR = radius + 14;
+    return {
+      x: center + labelR * Math.cos(angle),
+      y: center + labelR * Math.sin(angle),
+      text: labels[i],
+    };
+  });
+
   const levels = [0.2, 0.4, 0.6, 0.8, 1.0];
 
   return (
@@ -195,6 +245,21 @@ function MiniRadarChart({ personality, size = 180 }: { personality: BigFive; siz
           transition={{ duration: 0.3, ease: 'easeOut' }}
         />
       ))}
+      {/* Labels */}
+      {labelPoints.map((lp, i) => (
+        <text
+          key={`label-${i}`}
+          x={lp.x}
+          y={lp.y}
+          textAnchor="middle"
+          dominantBaseline="middle"
+          fontSize={size < 200 ? 10 : 11}
+          fill="#6B5B6E"
+          fontWeight={500}
+        >
+          {lp.text}
+        </text>
+      ))}
     </svg>
   );
 }
@@ -240,109 +305,80 @@ export default function Customize() {
   const [isComplete, setIsComplete] = useState(false);
   const [creating, setCreating] = useState(false);
 
-  // Step 1 state
-  const [name, setName] = useState('');
-  const [gender, setGender] = useState<string>('female');
-  const [age, setAge] = useState<number>(20);
-  const [birthday, setBirthday] = useState('');
-  const [background, setBackground] = useState('');
-  const [selectedAvatar, setSelectedAvatar] = useState(0);
-  const [intro, setIntro] = useState('');
-
-  // Step 2 state
-  const [personality, setPersonality] = useState<BigFive>({
-    openness: 50,
-    conscientiousness: 50,
-    extraversion: 50,
-    agreeableness: 50,
-    neuroticism: 50,
+  // Form state
+  const [form, setForm] = useState<FormData>({
+    nickname: '',
+    gender: 'female',
+    age: 20,
+    birthMonth: 1,
+    birthDay: 1,
+    language: 'zh',
+    avatarUrl: avatarOptions[0],
+    bfOpenness: 50,
+    bfConscientiousness: 50,
+    bfExtraversion: 50,
+    bfAgreeableness: 50,
+    bfNeuroticism: 50,
+    background: '',
+    bio: '',
+    petName: '',
+    petType: '',
   });
-  const [activePreset, setActivePreset] = useState<number | null>(null);
 
-  // Step 3 state
-  const [backstory, setBackstory] = useState('');
-  const [firstMessage, setFirstMessage] = useState('');
-  const [selectedTopics, setSelectedTopics] = useState<string[]>([]);
+  const [activePreset, setActivePreset] = useState<number | null>(null);
   const [showPrompts, setShowPrompts] = useState(false);
 
+  const updateForm = useCallback(<K extends keyof FormData>(key: K, value: FormData[K]) => {
+    setForm((prev) => ({ ...prev, [key]: value }));
+  }, []);
+
   const canProceed = useMemo(() => {
-    if (step === 0) return name.trim().length > 0;
+    if (step === 0) return form.nickname.trim().length > 0;
     return true;
-  }, [step, name]);
+  }, [step, form.nickname]);
 
   const createCompanion = useCallback(async () => {
     try {
       setCreating(true);
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
-        toast.error('请先登录');
+        toast.error('Please login first');
         return;
       }
 
-      // Parse birthday into month and day
-      let birthMonth: number | null = null;
-      let birthDay: number | null = null;
-      if (birthday) {
-        const parts = birthday.split('-');
-        if (parts.length === 3) {
-          birthMonth = parseInt(parts[1], 10);
-          birthDay = parseInt(parts[2], 10);
-        }
-      }
-
-      // 1. Insert companion
-      const { data: companion, error } = await supabase.from('companions').insert({
+      const { data, error } = await supabase.from('companions').insert({
         user_id: user.id,
-        nickname: name,
-        gender: gender,
-        age: age,
-        birth_month: birthMonth,
-        birth_day: birthDay,
-        background: backstory,
-        main_language: 'zh',
-        personality_openness: personality.openness,
-        personality_conscientiousness: personality.conscientiousness,
-        personality_extraversion: personality.extraversion,
-        personality_agreeableness: personality.agreeableness,
-        personality_neuroticism: personality.neuroticism,
-        welcome_message: firstMessage || `你好呀！我是${name}，很高兴认识你～`,
+        nickname: form.nickname,
+        gender: form.gender,
+        age: form.age,
+        birth_month: form.birthMonth,
+        birth_day: form.birthDay,
+        language: form.language,
+        avatar_url: form.avatarUrl,
+        bf_openness: form.bfOpenness,
+        bf_conscientiousness: form.bfConscientiousness,
+        bf_extraversion: form.bfExtraversion,
+        bf_agreeableness: form.bfAgreeableness,
+        bf_neuroticism: form.bfNeuroticism,
+        background: form.background,
+        bio: form.bio || null,
+        pet_name: form.petName || null,
+        pet_type: form.petType || null,
       }).select().single();
 
       if (error) throw error;
 
-      // 2. Create intimacy record (initial score 0, stage 1)
-      await supabase.from('intimacy_records').insert({
-        companion_id: companion.id,
-        user_id: user.id,
-        score: 0,
-        milestone_stage: 1,
-      });
-
-      // 3. Create mood record
-      await supabase.from('mood_records').insert({
-        companion_id: companion.id,
-        pleasure: 0.3,
-        arousal: 0.2,
-        dominance: 0.1,
-      });
-
-      // 4. Update user profile status
-      await supabase.from('profiles').update({
-        status: 'HAS_COMPANION',
-        current_companion_id: companion.id,
-      }).eq('id', user.id);
-
-      toast.success('伴侣创建成功！');
+      toast.success('Companion created!');
       setIsComplete(true);
       setTimeout(() => {
-        navigate('/chat');
-      }, 3500);
+        navigate('/dashboard');
+      }, 2500);
     } catch (e: any) {
-      toast.error('创建失败: ' + (e.message || '未知错误'));
+      toast.error('Creation failed: ' + (e.message || 'Unknown error'));
     } finally {
       setCreating(false);
     }
-  }, [navigate, name, gender, age, birthday, backstory, personality, firstMessage]);
+  }, [navigate, form]);
 
   const handleNext = useCallback(() => {
     if (step < 2) {
@@ -358,30 +394,31 @@ export default function Customize() {
       setDirection(-1);
       setStep((s) => s - 1);
     }
-  }, [step]);
+  }, []);
 
   const applyPreset = useCallback((index: number) => {
     setActivePreset(index);
-    setPersonality({ ...personalityPresets[index].values });
-  }, []);
-
-  const toggleTopic = useCallback((topic: string) => {
-    setSelectedTopics((prev) =>
-      prev.includes(topic) ? prev.filter((t) => t !== topic) : [...prev, topic]
-    );
+    const preset = personalityPresets[index];
+    setForm((prev) => ({
+      ...prev,
+      bfOpenness: preset.values.openness,
+      bfConscientiousness: preset.values.conscientiousness,
+      bfExtraversion: preset.values.extraversion,
+      bfAgreeableness: preset.values.agreeableness,
+      bfNeuroticism: preset.values.neuroticism,
+    }));
   }, []);
 
   const applyStoryPrompt = useCallback((prompt: string) => {
-    setBackstory(prompt);
+    updateForm('background', prompt);
     setShowPrompts(false);
-  }, []);
+  }, [updateForm]);
 
-  const handleSliderChange = useCallback((key: keyof BigFive, value: number) => {
-    setPersonality((prev) => ({ ...prev, [key]: value }));
+  const handleSliderChange = useCallback((fieldKey: keyof FormData, value: number) => {
+    setForm((prev) => ({ ...prev, [fieldKey]: value }));
     setActivePreset(null);
   }, []);
 
-  // Steps config
   const steps = [
     { label: '基础', icon: <User size={18} />, name: '基本信息' },
     { label: '性格', icon: <Sparkles size={18} />, name: '人格设定' },
@@ -406,7 +443,7 @@ export default function Customize() {
     animate: { opacity: 1, y: 0, transition: { duration: 0.4, ease: [0.25, 0.1, 0.25, 1] as [number, number, number, number] } },
   };
 
-  /* ──────────── Render ──────────── */
+  /* ──────────── Completion Screen ──────────── */
   if (isComplete) {
     return (
       <div className="min-h-[100dvh] flex items-center justify-center relative overflow-hidden bg-gradient-to-br from-pink-50 via-pink-100 to-pink-200">
@@ -443,7 +480,7 @@ export default function Customize() {
             transition={{ delay: 0.6 }}
             className="text-plum-800 text-lg"
           >
-            {name || '你的伴侣'}已经准备好了，正在前往聊天界面...
+            {form.nickname || '你的伴侣'}已经准备好了，正在前往主页...
           </motion.p>
         </motion.div>
       </div>
@@ -451,7 +488,7 @@ export default function Customize() {
   }
 
   return (
-    <div className="min-h-[100dvh] bg-pink-50">
+    <div className="min-h-[100dvh] bg-gradient-to-br from-pink-50 via-pink-100/50 to-pink-200/30">
       <div className="max-w-6xl mx-auto px-6 py-8">
         {/* Top Bar */}
         <motion.div
@@ -461,7 +498,7 @@ export default function Customize() {
           className="flex items-center justify-between mb-8"
         >
           <h2 className="text-2xl font-bold text-plum-900 font-display">创建个人伴侣</h2>
-          <span className="text-sm text-muted-plum">Step {step + 1} of 3</span>
+          <span className="text-sm text-muted-plum font-medium">Step {step + 1} of 3</span>
         </motion.div>
 
         {/* Step Indicator */}
@@ -489,7 +526,7 @@ export default function Customize() {
                       setStep(i);
                     }
                   }}
-                  className={`w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 ${
+                  className={`relative w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 ${
                     i < step
                       ? 'bg-pink-400 text-white'
                       : i === step
@@ -526,6 +563,8 @@ export default function Customize() {
           {/* Main Form */}
           <div className="flex-1 min-w-0">
             <AnimatePresence mode="wait" custom={direction}>
+
+              {/* ─────────────── Step 1: Basic Info ─────────────── */}
               {step === 0 && (
                 <motion.div
                   key="step0"
@@ -538,19 +577,19 @@ export default function Customize() {
                 >
                   <div className="bg-white rounded-2xl border border-pink-100 shadow-md p-8 max-w-2xl mx-auto card-gradient">
                     <motion.div variants={staggerContainer} initial="initial" animate="animate">
-                      {/* Companion Name */}
+                      {/* Nickname */}
                       <motion.div variants={staggerItem} className="mb-6">
                         <label className="block text-xs font-semibold uppercase tracking-wider text-plum-900 mb-2">
-                          伴侣名称 <span className="text-pink-400">*</span>
+                          昵称 <span className="text-pink-400">*</span>
                         </label>
                         <input
                           type="text"
-                          value={name}
-                          onChange={(e) => setName(e.target.value.slice(0, 16))}
+                          value={form.nickname}
+                          onChange={(e) => updateForm('nickname', e.target.value.slice(0, 16))}
                           placeholder="给她一个温暖的名字..."
                           className="w-full px-4 py-3 rounded-xl bg-white border border-pink-100 text-plum-900 placeholder:text-muted-plum focus:outline-none focus:border-pink-400 focus:shadow-glow transition-all duration-200"
                         />
-                        <span className="text-xs text-muted-plum mt-1 block text-right">{name.length}/16</span>
+                        <span className="text-xs text-muted-plum mt-1 block text-right">{form.nickname.length}/16</span>
                       </motion.div>
 
                       {/* Gender */}
@@ -562,13 +601,13 @@ export default function Customize() {
                           {genderOptions.map((g) => (
                             <button
                               key={g.value}
-                              onClick={() => setGender(g.value)}
+                              onClick={() => updateForm('gender', g.value)}
                               className={`flex-1 h-20 rounded-xl border-2 flex flex-col items-center justify-center gap-1.5 transition-all duration-150 cursor-pointer ${
-                                gender === g.value ? g.activeColor : `border-pink-100 ${g.color}`
+                                form.gender === g.value ? g.activeColor : `border-pink-100 ${g.color}`
                               }`}
                             >
-                              <User size={22} className={gender === g.value ? 'text-current' : 'text-muted-plum'} />
-                              <span className={`text-sm font-medium ${gender === g.value ? 'text-current' : 'text-muted-plum'}`}>
+                              <User size={22} className={form.gender === g.value ? 'text-current' : 'text-muted-plum'} />
+                              <span className={`text-sm font-medium ${form.gender === g.value ? 'text-current' : 'text-muted-plum'}`}>
                                 {g.label}
                               </span>
                             </button>
@@ -585,38 +624,60 @@ export default function Customize() {
                           type="number"
                           min={1}
                           max={120}
-                          value={age}
-                          onChange={(e) => setAge(Math.max(1, Math.min(120, Number(e.target.value) || 1)))}
+                          value={form.age}
+                          onChange={(e) => updateForm('age', Math.max(1, Math.min(120, Number(e.target.value) || 1)))}
                           className="w-full px-4 py-3 rounded-xl bg-white border border-pink-100 text-plum-900 focus:outline-none focus:border-pink-400 focus:shadow-glow transition-all duration-200"
                         />
                       </motion.div>
 
-                      {/* Birthday */}
+                      {/* Birthday: Month & Day */}
                       <motion.div variants={staggerItem} className="mb-6">
                         <label className="block text-xs font-semibold uppercase tracking-wider text-plum-900 mb-2">
                           生日
                         </label>
-                        <input
-                          type="date"
-                          value={birthday}
-                          onChange={(e) => setBirthday(e.target.value)}
-                          className="w-full px-4 py-3 rounded-xl bg-white border border-pink-100 text-plum-900 placeholder:text-muted-plum focus:outline-none focus:border-pink-400 focus:shadow-glow transition-all duration-200"
-                        />
+                        <div className="flex gap-3">
+                          <select
+                            value={form.birthMonth}
+                            onChange={(e) => updateForm('birthMonth', Number(e.target.value))}
+                            className="flex-1 px-4 py-3 rounded-xl bg-white border border-pink-100 text-plum-900 focus:outline-none focus:border-pink-400 focus:shadow-glow transition-all duration-200 cursor-pointer"
+                          >
+                            {months.map((m) => (
+                              <option key={m} value={m}>{m}月</option>
+                            ))}
+                          </select>
+                          <select
+                            value={form.birthDay}
+                            onChange={(e) => updateForm('birthDay', Number(e.target.value))}
+                            className="flex-1 px-4 py-3 rounded-xl bg-white border border-pink-100 text-plum-900 focus:outline-none focus:border-pink-400 focus:shadow-glow transition-all duration-200 cursor-pointer"
+                          >
+                            {days.map((d) => (
+                              <option key={d} value={d}>{d}日</option>
+                            ))}
+                          </select>
+                        </div>
                       </motion.div>
 
-                      {/* Short intro */}
+                      {/* Language */}
                       <motion.div variants={staggerItem} className="mb-6">
                         <label className="block text-xs font-semibold uppercase tracking-wider text-plum-900 mb-2">
-                          一句话简介
+                          语言偏好
                         </label>
-                        <textarea
-                          value={intro}
-                          onChange={(e) => setIntro(e.target.value.slice(0, 60))}
-                          placeholder="用一句话描述她给你的第一印象..."
-                          rows={3}
-                          className="w-full px-4 py-3 rounded-xl bg-white border border-pink-100 text-plum-900 placeholder:text-muted-plum focus:outline-none focus:border-pink-400 focus:shadow-glow transition-all duration-200 resize-none"
-                        />
-                        <span className="text-xs text-muted-plum mt-1 block text-right">{intro.length}/60</span>
+                        <div className="flex gap-3">
+                          {languageOptions.map((lang) => (
+                            <button
+                              key={lang.value}
+                              onClick={() => updateForm('language', lang.value)}
+                              className={`flex-1 py-3 rounded-xl border-2 text-sm font-medium transition-all duration-150 cursor-pointer flex items-center justify-center gap-1.5 ${
+                                form.language === lang.value
+                                  ? 'border-pink-400 bg-pink-50 text-pink-500 shadow-glow'
+                                  : 'border-pink-100 text-muted-plum hover:bg-pink-50/50'
+                              }`}
+                            >
+                              <Globe size={16} />
+                              {lang.label}
+                            </button>
+                          ))}
+                        </div>
                       </motion.div>
 
                       {/* Avatar selection */}
@@ -628,9 +689,9 @@ export default function Customize() {
                           {avatarOptions.map((avatar, i) => (
                             <button
                               key={i}
-                              onClick={() => setSelectedAvatar(i)}
+                              onClick={() => updateForm('avatarUrl', avatar)}
                               className={`relative w-20 h-20 mx-auto rounded-full overflow-hidden transition-all duration-200 ${
-                                selectedAvatar === i
+                                form.avatarUrl === avatar
                                   ? 'ring-[3px] ring-pink-400 shadow-glow scale-105'
                                   : 'ring-2 ring-pink-100 hover:ring-pink-300'
                               }`}
@@ -645,6 +706,7 @@ export default function Customize() {
                 </motion.div>
               )}
 
+              {/* ─────────────── Step 2: Big Five ─────────────── */}
               {step === 1 && (
                 <motion.div
                   key="step1"
@@ -671,62 +733,65 @@ export default function Customize() {
 
                     {/* Big Five Sliders */}
                     <motion.div variants={staggerContainer} initial="initial" animate="animate">
-                      {traitConfig.map((trait, _idx) => (
-                        <motion.div key={trait.key} variants={staggerItem} className="mb-7 last:mb-0">
-                          <div className="flex items-center justify-between mb-2">
-                            <div className="flex items-center gap-2">
-                              <span style={{ color: trait.color }}>{trait.icon}</span>
-                              <span className="text-sm font-semibold text-plum-900">{trait.label}</span>
-                              <span className="text-xs text-muted-plum">
-                                （{trait.leftLabel} · {trait.rightLabel}）
-                              </span>
+                      {traitConfig.map((trait) => {
+                        const value = form[trait.fieldKey] as number;
+                        return (
+                          <motion.div key={trait.key} variants={staggerItem} className="mb-7 last:mb-0">
+                            <div className="flex items-center justify-between mb-2">
+                              <div className="flex items-center gap-2">
+                                <span style={{ color: trait.color }}>{trait.icon}</span>
+                                <span className="text-sm font-semibold text-plum-900">{trait.label}</span>
+                                <span className="text-xs text-muted-plum">
+                                  （{trait.leftLabel} · {trait.rightLabel}）
+                                </span>
+                              </div>
+                              <motion.span
+                                key={value}
+                                initial={{ scale: 1.2 }}
+                                animate={{ scale: 1 }}
+                                transition={{ duration: 0.15 }}
+                                className="text-xl font-semibold text-pink-500 font-number"
+                              >
+                                {value}
+                              </motion.span>
                             </div>
-                            <motion.span
-                              key={personality[trait.key]}
-                              initial={{ scale: 1.2 }}
-                              animate={{ scale: 1 }}
-                              transition={{ duration: 0.15 }}
-                              className="text-xl font-semibold text-pink-500 font-number"
-                            >
-                              {personality[trait.key]}
-                            </motion.span>
-                          </div>
 
-                          {/* Slider track */}
-                          <div className="relative h-2 bg-pink-50 rounded-full mb-1.5">
-                            <motion.div
-                              className="absolute left-0 top-0 h-full rounded-full accent-gradient"
-                              initial={false}
-                              animate={{ width: `${personality[trait.key]}%` }}
-                              transition={{ duration: 0.3, ease: 'easeOut' }}
-                            />
-                            <input
-                              type="range"
-                              min={0}
-                              max={100}
-                              value={personality[trait.key]}
-                              onChange={(e) => handleSliderChange(trait.key, Number(e.target.value))}
-                              className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
-                            />
-                            {/* Thumb visual */}
-                            <motion.div
-                              className="absolute top-1/2 -translate-y-1/2 w-5 h-5 rounded-full bg-white border-2 border-pink-400 shadow-md pointer-events-none z-0"
-                              initial={false}
-                              animate={{ left: `calc(${personality[trait.key]}% - 10px)` }}
-                              transition={{ duration: 0.3, ease: 'easeOut' }}
-                            />
-                          </div>
+                            {/* Slider track */}
+                            <div className="relative h-2 bg-pink-50 rounded-full mb-1.5">
+                              <motion.div
+                                className="absolute left-0 top-0 h-full rounded-full accent-gradient"
+                                initial={false}
+                                animate={{ width: `${value}%` }}
+                                transition={{ duration: 0.3, ease: 'easeOut' }}
+                              />
+                              <input
+                                type="range"
+                                min={0}
+                                max={100}
+                                value={value}
+                                onChange={(e) => handleSliderChange(trait.fieldKey, Number(e.target.value))}
+                                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                              />
+                              {/* Thumb visual */}
+                              <motion.div
+                                className="absolute top-1/2 -translate-y-1/2 w-5 h-5 rounded-full bg-white border-2 border-pink-400 shadow-md pointer-events-none z-0"
+                                initial={false}
+                                animate={{ left: `calc(${value}% - 10px)` }}
+                                transition={{ duration: 0.3, ease: 'easeOut' }}
+                              />
+                            </div>
 
-                          {/* Description */}
-                          <div className="flex items-center justify-between">
-                            <span className="text-xs text-muted-plum">{trait.leftLabel}</span>
-                            <span className="text-xs font-medium text-pink-400">
-                              {getTraitDescription(trait.key, personality[trait.key])}
-                            </span>
-                            <span className="text-xs text-muted-plum">{trait.rightLabel}</span>
-                          </div>
-                        </motion.div>
-                      ))}
+                            {/* Description */}
+                            <div className="flex items-center justify-between">
+                              <span className="text-xs text-muted-plum">{trait.leftLabel}</span>
+                              <span className="text-xs font-medium text-pink-400">
+                                {getTraitDescription(trait.key, value)}
+                              </span>
+                              <span className="text-xs text-muted-plum">{trait.rightLabel}</span>
+                            </div>
+                          </motion.div>
+                        );
+                      })}
                     </motion.div>
 
                     {/* Presets */}
@@ -752,6 +817,7 @@ export default function Customize() {
                 </motion.div>
               )}
 
+              {/* ─────────────── Step 3: Background Story ─────────────── */}
               {step === 2 && (
                 <motion.div
                   key="step2"
@@ -770,16 +836,16 @@ export default function Customize() {
                     </div>
 
                     <motion.div variants={staggerContainer} initial="initial" animate="animate">
-                      {/* Backstory */}
+                      {/* Background Story */}
                       <motion.div variants={staggerItem} className="mb-6">
                         <label className="block text-xs font-semibold uppercase tracking-wider text-plum-900 mb-2">
-                          背景故事
+                          背景描述
                         </label>
                         <textarea
-                          value={backstory}
-                          onChange={(e) => setBackstory(e.target.value.slice(0, 500))}
+                          value={form.background}
+                          onChange={(e) => updateForm('background', e.target.value.slice(0, 500))}
                           placeholder="她从哪里来？有着怎样的过去？喜欢什么、害怕什么？写下她的故事..."
-                          rows={8}
+                          rows={6}
                           className="w-full px-4 py-3 rounded-xl bg-white border border-pink-100 text-plum-900 placeholder:text-muted-plum focus:outline-none focus:border-pink-400 focus:shadow-glow transition-all duration-200 resize-none"
                         />
                         <div className="flex items-center justify-between mt-1">
@@ -789,7 +855,7 @@ export default function Customize() {
                           >
                             {showPrompts ? '收起提示' : '需要灵感？点击获取提示'}
                           </button>
-                          <span className="text-xs text-muted-plum">{backstory.length}/500</span>
+                          <span className="text-xs text-muted-plum">{form.background.length}/500</span>
                         </div>
                         <AnimatePresence>
                           {showPrompts && (
@@ -819,44 +885,72 @@ export default function Customize() {
                         </AnimatePresence>
                       </motion.div>
 
-                      {/* First Message */}
+                      {/* Bio / 个性签名 */}
                       <motion.div variants={staggerItem} className="mb-6">
                         <label className="block text-xs font-semibold uppercase tracking-wider text-plum-900 mb-2">
-                          初见时的第一句话
+                          个性签名
                         </label>
-                        <input
-                          type="text"
-                          value={firstMessage}
-                          onChange={(e) => setFirstMessage(e.target.value)}
-                          placeholder="当她第一次见你时，会说些什么？"
-                          className="w-full px-4 py-3 rounded-xl bg-white border border-pink-100 text-plum-900 placeholder:text-muted-plum focus:outline-none focus:border-pink-400 focus:shadow-glow transition-all duration-200"
+                        <textarea
+                          value={form.bio}
+                          onChange={(e) => updateForm('bio', e.target.value.slice(0, 120))}
+                          placeholder="她常挂在嘴边的一句话..."
+                          rows={2}
+                          className="w-full px-4 py-3 rounded-xl bg-white border border-pink-100 text-plum-900 placeholder:text-muted-plum focus:outline-none focus:border-pink-400 focus:shadow-glow transition-all duration-200 resize-none"
                         />
-                        <p className="text-xs text-muted-plum mt-1 italic">
-                          例如：&ldquo;嗨，终于见到你了。我等了你好久。&rdquo;
-                        </p>
+                        <span className="text-xs text-muted-plum mt-1 block text-right">{form.bio.length}/120</span>
                       </motion.div>
 
-                      {/* Topic Preferences */}
-                      <motion.div variants={staggerItem}>
+                      {/* Pet Name */}
+                      <motion.div variants={staggerItem} className="mb-6">
                         <label className="block text-xs font-semibold uppercase tracking-wider text-plum-900 mb-2">
-                          她擅长的话题
+                          宠物名称 <span className="text-muted-plum font-normal normal-case">(可选)</span>
                         </label>
-                        <div className="flex flex-wrap gap-2">
-                          {topicOptions.map((topic) => (
-                            <button
-                              key={topic}
-                              onClick={() => toggleTopic(topic)}
-                              className={`px-3 py-1.5 rounded-full text-sm font-medium transition-all duration-150 ${
-                                selectedTopics.includes(topic)
-                                  ? 'bg-pink-400 text-white shadow-sm scale-105'
-                                  : 'bg-pink-50 text-plum-800 border border-pink-100 hover:bg-pink-100'
-                              }`}
-                            >
-                              {topic}
-                            </button>
-                          ))}
+                        <div className="flex items-center gap-2">
+                          <PawPrint size={16} className="text-muted-plum flex-shrink-0" />
+                          <input
+                            type="text"
+                            value={form.petName}
+                            onChange={(e) => updateForm('petName', e.target.value.slice(0, 20))}
+                            placeholder="她有一只叫什么的宠物？"
+                            className="flex-1 px-4 py-3 rounded-xl bg-white border border-pink-100 text-plum-900 placeholder:text-muted-plum focus:outline-none focus:border-pink-400 focus:shadow-glow transition-all duration-200"
+                          />
                         </div>
                       </motion.div>
+
+                      {/* Pet Type */}
+                      {form.petName && (
+                        <motion.div variants={staggerItem} className="mb-6">
+                          <label className="block text-xs font-semibold uppercase tracking-wider text-plum-900 mb-2">
+                            宠物类型
+                          </label>
+                          <div className="flex flex-wrap gap-2">
+                            {petTypeOptions.map((type) => (
+                              <button
+                                key={type}
+                                onClick={() => updateForm('petType', type === '自定义' ? '' : type)}
+                                className={`px-3 py-1.5 rounded-full text-sm font-medium transition-all duration-150 ${
+                                  form.petType === type || (type === '自定义' && form.petType !== '' && !petTypeOptions.slice(0, -1).includes(form.petType))
+                                    ? 'bg-pink-400 text-white shadow-sm scale-105'
+                                    : 'bg-pink-50 text-plum-800 border border-pink-100 hover:bg-pink-100'
+                                }`}
+                              >
+                                {type === '自定义' ? (
+                                  form.petType && !petTypeOptions.slice(0, -1).includes(form.petType) ? form.petType : '自定义'
+                                ) : type}
+                              </button>
+                            ))}
+                          </div>
+                          {form.petType && !petTypeOptions.slice(0, -1).includes(form.petType) && (
+                            <input
+                              type="text"
+                              value={form.petType}
+                              onChange={(e) => updateForm('petType', e.target.value.slice(0, 20))}
+                              placeholder="输入宠物类型..."
+                              className="mt-2 w-full px-4 py-2 rounded-xl bg-white border border-pink-100 text-plum-900 placeholder:text-muted-plum focus:outline-none focus:border-pink-400 focus:shadow-glow transition-all duration-200 text-sm"
+                            />
+                          )}
+                        </motion.div>
+                      )}
                     </motion.div>
                   </div>
                 </motion.div>
@@ -897,7 +991,7 @@ export default function Customize() {
                     </>
                   ) : (
                     <>
-                      <Sparkles size={16} />
+                      <Gift size={16} />
                       完成创建
                     </>
                   )
@@ -911,7 +1005,7 @@ export default function Customize() {
             </div>
           </div>
 
-          {/* Preview Panel */}
+          {/* ─── Preview Panel (Step 2: Big Five Radar) ─── */}
           <AnimatePresence>
             {step === 1 && (
               <motion.div
@@ -926,21 +1020,21 @@ export default function Customize() {
 
                   {/* Radar Chart */}
                   <div className="flex justify-center mb-5">
-                    <MiniRadarChart personality={personality} size={180} />
+                    <MiniRadarChart personality={formToBigFive(form)} size={200} />
                   </div>
 
                   {/* Personality Description */}
                   <div className="border-l-[3px] border-rose-gold pl-3 mb-5">
                     <AnimatePresence mode="wait">
                       <motion.p
-                        key={JSON.stringify(personality)}
+                        key={JSON.stringify(formToBigFive(form))}
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
                         transition={{ duration: 0.2 }}
                         className="text-sm text-plum-800 leading-relaxed"
                       >
-                        {generatePersonalityText(personality)}
+                        {generatePersonalityText(formToBigFive(form))}
                       </motion.p>
                     </AnimatePresence>
                   </div>
@@ -948,12 +1042,12 @@ export default function Customize() {
                   {/* Avatar Preview */}
                   <div className="flex flex-col items-center">
                     <img
-                      src={avatarOptions[selectedAvatar]}
+                      src={form.avatarUrl}
                       alt="Preview"
                       className="w-[120px] h-[120px] rounded-full object-cover shadow-glow ring-2 ring-pink-100"
                     />
                     <p className="mt-3 text-base font-semibold text-plum-900">
-                      {name || '未命名'}
+                      {form.nickname || '未命名'}
                     </p>
                   </div>
                 </div>
@@ -961,7 +1055,7 @@ export default function Customize() {
             )}
           </AnimatePresence>
 
-          {/* Step 3 Preview Summary */}
+          {/* ─── Preview Panel (Step 3: Summary) ─── */}
           <AnimatePresence>
             {step === 2 && (
               <motion.div
@@ -976,46 +1070,47 @@ export default function Customize() {
 
                   <div className="flex flex-col items-center mb-5">
                     <img
-                      src={avatarOptions[selectedAvatar]}
+                      src={form.avatarUrl}
                       alt="Preview"
                       className="w-24 h-24 rounded-full object-cover shadow-glow ring-2 ring-pink-100"
                     />
                     <p className="mt-3 text-lg font-semibold text-plum-900">
-                      {name || '未命名'}
+                      {form.nickname || '未命名'}
                     </p>
                     <p className="text-sm text-muted-plum">
-                      {genderOptions.find((g) => g.value === gender)?.label} · {age}岁
+                      {genderOptions.find((g) => g.value === form.gender)?.label} &middot; {form.age}岁
                     </p>
+                    {form.birthMonth && form.birthDay && (
+                      <p className="text-xs text-muted-plum">
+                        {form.birthMonth}月{form.birthDay}日
+                      </p>
+                    )}
                   </div>
 
-                  {intro && (
+                  {form.bio && (
                     <p className="text-sm text-plum-800 italic text-center mb-4 border-l-[3px] border-rose-gold pl-3">
-                      &ldquo;{intro}&rdquo;
+                      &ldquo;{form.bio}&rdquo;
                     </p>
                   )}
 
                   <div className="mb-4">
                     <p className="text-xs font-semibold uppercase tracking-wider text-muted-plum mb-2">性格特点</p>
-                    <MiniRadarChart personality={personality} size={160} />
+                    <div className="flex justify-center">
+                      <MiniRadarChart personality={formToBigFive(form)} size={160} />
+                    </div>
                   </div>
 
-                  {selectedTopics.length > 0 && (
+                  {form.background && (
                     <div className="mb-4">
-                      <p className="text-xs font-semibold uppercase tracking-wider text-muted-plum mb-2">擅长话题</p>
-                      <div className="flex flex-wrap gap-1.5">
-                        {selectedTopics.map((topic) => (
-                          <span key={topic} className="px-2 py-1 rounded-full text-xs bg-pink-50 text-pink-500 border border-pink-100">
-                            {topic}
-                          </span>
-                        ))}
-                      </div>
+                      <p className="text-xs font-semibold uppercase tracking-wider text-muted-plum mb-1">背景故事</p>
+                      <p className="text-xs text-plum-800 line-clamp-4">{form.background}</p>
                     </div>
                   )}
 
-                  {backstory && (
+                  {form.petName && (
                     <div>
-                      <p className="text-xs font-semibold uppercase tracking-wider text-muted-plum mb-1">背景故事</p>
-                      <p className="text-xs text-plum-800 line-clamp-4">{backstory}</p>
+                      <p className="text-xs font-semibold uppercase tracking-wider text-muted-plum mb-1">宠物</p>
+                      <p className="text-xs text-plum-800">{form.petName}{form.petType ? ` (${form.petType})` : ''}</p>
                     </div>
                   )}
                 </div>

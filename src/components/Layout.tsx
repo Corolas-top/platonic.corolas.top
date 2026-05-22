@@ -1,12 +1,14 @@
 /**
  * Layout.tsx - Application Root Layout
  *
- * Manages the sidebar visibility, dark mode theme, and toast notifications.
+ * Manages the sidebar visibility, dark mode theme (3-state: light/dark/auto),
+ * and toast notifications.
  * Integrates with AuthContext to pass auth state to the Navbar.
  */
 import { useLocation } from 'react-router-dom';
 import { Toaster } from 'sonner';
 import { useAuth } from '@/context/AuthContext';
+import { applyTheme, loadSavedTheme, getEffectiveTheme } from '@/lib/theme';
 import Navbar from './Navbar';
 
 /** Routes that should display the sidebar navigation */
@@ -31,15 +33,13 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     location.pathname.startsWith(route)
   );
 
-  // Apply dark mode class based on localStorage theme preference
-  // This runs on every render to keep the theme in sync
-  const theme = localStorage.getItem('theme');
-  const isDark = theme === 'dark';
-  if (isDark) {
-    document.documentElement.classList.add('dark');
-  } else if (theme === 'light') {
-    document.documentElement.classList.remove('dark');
-  }
+  // Apply theme on mount and listen for system changes
+  const theme = loadSavedTheme();
+  applyTheme(theme);
+
+  // Determine effective theme for toast styling
+  const effectiveTheme = getEffectiveTheme(theme);
+  const isDark = effectiveTheme === 'dark';
 
   return (
     <div className={`min-h-screen bg-pink-50 dark:bg-gray-900 transition-colors duration-300`}>

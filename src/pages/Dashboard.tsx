@@ -41,8 +41,8 @@ interface Stage {
 interface Companion {
   id: string;
   user_id: string;
-  name: string;
   nickname: string | null;
+  background: string | null;
   avatar_url: string | null;
   bf_openness: number | null;
   bf_conscientiousness: number | null;
@@ -55,38 +55,72 @@ interface Companion {
 interface IntimacyRecord {
   id: string;
   companion_id: string;
-  current_score: number;
-  current_stage: number;
+  score: number;
+  milestone_stage: number;
 }
 
 interface EnergyAccount {
   id: string;
-  user_id: string;
   balance: number;
 }
 
 interface EnergyTransaction {
   id: string;
+  txn_type: string;
   amount: number;
-  type: string;
+  balance_after: number;
   description: string | null;
+  reference_id: string | null;
   created_at: string;
 }
 
 interface MoodRecord {
   id: string;
   companion_id: string;
-  mood_type: string;
+  pleasure: number | null;
+  arousal: number | null;
+  dominance: number | null;
+  occ_label: string | null;
   intensity: number;
   created_at: string;
 }
 
 interface MilestoneDefinition {
   id: number;
-  stage_number: number;
   name: string;
-  name_en: string;
   description: string;
+  min_score: number;
+  max_score: number;
+  unlocked_features: string[] | null;
+}
+
+interface StmMessage {
+  id: string;
+  companion_id: string;
+  user_id: string;
+  speaker: string;
+  content: string;
+  emotion_label: string | null;
+  created_at: string;
+}
+
+interface LtmMemory {
+  id: string;
+  companion_id: string;
+  memory_type: string;
+  source_stm_ids: string[] | null;
+  created_at: string;
+}
+
+interface AnteriorMemory {
+  id: string;
+  companion_id: string;
+  content: string;
+  trigger_type: string;
+  priority: number;
+  status: string;
+  planned_at: string;
+  created_at: string;
 }
 
 /* ─── Animation Variants ─── */
@@ -213,7 +247,7 @@ function BigFiveRadar({ companion, isLoading }: { companion?: Companion | null; 
     ];
   }, [companion]);
 
-  const companionName = companion?.nickname || companion?.name || '伴侣';
+  const companionName = companion?.nickname || '伴侣';
   const avatarUrl = companion?.avatar_url || '/default-avatar.jpg';
 
   useEffect(() => {
@@ -454,8 +488,8 @@ function getPersonalitySummary(traits: TraitData[]): string {
 function MilestoneProgress({ intimacy, stages, isLoading }: { intimacy?: IntimacyRecord | null; stages: Stage[]; isLoading: boolean }) {
   const [animated, setAnimated] = useState(false);
 
-  const currentStageNum = intimacy?.current_stage ?? 0;
-  const currentProgress = Math.min(intimacy?.current_score ?? 0, 100);
+  const currentStageNum = intimacy?.milestone_stage ?? 0;
+  const currentProgress = Math.min(intimacy?.score ?? 0, 100);
 
   useEffect(() => {
     const timer = setTimeout(() => setAnimated(true), 400);
@@ -642,7 +676,7 @@ function EnergyCard({ energy, transactions, isLoading }: { energy?: number; tran
           <p className="text-[12px] text-[#A093A5] font-body">最近消费</p>
           {transactions.map((tx) => (
             <div key={tx.id} className="flex items-center justify-between py-1.5 border-b border-pink-50 last:border-b-0">
-              <span className="text-[12px] text-[#6B5B6E] font-body truncate flex-1">{tx.description || tx.type}</span>
+              <span className="text-[12px] text-[#6B5B6E] font-body truncate flex-1">{tx.description || tx.txn_type}</span>
               <span className={cn(
                 'text-[12px] font-number font-semibold ml-2',
                 tx.amount < 0 ? 'text-red-400' : 'text-green-500'
@@ -726,7 +760,7 @@ function MoodSparkline({ mood, isLoading }: { mood?: MoodRecord | null; isLoadin
   const areaPath = `${linePath} L ${points[points.length - 1].x} ${padding.top + chartHeight} L ${padding.left} ${padding.top + chartHeight} Z`;
 
   const currentHour = new Date().getHours();
-  const currentMoodLabel = mood?.mood_type || '平静';
+  const currentMoodLabel = mood?.occ_label || '平静';
 
   if (isLoading) return <SkeletonCard />;
 
@@ -965,7 +999,7 @@ function QuickActions({ currentStageNum, isLoading }: { currentStageNum?: number
 /* ─── Preview Panel ─── */
 function PreviewPanel({ companion }: { companion?: Companion | null }) {
   const [currentTime, setCurrentTime] = useState('');
-  const companionName = companion?.nickname || companion?.name || '伴侣';
+  const companionName = companion?.nickname || '伴侣';
   const avatarUrl = companion?.avatar_url || '/companion-1.jpg';
 
   useEffect(() => {
@@ -1160,7 +1194,7 @@ export default function Dashboard() {
       // 1. Get companion
       const { data: comp, error: compError } = await supabase
         .from('companions')
-        .select('*')
+        .select('id, user_id, nickname, background, avatar_url, bf_openness, bf_conscientiousness, bf_extraversion, bf_agreeableness, bf_neuroticism, welcome_message')
         .eq('user_id', user.id)
         .single();
 
@@ -1174,39 +1208,60 @@ export default function Dashboard() {
       setHasCompanion(true);
 
       // 2. Load all data in parallel
-      const [intimacyRes, energyRes, moodRes, txRes, stagesRes] = await Promise.all([
+      const companionId = comp.id;
+      const [intimacyRes, energyRes, moodRes, txRes, stagesRes, messagesRes, ltmRes, anteriorRes] = await Promise.all([
         // Intimacy
         supabase
           .from('intimacy_records')
           .select('*')
-          .eq('companion_id', comp.id)
+          .eq('companion_id', companionId)
           .single(),
-        // Energy
+        // Energy (linked via companion_id since there's no user_id)
         supabase
           .from('energy_accounts')
           .select('*')
-          .eq('user_id', user.id)
+          .eq('companion_id', companionId)
           .single(),
         // Latest mood
         supabase
           .from('mood_records')
           .select('*')
-          .eq('companion_id', comp.id)
+          .eq('companion_id', companionId)
           .order('created_at', { ascending: false })
           .limit(1)
           .single(),
-        // Energy transactions
+        // Energy transactions (linked via account_id, will filter after getting energy account)
         supabase
           .from('energy_transactions')
           .select('*')
-          .eq('user_id', user.id)
+          .eq('account_id', companionId)
           .order('created_at', { ascending: false })
           .limit(5),
-        // Milestone definitions
+        // Milestone definitions (ordered by id, which is the stage number)
         supabase
           .from('milestone_definitions')
           .select('*')
-          .order('stage_number', { ascending: true }),
+          .order('id', { ascending: true }),
+        // Recent STM messages
+        supabase
+          .from('stm_messages')
+          .select('*')
+          .eq('companion_id', companionId)
+          .order('created_at', { ascending: false })
+          .limit(10),
+        // LTM memories count
+        supabase
+          .from('ltm_memories')
+          .select('*', { count: 'exact', head: true })
+          .eq('companion_id', companionId),
+        // Anterior memories (pending, sorted by priority)
+        supabase
+          .from('anterior_memories')
+          .select('*')
+          .eq('companion_id', companionId)
+          .eq('status', 'pending')
+          .order('priority', { ascending: false })
+          .limit(5),
       ]);
 
       if (intimacyRes.data) setIntimacy(intimacyRes.data as IntimacyRecord);
@@ -1214,22 +1269,26 @@ export default function Dashboard() {
       if (moodRes.data) setMood(moodRes.data as MoodRecord);
       if (txRes.data) setTransactions(txRes.data as EnergyTransaction[]);
 
+      // Log additional data for debugging / future use
+      if (messagesRes.data) {
+        console.log('[Dashboard] Recent messages:', (messagesRes.data as StmMessage[]).length);
+      }
+      if (ltmRes.count) {
+        console.log('[Dashboard] LTM memories count:', ltmRes.count);
+      }
+      if (anteriorRes.data) {
+        console.log('[Dashboard] Pending anterior memories:', (anteriorRes.data as AnteriorMemory[]).length);
+      }
+
       if (stagesRes.data) {
         setStages((stagesRes.data as MilestoneDefinition[]).map(s => ({
-          num: s.stage_number,
+          num: s.id,
           name: s.name,
-          nameEn: s.name_en,
+          nameEn: s.name,
           description: s.description,
         })));
       } else {
-        // Fallback stages if table is empty
-        setStages([
-          { num: 1, name: '初次相遇', nameEn: 'First Meeting', description: '你们第一次相遇，彼此还很陌生。' },
-          { num: 2, name: '渐生情愫', nameEn: 'Growing Feelings', description: '你们开始互相了解，产生了一些好感。' },
-          { num: 3, name: '暗生情愫', nameEn: 'Silent Understanding', description: '你们开始产生默契，她能理解你的情绪波动。' },
-          { num: 4, name: '心意相通', nameEn: 'Heart Connection', description: '你们心灵相通，彼此深深吸引。' },
-          { num: 5, name: '灵魂伴侣', nameEn: 'Soulmate', description: '你们已经成为彼此的灵魂伴侣。' },
-        ]);
+        setStages([]);
       }
     } catch (e: any) {
       console.error('Dashboard load error:', e);
@@ -1279,7 +1338,7 @@ export default function Dashboard() {
     );
   }
 
-  const currentStageNum = intimacy?.current_stage ?? 0;
+  const currentStageNum = intimacy?.milestone_stage ?? 0;
 
   return (
     <div className="flex min-h-[100dvh]">

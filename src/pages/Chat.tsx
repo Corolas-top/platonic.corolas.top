@@ -8,7 +8,6 @@ import {
   Settings,
   MoreVertical,
   ChevronDown,
-  ChevronRight,
   PanelRightClose,
   PanelRightOpen,
   Sparkles,
@@ -21,7 +20,7 @@ import { toast } from 'sonner';
 /* ─── Types ─── */
 interface ChatMessage {
   id: string;
-  role: 'user' | 'companion';
+  speaker: 'user' | 'companion';
   content: string;
   timestamp: Date;
   isStreaming?: boolean;
@@ -30,10 +29,8 @@ interface ChatMessage {
 interface Companion {
   id: string;
   user_id: string;
-  name: string;
-  nickname: string | null;
+  nickname: string;
   avatar_url: string | null;
-  welcome_message: string | null;
 }
 
 /* ─── Helpers ─── */
@@ -95,9 +92,9 @@ function RightPreviewPanel({ companion }: { companion?: Companion | null }) {
   const [activePreviewTab, setActivePreviewTab] = useState<'live2d' | 'pet'>('live2d');
 
   return (
-    <div className="w-[240px] border-l border-pink-100 bg-pink-50/50 flex flex-col">
+    <div className="w-[240px] border-l border-pink-100 bg-pink-50/50 flex flex-col h-full">
       {/* Tab Header */}
-      <div className="flex items-center border-b border-pink-100">
+      <div className="flex items-center border-b border-pink-100 flex-shrink-0">
         <button
           onClick={() => setActivePreviewTab('live2d')}
           className={`flex-1 flex items-center justify-center gap-1.5 py-3 text-[12px] font-body font-medium transition-colors ${
@@ -123,7 +120,7 @@ function RightPreviewPanel({ companion }: { companion?: Companion | null }) {
       </div>
 
       {/* Tab Content */}
-      <div className="flex-1 p-4 overflow-y-auto">
+      <div className="flex-1 p-4 overflow-y-auto min-h-0">
         <AnimatePresence mode="wait">
           {activePreviewTab === 'live2d' ? (
             <motion.div
@@ -134,7 +131,7 @@ function RightPreviewPanel({ companion }: { companion?: Companion | null }) {
               transition={{ duration: 0.2 }}
               className="flex flex-col items-center"
             >
-              <div className="w-full aspect-[3/4] rounded-2xl overflow-hidden bg-gradient-to-br from-pink-100 to-pink-50 border border-pink-200 mb-4 flex items-center justify-center">
+              <div className="relative w-full aspect-[3/4] rounded-2xl overflow-hidden bg-gradient-to-br from-pink-100 to-pink-50 border border-pink-200 mb-4 flex items-center justify-center">
                 <img
                   src="/live2d-preview.jpg"
                   alt="Live2D Preview"
@@ -163,7 +160,7 @@ function RightPreviewPanel({ companion }: { companion?: Companion | null }) {
               transition={{ duration: 0.2 }}
               className="flex flex-col items-center"
             >
-              <div className="w-full aspect-square rounded-2xl overflow-hidden bg-gradient-to-br from-orange-50 to-pink-50 border border-pink-200 mb-4 flex items-center justify-center relative">
+              <div className="relative w-full aspect-square rounded-2xl overflow-hidden bg-gradient-to-br from-orange-50 to-pink-50 border border-pink-200 mb-4 flex items-center justify-center">
                 <img
                   src="/pet-preview.jpg"
                   alt="Pet Preview"
@@ -228,7 +225,7 @@ export default function Chat() {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const streamingRef = useRef(false);
 
-  const companionName = companion?.nickname || companion?.name || '伴侣';
+  const companionName = companion?.nickname || '伴侣';
   const companionAvatar = companion?.avatar_url || '/default-avatar.jpg';
 
   // Load companion and messages on mount
@@ -286,7 +283,7 @@ export default function Chat() {
         setMessages(
           msgs.map((m: Record<string, unknown>) => ({
             id: (m.id as string) || generateId(),
-            role: m.speaker === 'user' ? 'user' : 'companion',
+            speaker: m.speaker === 'user' ? 'user' : 'companion',
             content: (m.content as string) || '',
             timestamp: new Date((m.created_at as string) || Date.now()),
           }))
@@ -296,8 +293,8 @@ export default function Chat() {
         setMessages([
           {
             id: 'welcome',
-            role: 'companion',
-            content: comp.welcome_message || `你好呀！我是${comp.nickname || comp.name}，很高兴认识你～`,
+            speaker: 'companion',
+            content: `你好呀！我是${comp.nickname || '伴侣'}，很高兴认识你～`,
             timestamp: new Date(),
           },
         ]);
@@ -307,8 +304,8 @@ export default function Chat() {
       setMessages([
         {
           id: 'welcome',
-          role: 'companion',
-          content: comp.welcome_message || `你好呀！很高兴见到你～`,
+          speaker: 'companion',
+          content: `你好呀！很高兴见到你～`,
           timestamp: new Date(),
         },
       ]);
@@ -367,7 +364,7 @@ export default function Chat() {
           ...prev,
           {
             id: generateId(),
-            role: 'companion',
+            speaker: 'companion',
             content: text,
             timestamp: new Date(),
           },
@@ -408,7 +405,7 @@ export default function Chat() {
         ...prev,
         {
           id: aiId,
-          role: 'companion',
+          speaker: 'companion',
           content: '',
           timestamp: new Date(),
           isStreaming: true,
@@ -457,7 +454,7 @@ export default function Chat() {
     // Add user message
     const userMsg: ChatMessage = {
       id: generateId(),
-      role: 'user',
+      speaker: 'user',
       content: trimmed,
       timestamp: new Date(),
     };
@@ -512,7 +509,7 @@ export default function Chat() {
   // Loading state
   if (loading) {
     return (
-      <div className="fixed inset-0 flex items-center justify-center">
+      <div className="ml-[220px] min-h-screen flex items-center justify-center">
         <div className="flex flex-col items-center gap-3">
           <div className="w-8 h-8 border-2 border-pink-200 border-t-pink-400 rounded-full animate-spin" />
           <div className="text-[#A093A5] font-body text-[14px]">加载中...</div>
@@ -524,7 +521,7 @@ export default function Chat() {
   // Not authenticated
   if (!isAuthenticated) {
     return (
-      <div className="fixed inset-0 flex flex-col" style={{ marginLeft: 0 }}>
+      <div className="ml-[220px] min-h-screen flex flex-col relative">
         {/* Breathing gradient background */}
         <div
           className="absolute inset-0 -z-10"
@@ -543,7 +540,7 @@ export default function Chat() {
   // No companion
   if (!hasCompanion) {
     return (
-      <div className="fixed inset-0 flex flex-col" style={{ marginLeft: 0 }}>
+      <div className="ml-[220px] min-h-screen flex flex-col relative">
         {/* Breathing gradient background */}
         <div
           className="absolute inset-0 -z-10"
@@ -573,7 +570,7 @@ export default function Chat() {
   }
 
   return (
-    <div className="fixed inset-0 flex" style={{ marginLeft: 0 }}>
+    <div className="ml-[220px] h-screen flex overflow-hidden relative">
       {/* Breathing gradient background */}
       <div
         className="absolute inset-0 -z-10"
@@ -614,7 +611,7 @@ export default function Chat() {
       />
 
       {/* Main Chat Area */}
-      <div className="flex-1 flex flex-col min-w-0">
+      <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
         {/* Top Bar */}
         <motion.div
           initial={{ opacity: 0, y: -10 }}
@@ -687,7 +684,7 @@ export default function Chat() {
         <div
           ref={messagesContainerRef}
           onScroll={handleScroll}
-          className="flex-1 overflow-y-auto px-5 py-4"
+          className="flex-1 overflow-y-auto px-5 py-4 min-h-0"
         >
           {/* Date separator */}
           <div className="flex items-center justify-center gap-3 my-4">
@@ -699,7 +696,7 @@ export default function Chat() {
           {/* Messages */}
           <AnimatePresence initial={false}>
             {messages.map((msg) =>
-              msg.role === 'companion' ? (
+              msg.speaker === 'companion' ? (
                 <motion.div
                   key={msg.id}
                   initial={{ opacity: 0, x: -20 }}
@@ -715,9 +712,9 @@ export default function Chat() {
                     alt={companionName}
                     className="w-7 h-7 rounded-full object-cover shadow-sm flex-shrink-0 self-end mb-5"
                   />
-                  <div className="max-w-[70%]">
+                  <div className="max-w-[70%] min-w-0">
                     <div
-                      className="rounded-tr-[20px] rounded-br-[20px] rounded-tl-[4px] rounded-bl-[20px] px-[18px] py-[14px] shadow-sm text-[15px] text-plum-900 leading-relaxed"
+                      className="rounded-tr-[20px] rounded-br-[20px] rounded-tl-[4px] rounded-bl-[20px] px-[18px] py-[14px] shadow-sm text-[15px] text-plum-900 leading-relaxed break-words"
                       style={{
                         background: 'rgba(255,255,255,0.82)',
                         border: '1px solid rgba(255,182,193,0.3)',
@@ -743,9 +740,9 @@ export default function Chat() {
                   }}
                   className="flex justify-end mb-1"
                 >
-                  <div className="max-w-[70%]">
+                  <div className="max-w-[70%] min-w-0">
                     <div
-                      className="rounded-tl-[20px] rounded-bl-[20px] rounded-tr-[20px] rounded-br-[4px] px-[18px] py-[14px] shadow-sm text-[15px] text-plum-900 leading-relaxed"
+                      className="rounded-tl-[20px] rounded-bl-[20px] rounded-tr-[20px] rounded-br-[4px] px-[18px] py-[14px] shadow-sm text-[15px] text-plum-900 leading-relaxed break-words"
                       style={{
                         background: 'rgba(255,255,255,0.92)',
                         border: '1px solid rgba(255,182,193,0.2)',
@@ -808,9 +805,9 @@ export default function Chat() {
                   alt={companionName}
                   className="w-7 h-7 rounded-full object-cover shadow-sm flex-shrink-0 self-end mb-5"
                 />
-                <div className="max-w-[70%]">
+                <div className="max-w-[70%] min-w-0">
                   <div
-                    className="rounded-tr-[20px] rounded-br-[20px] rounded-tl-[4px] rounded-bl-[20px] px-[18px] py-[14px] shadow-sm text-[15px] text-plum-900 leading-relaxed"
+                    className="rounded-tr-[20px] rounded-br-[20px] rounded-tl-[4px] rounded-bl-[20px] px-[18px] py-[14px] shadow-sm text-[15px] text-plum-900 leading-relaxed break-words"
                     style={{
                       background: 'rgba(255,255,255,0.82)',
                       border: '1px solid rgba(255,182,193,0.3)',
@@ -881,7 +878,7 @@ export default function Chat() {
             </button>
 
             {/* Textarea */}
-            <div className="flex-1 relative">
+            <div className="flex-1 relative min-w-0">
               <textarea
                 ref={textareaRef}
                 value={inputValue}

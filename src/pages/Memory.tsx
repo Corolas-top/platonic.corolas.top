@@ -30,10 +30,11 @@ interface MemoryItem {
 
 interface DiaryRow {
   id: string;
-  created_at: string;
-  title: string;
+  companion_id: string;
+  diary_date: string;
   content: string;
-  memory_type: string;
+  emotion_tag: string | null;
+  sentiment_score: number | null;
 }
 
 /* ─── Color helpers ─── */
@@ -114,11 +115,24 @@ export default function Memory() {
         const { data: { user } } = await supabase.auth.getUser();
         if (!user) return;
 
+        // First get the companion for this user
+        const { data: companion } = await supabase
+          .from('companions')
+          .select('id')
+          .eq('user_id', user.id)
+          .single();
+
+        if (!companion) {
+          setMemories(emptyMemories);
+          setLoading(false);
+          return;
+        }
+
         const { data: rows, error } = await supabase
           .from('companion_diaries')
-          .select('id, created_at, title, content, memory_type')
-          .eq('user_id', user.id)
-          .order('created_at', { ascending: false })
+          .select('id, companion_id, diary_date, content, emotion_tag, sentiment_score')
+          .eq('companion_id', companion.id)
+          .order('diary_date', { ascending: false })
           .limit(200);
 
         if (error || !rows) {
@@ -129,15 +143,20 @@ export default function Memory() {
         // Group by date
         const grouped: Record<string, MemoryItem[]> = {};
         rows.forEach((row: DiaryRow) => {
-          const dateKey = format(new Date(row.created_at), 'yyyy-MM-dd');
-          const type = (row.memory_type as 'milestone' | 'anterior' | 'ltm') || 'ltm';
+          const dateKey = format(new Date(row.diary_date), 'yyyy-MM-dd');
+          // Derive a memory type from emotion_tag for display purposes
+          const type: 'milestone' | 'anterior' | 'ltm' = row.emotion_tag === 'milestone'
+            ? 'milestone'
+            : row.emotion_tag === 'reflect'
+              ? 'anterior'
+              : 'ltm';
           if (!grouped[dateKey]) grouped[dateKey] = [];
           grouped[dateKey].push({
             id: row.id,
             type,
-            title: row.title || (type === 'milestone' ? '里程碑' : type === 'anterior' ? '工作记忆' : '长期记忆形成'),
+            title: row.emotion_tag || (type === 'milestone' ? '里程碑' : type === 'anterior' ? '工作记忆' : '长期记忆形成'),
             description: row.content || '',
-            time: format(new Date(row.created_at), 'HH:mm'),
+            time: format(new Date(row.diary_date), 'HH:mm'),
           });
         });
 

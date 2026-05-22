@@ -2,9 +2,9 @@
  * Navbar.tsx - Sidebar Navigation Component
  *
  * Provides dynamic navigation based on authentication state and companion status.
- * Includes brand header, nav items, utility buttons, and auth section.
+ * Includes brand header, nav items, dark mode (3-state), language selector, and auth section.
  */
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import {
   LayoutDashboard,
@@ -18,22 +18,14 @@ import {
   LogOut,
   LogIn,
   Sparkles,
-  HelpCircle,
-  Shield,
-  FileText,
-  Moon,
   Sun,
+  Moon,
+  Monitor,
   Globe,
 } from 'lucide-react';
 import type { User } from '@supabase/supabase-js';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from '@/components/ui/dialog';
+import { applyTheme, loadSavedTheme } from '@/lib/theme';
+import type { Theme } from '@/lib/theme';
 
 /** Navigation item definition */
 interface NavItem {
@@ -50,28 +42,50 @@ interface NavbarProps {
   onLogout: () => Promise<void>;
 }
 
+/** Get navigation items for authenticated users */
+function getAuthenticatedNavItems(hasCompanion: boolean): NavItem[] {
+  const items: NavItem[] = [];
+
+  // Dashboard / Plaza are mutually exclusive based on companion status
+  if (hasCompanion) {
+    items.push({ label: 'Dashboard', path: '/dashboard', icon: <LayoutDashboard size={20} /> });
+  } else {
+    items.push({ label: 'Plaza', path: '/plaza', icon: <Users size={20} /> });
+  }
+
+  items.push(
+    { label: 'Chat', path: '/chat', icon: <MessageCircle size={20} /> },
+    { label: 'Memory', path: '/memory', icon: <Calendar size={20} /> },
+    { label: 'Drama', path: '/drama', icon: <BookOpen size={20} /> },
+    { label: 'Payment', path: '/payment', icon: <Zap size={20} /> },
+    { label: 'Settings', path: '/settings', icon: <Settings size={20} /> },
+    { label: 'Crowdfunding', path: '/crowdfunding', icon: <Heart size={20} /> },
+  );
+
+  return items;
+}
+
 /** Navigation items shown when user is NOT authenticated */
 const publicNavItems: NavItem[] = [
   { label: 'Home', path: '/', icon: <Sparkles size={20} /> },
   { label: 'Login', path: '/auth', icon: <LogIn size={20} /> },
 ];
 
-/** Base navigation items shown when user IS authenticated */
-function getAuthenticatedNavItems(hasCompanion: boolean): NavItem[] {
-  // First item depends on companion status
-  const firstItem: NavItem = hasCompanion
-    ? { label: 'Dashboard', path: '/dashboard', icon: <LayoutDashboard size={20} /> }
-    : { label: 'Companion', path: '/customize', icon: <Sparkles size={20} /> };
+/** Theme cycle order: light -> dark -> auto -> light */
+const themeCycle: Theme[] = ['light', 'dark', 'auto'];
 
-  return [
-    firstItem,
-    { label: 'Plaza', path: '/plaza', icon: <Users size={20} /> },
-    { label: 'Chat', path: '/chat', icon: <MessageCircle size={20} /> },
-    { label: 'Memory', path: '/memory', icon: <Calendar size={20} /> },
-    { label: 'Drama', path: '/drama', icon: <BookOpen size={20} /> },
-    { label: 'Payment', path: '/payment', icon: <Zap size={20} /> },
-    { label: 'Settings', path: '/settings', icon: <Settings size={20} /> },
-  ];
+/** Theme icon map */
+function ThemeIcon({ theme, size = 18, className }: { theme: Theme; size?: number; className?: string }) {
+  if (theme === 'light') return <Sun size={size} className={className} />;
+  if (theme === 'dark') return <Moon size={size} className={className} />;
+  return <Monitor size={size} className={className} />;
+}
+
+/** Theme label map */
+function themeLabel(theme: Theme): string {
+  if (theme === 'light') return 'Light';
+  if (theme === 'dark') return 'Dark';
+  return 'Auto';
 }
 
 export default function Navbar({
@@ -82,31 +96,41 @@ export default function Navbar({
 }: NavbarProps) {
   const navigate = useNavigate();
   const location = useLocation();
-  const [hoveredItem, setHoveredItem] = useState<string | null>(null);
-  const [isDark, setIsDark] = useState(() => {
-    const stored = localStorage.getItem('theme');
-    return stored === 'dark';
-  });
+
+  // 3-state theme: light / dark / auto
+  const [theme, setTheme] = useState<Theme>(() => loadSavedTheme());
+
   const [language, setLanguage] = useState<'en' | 'zh'>(() => {
     const stored = localStorage.getItem('language');
     return stored === 'zh' ? 'zh' : 'en';
   });
+
+  // Apply theme on mount and when changed
+  useEffect(() => {
+    applyTheme(theme);
+  }, [theme]);
+
+  // Listen for system theme changes when in auto mode
+  useEffect(() => {
+    if (theme !== 'auto') return;
+    const mq = window.matchMedia('(prefers-color-scheme: dark)');
+    const handler = () => applyTheme('auto');
+    mq.addEventListener('change', handler);
+    return () => mq.removeEventListener('change', handler);
+  }, [theme]);
 
   // Determine which nav items to show
   const navItems = isAuthenticated
     ? getAuthenticatedNavItems(hasCompanion)
     : publicNavItems;
 
-  /** Toggle dark mode and persist preference */
-  const toggleDarkMode = () => {
-    const next = !isDark;
-    setIsDark(next);
-    localStorage.setItem('theme', next ? 'dark' : 'light');
-    if (next) {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-    }
+  /** Cycle theme: light -> dark -> auto -> light */
+  const cycleTheme = () => {
+    const currentIndex = themeCycle.indexOf(theme);
+    const next = themeCycle[(currentIndex + 1) % themeCycle.length];
+    setTheme(next);
+    localStorage.setItem('theme', next);
+    applyTheme(next);
   };
 
   /** Toggle language and persist preference */
@@ -132,7 +156,11 @@ export default function Navbar({
         className="flex items-center gap-2 px-5 py-6 cursor-pointer"
         onClick={() => navigate('/')}
       >
-        <img src="/platonic.png" alt="Logo" className="w-8 h-8 rounded-lg object-cover ring-1 ring-pink-400/40" />
+        <img
+          src="/platonic.png"
+          alt="Logo"
+          className="w-8 h-8 rounded-lg object-cover ring-1 ring-pink-400/40"
+        />
         <span className="text-pink-200 text-lg font-bold tracking-tight">
           Corolas | Platonic
         </span>
@@ -146,8 +174,6 @@ export default function Navbar({
             <button
               key={item.path}
               onClick={() => navigate(item.path)}
-              onMouseEnter={() => setHoveredItem(item.path)}
-              onMouseLeave={() => setHoveredItem(null)}
               className={`
                 flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium
                 transition-all duration-150 ease-out
@@ -161,7 +187,6 @@ export default function Navbar({
               <span
                 className={`
                   transition-transform duration-150
-                  ${hoveredItem === item.path && !isActive ? 'scale-110' : ''}
                   ${isActive ? 'text-pink-200' : 'text-sidebar-icon'}
                 `}
               >
@@ -175,148 +200,30 @@ export default function Navbar({
 
       {/* ========== Bottom Section ========== */}
       <div className="px-3 pb-4 flex flex-col gap-2">
-        {/* Crowdfunding link - only show for authenticated users */}
-        {isAuthenticated && (
-          <button
-            onClick={() => navigate('/crowdfunding')}
-            onMouseEnter={() => setHoveredItem('/crowdfunding')}
-            onMouseLeave={() => setHoveredItem(null)}
-            className={`
-              flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium
-              transition-all duration-150 border-l-[3px]
-              ${
-                location.pathname === '/crowdfunding'
-                  ? 'bg-sidebar-active text-white border-pink-400'
-                  : 'text-sidebar-text hover:bg-sidebar-hover hover:text-rose-gold border-transparent'
-              }
-            `}
-          >
-            <Heart
-              size={20}
-              className={
-                location.pathname === '/crowdfunding'
-                  ? 'text-pink-200'
-                  : 'text-rose-gold'
-              }
-            />
-            <span className="font-body">Crowdfunding</span>
-          </button>
-        )}
+        {/* Separator */}
+        <div className="border-t border-sidebar-hover my-1" />
 
-        {/* Utility Buttons */}
-        <div className="flex flex-col gap-1">
-          {/* Help - opens dialog */}
-          <Dialog>
-            <DialogTrigger asChild>
-              <button
-                onMouseEnter={() => setHoveredItem('help')}
-                onMouseLeave={() => setHoveredItem(null)}
-                className="flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm
-                  text-sidebar-text hover:bg-sidebar-hover hover:text-pink-200
-                  transition-all duration-150 w-full"
-              >
-                <HelpCircle
-                  size={18}
-                  className={hoveredItem === 'help' ? 'text-pink-200 scale-110' : 'text-sidebar-icon'}
-                />
-                <span className="font-body">Help</span>
-              </button>
-            </DialogTrigger>
-            <DialogContent className="sm:max-w-[425px]">
-              <DialogHeader>
-                <DialogTitle>Help Center</DialogTitle>
-                <DialogDescription>
-                  Need assistance? Contact us at{' '}
-                  <a
-                    href="mailto:corolar@corolas.top"
-                    className="text-pink-400 hover:underline"
-                  >
-                    corolar@corolas.top
-                  </a>
-                </DialogDescription>
-              </DialogHeader>
-              <div className="space-y-4 py-4">
-                <p className="text-sm text-muted-foreground">
-                  Welcome to Corolas | Platonic! Here you can create your own AI companion,
-                  chat with them, explore memories together, and enjoy immersive drama stories.
-                </p>
-                <div className="space-y-2">
-                  <h4 className="text-sm font-medium">Getting Started</h4>
-                  <ul className="text-sm text-muted-foreground list-disc list-inside space-y-1">
-                    <li>Sign up or log in to your account</li>
-                    <li>Create your companion in the Companion page</li>
-                    <li>Start chatting and building memories</li>
-                  </ul>
-                </div>
-              </div>
-            </DialogContent>
-          </Dialog>
+        {/* Dark Mode Toggle - 3-state */}
+        <button
+          onClick={cycleTheme}
+          className="flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm
+            text-sidebar-text hover:bg-sidebar-hover hover:text-pink-200
+            transition-all duration-150 w-full"
+        >
+          <ThemeIcon theme={theme} size={18} className="text-sidebar-icon" />
+          <span className="font-body">{themeLabel(theme)}</span>
+        </button>
 
-          {/* Privacy */}
-          <button
-            onClick={() => navigate('/privacy')}
-            onMouseEnter={() => setHoveredItem('privacy')}
-            onMouseLeave={() => setHoveredItem(null)}
-            className="flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm
-              text-sidebar-text hover:bg-sidebar-hover hover:text-pink-200
-              transition-all duration-150 w-full"
-          >
-            <Shield
-              size={18}
-              className={hoveredItem === 'privacy' ? 'text-pink-200 scale-110' : 'text-sidebar-icon'}
-            />
-            <span className="font-body">Privacy</span>
-          </button>
-
-          {/* Terms */}
-          <button
-            onClick={() => navigate('/terms')}
-            onMouseEnter={() => setHoveredItem('terms')}
-            onMouseLeave={() => setHoveredItem(null)}
-            className="flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm
-              text-sidebar-text hover:bg-sidebar-hover hover:text-pink-200
-              transition-all duration-150 w-full"
-          >
-            <FileText
-              size={18}
-              className={hoveredItem === 'terms' ? 'text-pink-200 scale-110' : 'text-sidebar-icon'}
-            />
-            <span className="font-body">Terms</span>
-          </button>
-
-          {/* Dark Mode Toggle */}
-          <button
-            onClick={toggleDarkMode}
-            onMouseEnter={() => setHoveredItem('darkmode')}
-            onMouseLeave={() => setHoveredItem(null)}
-            className="flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm
-              text-sidebar-text hover:bg-sidebar-hover hover:text-pink-200
-              transition-all duration-150 w-full"
-          >
-            {isDark ? (
-              <Sun size={18} className={hoveredItem === 'darkmode' ? 'text-pink-200 scale-110' : 'text-sidebar-icon'} />
-            ) : (
-              <Moon size={18} className={hoveredItem === 'darkmode' ? 'text-pink-200 scale-110' : 'text-sidebar-icon'} />
-            )}
-            <span className="font-body">{isDark ? 'Light Mode' : 'Dark Mode'}</span>
-          </button>
-
-          {/* Language Selector */}
-          <button
-            onClick={toggleLanguage}
-            onMouseEnter={() => setHoveredItem('language')}
-            onMouseLeave={() => setHoveredItem(null)}
-            className="flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm
-              text-sidebar-text hover:bg-sidebar-hover hover:text-pink-200
-              transition-all duration-150 w-full"
-          >
-            <Globe
-              size={18}
-              className={hoveredItem === 'language' ? 'text-pink-200 scale-110' : 'text-sidebar-icon'}
-            />
-            <span className="font-body">{language === 'en' ? 'English' : '中文'}</span>
-          </button>
-        </div>
+        {/* Language Selector */}
+        <button
+          onClick={toggleLanguage}
+          className="flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm
+            text-sidebar-text hover:bg-sidebar-hover hover:text-pink-200
+            transition-all duration-150 w-full"
+        >
+          <Globe size={18} className="text-sidebar-icon" />
+          <span className="font-body">{language === 'en' ? 'English' : '中文'}</span>
+        </button>
 
         {/* ========== Auth Section ========== */}
         <div className="border-t border-sidebar-hover pt-3 mt-1">
@@ -345,32 +252,22 @@ export default function Navbar({
               {/* Logout button */}
               <button
                 onClick={handleLogout}
-                onMouseEnter={() => setHoveredItem('logout')}
-                onMouseLeave={() => setHoveredItem(null)}
                 className="flex items-center gap-3 px-4 py-2 rounded-xl text-sm
                   text-sidebar-text hover:bg-sidebar-hover hover:text-pink-200
                   transition-all duration-150 w-full"
               >
-                <LogOut
-                  size={18}
-                  className={hoveredItem === 'logout' ? 'text-pink-200 scale-110' : 'text-sidebar-icon'}
-                />
+                <LogOut size={18} className="text-sidebar-icon" />
                 <span className="font-body text-xs">Logout</span>
               </button>
             </div>
           ) : (
             <button
               onClick={() => navigate('/auth')}
-              onMouseEnter={() => setHoveredItem('login')}
-              onMouseLeave={() => setHoveredItem(null)}
               className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium
                 text-sidebar-text hover:bg-sidebar-hover hover:text-pink-200
                 transition-all duration-150 w-full"
             >
-              <LogIn
-                size={20}
-                className={hoveredItem === 'login' ? 'text-pink-200 scale-110' : 'text-sidebar-icon'}
-              />
+              <LogIn size={20} className="text-sidebar-icon" />
               <span className="font-body">Login</span>
             </button>
           )}
