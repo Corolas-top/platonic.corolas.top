@@ -6,19 +6,19 @@ import {
   Heart,
   Zap,
   TrendingUp,
-  Bell,
   ChevronRight,
+  ChevronDown,
   Users,
   MessageCircle,
   BookOpen,
   Star,
   Check,
-  Battery,
-  PawPrint,
-  ChevronDown,
   RefreshCw,
   AlertCircle,
   LogIn,
+  Battery,
+  PawPrint,
+  Bell,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { supabase } from '@/lib/supabase';

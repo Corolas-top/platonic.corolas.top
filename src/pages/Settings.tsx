@@ -10,20 +10,19 @@ import {
   ChevronRight,
   CheckCircle,
   LogOut,
-  Trash2,
   AlertTriangle,
   Sun,
   Moon,
   Monitor,
   HeartCrack,
   Sparkles,
-  Loader2,
   HelpCircle,
   Mail,
   FileText,
   Shield,
   ChevronDown,
   ChevronUp,
+  Loader2,
 } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { applyTheme, loadSavedTheme } from '@/lib/theme';

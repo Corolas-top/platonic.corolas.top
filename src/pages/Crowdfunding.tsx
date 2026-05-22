@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import {
   Heart,
-  Users,
   Target,
   Sparkles,
   Loader2,
@@ -11,16 +10,14 @@ import { supabase, getStorageUrl } from '@/lib/supabase';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
 
-/* ─── Types ─── */
+/* ─── Types (matching DB schema exactly) ─── */
 interface CrowdfundingProject {
   id: string;
-  title: string;
-  subtitle: string;
+  feature_name: string;
   description: string;
   cover_image_url: string | null;
   target_amount: number;
   current_amount: number;
-  backers: number;
   status: string;
   sort_order: number;
   created_at: string;
@@ -43,17 +40,17 @@ function ProjectCard({
 
   const imageSrc = project.cover_image_url && !imgError
     ? getStorageUrl(project.cover_image_url)
-    : `/crowdfunding/project-${index + 1}.jpg`;
+    : `/previews/${['tts-preview', 'pet-preview', 'live2d-preview'][index]}.jpg`;
 
   const handleSupport = () => {
     if (!isAuthenticated) {
-      toast('请先登录', {
-        description: '登录后您可以参与众筹支持项目',
+      toast('Please login first', {
+        description: 'Login to support crowdfunding projects',
       });
       return;
     }
     toast('Coming Soon', {
-      description: '众筹支持功能即将上线，敬请期待！',
+      description: 'Crowdfunding support feature coming soon!',
       icon: <Sparkles size={16} className="text-pink-400" />,
     });
   };
@@ -70,16 +67,15 @@ function ProjectCard({
       <div className="relative w-full aspect-[16/10] overflow-hidden bg-pink-50">
         <img
           src={imageSrc}
-          alt={project.title}
+          alt={project.feature_name}
           className="w-full h-full object-cover"
           onError={() => setImgError(true)}
         />
         <div className="absolute inset-0 bg-gradient-to-t from-[rgba(45,27,46,0.5)] to-transparent" />
         <div className="absolute bottom-3 left-4 right-4">
           <h3 className="font-body text-[20px] font-bold text-white drop-shadow-sm">
-            {project.title}
+            {project.feature_name}
           </h3>
-          <p className="text-[13px] text-white/80">{project.subtitle}</p>
         </div>
       </div>
 
@@ -93,7 +89,7 @@ function ProjectCard({
         <div className="mb-4">
           <div className="flex items-center justify-between mb-1.5">
             <span className="text-[12px] text-[#A093A5]">
-              ¥{project.current_amount.toLocaleString()} / ¥{project.target_amount.toLocaleString()}
+              ¥{(project.current_amount || 0).toLocaleString()} / ¥{(project.target_amount || 0).toLocaleString()}
             </span>
             <span className="text-[12px] font-semibold text-pink-500">
               {Math.round(progress)}%
@@ -112,15 +108,9 @@ function ProjectCard({
         {/* Stats */}
         <div className="flex items-center gap-4 mb-4">
           <div className="flex items-center gap-1.5">
-            <Users size={14} className="text-pink-400" />
-            <span className="text-[12px] text-[#6B5B6E]">
-              {project.backers.toLocaleString()} 支持者
-            </span>
-          </div>
-          <div className="flex items-center gap-1.5">
             <Target size={14} className="text-pink-400" />
             <span className="text-[12px] text-[#6B5B6E]">
-              目标 ¥{project.target_amount.toLocaleString()}
+              Target ¥{(project.target_amount || 0).toLocaleString()}
             </span>
           </div>
         </div>
@@ -131,7 +121,7 @@ function ProjectCard({
           className="w-full py-2.5 rounded-xl accent-gradient text-white font-semibold text-[14px]
             hover:brightness-110 hover:shadow-glow transition-all duration-150 active:brightness-95"
         >
-          支持项目
+          Support Project
         </button>
       </div>
     </motion.div>
@@ -176,69 +166,61 @@ export default function Crowdfunding() {
 
       const { data, error: dbError } = await supabase
         .from('crowdfunding_projects')
-        .select('*')
+        .select('id, feature_name, description, cover_image_url, target_amount, current_amount, status, sort_order, created_at')
         .eq('status', 'active')
         .order('sort_order');
 
       if (dbError) {
-        console.error('[Crowdfunding] Error loading projects:', dbError.message);
-        setError('加载项目失败，请稍后重试');
+        console.error('[Crowdfunding] DB error:', dbError.message);
+        setProjects(getDefaultProjects());
         return;
       }
 
       if (data && data.length > 0) {
         setProjects(data as CrowdfundingProject[]);
       } else {
-        // Fallback: use default 3 projects if no data in DB
         setProjects(getDefaultProjects());
       }
     } catch (e) {
-      console.error('[Crowdfunding] Unexpected error:', e);
-      setError('加载项目时出错');
+      console.error('[Crowdfunding] Error:', e);
       setProjects(getDefaultProjects());
     } finally {
       setLoading(false);
     }
   }
 
-  /** Default projects as fallback when DB is empty */
+  /** Fallback when DB is empty or error */
   function getDefaultProjects(): CrowdfundingProject[] {
     return [
       {
         id: 'tts-voice',
-        title: 'TTS语音合成',
-        subtitle: '为伴侣赋予真实的语音',
-        description: ' advanced 文本转语音技术，让你的伴侣拥有自然、富有情感的语音。支持多种音色和语调，让每一次对话都更加真实动人。',
-        cover_image_url: 'crowdfunding/tts-voice.jpg',
-        target_amount: 200000,
-        current_amount: 86500,
-        backers: 342,
+        feature_name: 'TTS语音合成',
+        description: 'Advanced text-to-speech technology for your companion. Natural, emotional voice output with multiple tones.',
+        cover_image_url: 'previews/tts-preview.jpg',
+        target_amount: 40000,
+        current_amount: 6200,
         status: 'active',
         sort_order: 1,
         created_at: new Date().toISOString(),
       },
       {
         id: 'virtual-pet',
-        title: '虚拟宠物系统',
-        subtitle: '伴侣可以养育自己的虚拟宠物',
-        description: '让你的伴侣拥有自己的虚拟宠物，陪伴她成长、互动。宠物会有自己的情绪和需求，为伴侣增添更多生活乐趣和话题。',
-        cover_image_url: 'crowdfunding/virtual-pet.jpg',
-        target_amount: 150000,
-        current_amount: 72300,
-        backers: 289,
+        feature_name: '虚拟宠物系统',
+        description: 'Your companion can raise her own virtual pet. The pet has its own emotions and needs, adding more fun.',
+        cover_image_url: 'previews/pet-preview.jpg',
+        target_amount: 30000,
+        current_amount: 8500,
         status: 'active',
         sort_order: 2,
         created_at: new Date().toISOString(),
       },
       {
         id: 'live2d-avatar',
-        title: 'Live2D互动形象',
-        subtitle: '生动的Live2D形象',
-        description: '采用 Live2D 技术，为伴侣打造生动的动态形象。支持丰富的表情、动作和互动反馈，让你的伴侣在屏幕上栩栩如生。',
-        cover_image_url: 'crowdfunding/live2d-avatar.jpg',
-        target_amount: 300000,
-        current_amount: 128000,
-        backers: 512,
+        feature_name: 'Live2D互动形象',
+        description: 'Live2D technology for dynamic interactive avatars. Rich expressions, movements and interaction feedback.',
+        cover_image_url: 'previews/live2d-preview.jpg',
+        target_amount: 50000,
+        current_amount: 12800,
         status: 'active',
         sort_order: 3,
         created_at: new Date().toISOString(),
@@ -262,7 +244,7 @@ export default function Crowdfunding() {
           </h2>
         </div>
         <span className="text-[14px] text-[#6B5B6E]">
-          支持我们，让 Platonic 变得更好
+          Support Corolas | Platonic
         </span>
       </motion.div>
 
@@ -273,17 +255,6 @@ export default function Crowdfunding() {
             {[0, 1, 2].map((i) => (
               <ProjectSkeleton key={i} index={i} />
             ))}
-          </div>
-        ) : error && projects.length === 0 ? (
-          <div className="text-center py-20">
-            <p className="text-[16px] text-[#6B5B6E] mb-4">{error}</p>
-            <button
-              onClick={loadProjects}
-              className="px-6 py-2.5 rounded-xl accent-gradient text-white font-semibold
-                hover:brightness-110 transition-all duration-150"
-            >
-              重新加载
-            </button>
           </div>
         ) : (
           <>
@@ -296,25 +267,19 @@ export default function Crowdfunding() {
             {/* ── Stats Summary ── */}
             {projects.length > 0 && (
               <motion.div
-                className="mt-10 grid grid-cols-3 gap-4 max-w-[640px] mx-auto"
+                className="mt-10 grid grid-cols-2 gap-4 max-w-[480px] mx-auto"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.4, duration: 0.4 }}
               >
                 <div className="bg-white rounded-xl border border-pink-100 p-4 text-center">
-                  <p className="text-[12px] text-[#A093A5] mb-1">活跃项目</p>
+                  <p className="text-[12px] text-[#A093A5] mb-1">Active Projects</p>
                   <p className="font-number text-[24px] font-bold text-[#2D1B2E]">
                     {projects.length}
                   </p>
                 </div>
                 <div className="bg-white rounded-xl border border-pink-100 p-4 text-center">
-                  <p className="text-[12px] text-[#A093A5] mb-1">总支持者</p>
-                  <p className="font-number text-[24px] font-bold text-[#2D1B2E]">
-                    {projects.reduce((sum, p) => sum + (p.backers || 0), 0).toLocaleString()}
-                  </p>
-                </div>
-                <div className="bg-white rounded-xl border border-pink-100 p-4 text-center">
-                  <p className="text-[12px] text-[#A093A5] mb-1">已筹金额</p>
+                  <p className="text-[12px] text-[#A093A5] mb-1">Total Raised</p>
                   <p className="font-number text-[24px] font-bold text-pink-500">
                     ¥{projects.reduce((sum, p) => sum + (p.current_amount || 0), 0).toLocaleString()}
                   </p>

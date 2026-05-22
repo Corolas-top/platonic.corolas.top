@@ -19,6 +19,7 @@ import {
 import { cn } from '@/lib/utils';
 import { supabase, getStorageUrl } from '@/lib/supabase';
 import { useAuth } from '@/hooks/useAuth';
+import { toast } from 'sonner';
 
 /* ─── Types ─── */
 interface PlazaCompanion {
@@ -32,6 +33,7 @@ interface PlazaCompanion {
   chats: string;
   personalityType: string;
   gender: 'female' | 'male';
+  age?: number;
   bigFive: { trait: string; value: number }[];
   quote: string;
 }
@@ -49,6 +51,7 @@ const mockCompanions: PlazaCompanion[] = [
     chats: '8.2k',
     personalityType: '活泼型',
     gender: 'female',
+    age: 18,
     bigFive: [
       { trait: '开放性', value: 85 },
       { trait: '尽责性', value: 60 },
@@ -69,6 +72,7 @@ const mockCompanions: PlazaCompanion[] = [
     chats: '6.5k',
     personalityType: '知性型',
     gender: 'female',
+    age: 18,
     bigFive: [
       { trait: '开放性', value: 80 },
       { trait: '尽责性', value: 95 },
@@ -89,6 +93,7 @@ const mockCompanions: PlazaCompanion[] = [
     chats: '7.1k',
     personalityType: '温柔型',
     gender: 'female',
+    age: 18,
     bigFive: [
       { trait: '开放性', value: 75 },
       { trait: '尽责性', value: 85 },
@@ -109,6 +114,7 @@ const mockCompanions: PlazaCompanion[] = [
     chats: '9.3k',
     personalityType: '活泼型',
     gender: 'female',
+    age: 18,
     bigFive: [
       { trait: '开放性', value: 70 },
       { trait: '尽责性', value: 50 },
@@ -129,6 +135,7 @@ const mockCompanions: PlazaCompanion[] = [
     chats: '5.4k',
     personalityType: '神秘型',
     gender: 'female',
+    age: 18,
     bigFive: [
       { trait: '开放性', value: 90 },
       { trait: '尽责性', value: 70 },
@@ -149,6 +156,7 @@ const mockCompanions: PlazaCompanion[] = [
     chats: '7.8k',
     personalityType: '温柔型',
     gender: 'female',
+    age: 18,
     bigFive: [
       { trait: '开放性', value: 88 },
       { trait: '尽责性', value: 65 },
@@ -502,7 +510,7 @@ function DetailModal({
                   className="w-full py-3 rounded-xl accent-gradient text-white font-body font-semibold text-[14px] hover:brightness-110 transition-all duration-150 flex items-center justify-center gap-2"
                 >
                   <LogIn size={16} />
-                  登录以领养
+                  登录以认识
                 </button>
               )}
               <button
@@ -533,7 +541,7 @@ function AuthBanner() {
       <Info size={20} className="text-pink-400 flex-shrink-0" />
       <div className="flex-1">
         <p className="text-[13px] text-[#6B5B6E] font-body">
-          请登录以领养伴侣。
+          请登录以认识伴侣。
         </p>
       </div>
       <div className="flex items-center gap-2">
@@ -564,7 +572,39 @@ export default function Plaza() {
   const [showFilterDrawer, setShowFilterDrawer] = useState(false);
   const [companions, setCompanions] = useState<PlazaCompanion[]>(mockCompanions);
   const [loading, setLoading] = useState(true);
+  const [confirmCompanion, setConfirmCompanion] = useState<PlazaCompanion | null>(null);
   const { isAuthenticated } = useAuth();
+  const navigate = useNavigate();
+
+  // Adopt companion: copy preset to user's account
+  async function adoptCompanion(preset: PlazaCompanion) {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) { toast.error('请先登录'); return; }
+
+    // Check if user already has companion
+    const { data: existing } = await supabase.from('companions').select('id').eq('user_id', user.id).single();
+    if (existing) { toast.error('您已经有伴侣了，请先释放现有伴侣'); return; }
+
+    const { error } = await supabase.from('companions').insert({
+      user_id: user.id,
+      nickname: preset.nickname,
+      gender: preset.gender,
+      age: preset.age || 18,
+      language: 'zh',
+      avatar_url: preset.avatar,
+      bf_openness: preset.bigFive[0]?.value || 50,
+      bf_conscientiousness: preset.bigFive[1]?.value || 50,
+      bf_extraversion: preset.bigFive[2]?.value || 50,
+      bf_agreeableness: preset.bigFive[3]?.value || 50,
+      bf_neuroticism: preset.bigFive[4]?.value || 50,
+      background: preset.description,
+      bio: preset.quote,
+    });
+
+    if (error) { toast.error('认识失败: ' + error.message); return; }
+    toast.success(`你认识了 ${preset.nickname}！`);
+    navigate('/dashboard');
+  }
 
   // Load companions from Supabase
   useEffect(() => {
@@ -668,13 +708,24 @@ export default function Plaza() {
             <p className="text-[13px] text-[#6B5B6E] font-body">选择一个灵魂，开始你的旅程</p>
           </motion.div>
 
-          {/* Right: Search + Filter */}
+          {/* Right: Create Custom Companion + Search + Filter */}
           <motion.div
             className="flex items-center gap-3"
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.3, delay: 0.1 }}
           >
+            {/* Create Custom Companion Button */}
+            <button
+              onClick={() => navigate('/customize')}
+              className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-[13px] font-body font-semibold text-white hover:brightness-110 transition-all duration-150 shadow-md shrink-0"
+              style={{ background: 'linear-gradient(135deg, #FF69B4, #E850A0)' }}
+            >
+              <Sparkles size={16} />
+              <span className="hidden sm:inline">✨ 创建自定义伴侣</span>
+              <span className="sm:hidden">✨ 创建</span>
+            </button>
+
             {/* Search */}
             <div className="relative">
               <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#A093A5]" />
@@ -748,7 +799,13 @@ export default function Plaza() {
                   key={companion.id}
                   companion={companion}
                   index={index}
-                  onClick={() => setSelectedCompanion(companion)}
+                  onClick={() => {
+                    if (!isAuthenticated) {
+                      toast.info('请先登录');
+                      return;
+                    }
+                    setConfirmCompanion(companion);
+                  }}
                 />
               ))}
             </AnimatePresence>
@@ -899,6 +956,63 @@ export default function Plaza() {
                   className="flex-1 py-3 rounded-xl accent-gradient text-white text-[13px] font-body font-medium hover:brightness-110 transition-all"
                 >
                   应用
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* ─── Confirm Companion Dialog ─── */}
+      <AnimatePresence>
+        {confirmCompanion && (
+          <motion.div
+            className="fixed inset-0 z-[100] flex items-center justify-center p-4"
+            variants={modalOverlayVariants}
+            initial="hidden"
+            animate="visible"
+            exit="exit"
+          >
+            {/* Backdrop */}
+            <div
+              className="absolute inset-0 bg-[rgba(26,16,37,0.5)] backdrop-blur-[4px]"
+              onClick={() => setConfirmCompanion(null)}
+            />
+
+            {/* Dialog Panel */}
+            <motion.div
+              className="relative w-full max-w-[400px] bg-white rounded-2xl shadow-lg overflow-hidden z-10 p-6"
+              variants={modalPanelVariants}
+            >
+              <div className="text-center mb-5">
+                <div className="w-14 h-14 rounded-full bg-pink-50 flex items-center justify-center mx-auto mb-3">
+                  <Heart size={28} className="text-pink-400" />
+                </div>
+                <h3 className="font-body text-[20px] font-bold text-[#2D1B2E] mb-1">
+                  确定认识 {confirmCompanion.nickname} 吗？
+                </h3>
+                <p className="text-[13px] text-[#6B5B6E] font-body">
+                  认识后，{confirmCompanion.nickname} 将成为你的专属伴侣
+                </p>
+              </div>
+
+              <div className="flex gap-3">
+                <button
+                  onClick={() => setConfirmCompanion(null)}
+                  className="flex-1 py-2.5 rounded-xl border border-pink-100 text-[#6B5B6E] text-[13px] font-body font-medium hover:bg-pink-50 transition-colors"
+                >
+                  取消
+                </button>
+                <button
+                  onClick={() => {
+                    const preset = confirmCompanion;
+                    setConfirmCompanion(null);
+                    adoptCompanion(preset);
+                  }}
+                  className="flex-1 py-2.5 rounded-xl accent-gradient text-white text-[13px] font-body font-semibold hover:brightness-110 transition-all flex items-center justify-center gap-1.5"
+                >
+                  <Sparkles size={14} />
+                  确定认识
                 </button>
               </div>
             </motion.div>
