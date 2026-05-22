@@ -49,7 +49,6 @@ interface Companion {
   bf_extraversion: number | null;
   bf_agreeableness: number | null;
   bf_neuroticism: number | null;
-  welcome_message: string | null;
 }
 
 interface IntimacyRecord {
@@ -1194,7 +1193,7 @@ export default function Dashboard() {
       // 1. Get companion
       const { data: comp, error: compError } = await supabase
         .from('companions')
-        .select('id, user_id, nickname, background, avatar_url, bf_openness, bf_conscientiousness, bf_extraversion, bf_agreeableness, bf_neuroticism, welcome_message')
+        .select('id, user_id, nickname, background, avatar_url, bf_openness, bf_conscientiousness, bf_extraversion, bf_agreeableness, bf_neuroticism')
         .eq('user_id', user.id)
         .single();
 
