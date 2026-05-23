@@ -311,7 +311,6 @@ export default function Settings() {
   const [theme, setTheme] = useState<Theme>(() => loadSavedTheme());
 
   // Notification states
-  const [notifProactive, setNotifProactive] = useState(true);
   const [notifEnergy, setNotifEnergy] = useState(true);
   const [notifDaily, setNotifDaily] = useState(true);
 
@@ -380,7 +379,6 @@ export default function Settings() {
 
   async function loadNotificationSettings() {
     // notification_settings table has no columns yet - use defaults
-    setNotifProactive(true);
     setNotifEnergy(true);
   }
 
@@ -771,12 +769,6 @@ export default function Settings() {
           <h3 className="font-body text-[22px] font-bold text-plum-900 mb-4">
             通知设置
           </h3>
-          <NotificationToggle
-            label="主动消息提醒"
-            description="伴侣主动发来消息时通知你"
-            enabled={notifProactive}
-            onChange={setNotifProactive}
-          />
           <NotificationToggle
             label="电量不足提醒"
             description="电量低于 20% 时提醒你"
