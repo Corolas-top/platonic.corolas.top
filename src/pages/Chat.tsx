@@ -509,7 +509,7 @@ export default function Chat() {
   // Loading state
   if (loading) {
     return (
-      <div className="ml-[220px] min-h-screen flex items-center justify-center">
+      <div className="h-screen flex items-center justify-center">
         <div className="flex flex-col items-center gap-3">
           <div className="w-8 h-8 border-2 border-pink-200 border-t-pink-400 rounded-full animate-spin" />
           <div className="text-[#A093A5] font-body text-[14px]">加载中...</div>
@@ -521,7 +521,7 @@ export default function Chat() {
   // Not authenticated
   if (!isAuthenticated) {
     return (
-      <div className="ml-[220px] min-h-screen flex flex-col relative">
+      <div className="h-screen flex flex-col relative">
         {/* Breathing gradient background */}
         <div
           className="absolute inset-0 -z-10"
@@ -540,7 +540,7 @@ export default function Chat() {
   // No companion
   if (!hasCompanion) {
     return (
-      <div className="ml-[220px] min-h-screen flex flex-col relative">
+      <div className="h-screen flex flex-col relative">
         {/* Breathing gradient background */}
         <div
           className="absolute inset-0 -z-10"
@@ -570,7 +570,7 @@ export default function Chat() {
   }
 
   return (
-    <div className="ml-[220px] h-screen flex overflow-hidden relative">
+    <div className="h-screen flex overflow-hidden relative">
       {/* Breathing gradient background */}
       <div
         className="absolute inset-0 -z-10"
