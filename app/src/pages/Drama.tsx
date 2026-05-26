@@ -147,7 +147,7 @@ export default function Drama() {
           cover_image_path: row.cover_image_path ? getStorageUrl(String(row.cover_image_path)) : null,
           scene_setting: String(row.scene_setting || ''),
           rating: 4.5,                    // default
-          ratingCount: '128',             // default
+          ratingCount: 'Unknown',             // default
           genre: '浪漫',                   // default
           tags: ['剧情', '互动'],           // default
           isUnlocked: true,               // ← ALL dramas unlocked by default
