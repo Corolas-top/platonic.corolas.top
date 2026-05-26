@@ -50,10 +50,6 @@ function ProjectCard({
 }) {
   const [imgError, setImgError] = useState(false);
 
-  const progress = project.target_amount > 0
-    ? Math.min((project.current_amount / project.target_amount) * 100, 100)
-    : 0;
-
   const imageSrc = project.cover_image_url && !imgError
     ? getStorageUrl(project.cover_image_url)
     : `/previews/${['tts-preview', 'pet-preview', 'live2d-preview'][index]}.jpg`;
@@ -84,39 +80,9 @@ function ProjectCard({
 
       {/* Content */}
       <div className="p-5">
-        <p className="text-[14px] text-[#6B5B6E] leading-relaxed mb-4">
+        <p className="text-[14px] text-[#6B5B6E] leading-relaxed">
           {project.description}
         </p>
-
-        {/* Progress Bar */}
-        <div className="mb-4">
-          <div className="flex items-center justify-between mb-1.5">
-            <span className="text-[12px] text-[#A093A5]">
-              ¥{(project.current_amount || 0).toLocaleString()} / ¥{(project.target_amount || 0).toLocaleString()}
-            </span>
-            <span className="text-[12px] font-semibold text-pink-500">
-              {Math.round(progress)}%
-            </span>
-          </div>
-          <div className="h-2 bg-pink-50 rounded-full overflow-hidden">
-            <motion.div
-              className="h-full accent-gradient rounded-full"
-              initial={{ width: 0 }}
-              animate={{ width: `${progress}%` }}
-              transition={{ duration: 1, ease: 'easeOut', delay: 0.2 * index }}
-            />
-          </div>
-        </div>
-
-        {/* Stats */}
-        <div className="flex items-center gap-4">
-          <div className="flex items-center gap-1.5">
-            <Target size={14} className="text-pink-400" />
-            <span className="text-[12px] text-[#6B5B6E]">
-              Target ¥{(project.target_amount || 0).toLocaleString()}
-            </span>
-          </div>
-        </div>
       </div>
     </motion.div>
   );
