@@ -111,7 +111,11 @@ const THEME_SWATCHES = [
 /** Default privacy policy content */
 const DEFAULT_PRIVACY_POLICY = `Corolas | Platonic 隐私政策
 
-最后更新日期：2026年1月1日
+最后更新日期：2026年5月20日
+
+引言
+
+【Corolas | Platonic】（以下简称“我们”）我们非常重视您的隐私和数据安全。本《Corolas | Platonic 隐私政策》将向您说明我们在您使用Corolas | Platonic时，我们如何收集、存储、使用和保护您个人信息，以及您享有的相关权利的说明：
 
 1. 数据收集
 我们仅收集为您提供服务所必需的最少信息，包括：
@@ -136,12 +140,13 @@ const DEFAULT_PRIVACY_POLICY = `Corolas | Platonic 隐私政策
 - 导出权：导出您的数据副本
 
 5. 联系方式
-如有隐私相关问题，请联系：corolar@corolas.top`;
+如果您对本隐私政策有疑问，请通过以下方式联系我们：
+邮箱：corolar@corolas.top`;
 
 /** Default terms of service content */
 const DEFAULT_TERMS_OF_SERVICE = `Corolas | Platonic 服务条款
 
-最后更新日期：2026年1月1日
+最后更新日期：2026年5月20日
 
 1. 服务说明
 Corolas | Platonic 是一款AI虚拟伴侣应用，旨在为用户提供情感陪伴和互动体验。
