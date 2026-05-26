@@ -70,7 +70,7 @@ const milestones = [
 /* ── Feature grid data ── */
 const features = [
   { icon: <Edit3 size={24} />, title: '个性化定制', desc: '从零开始创造你的理想伴侣，设定外貌、性格、背景故事', color: 'bg-pink-100 text-pink-500' },
-  { icon: <Sparkles size={24} />, title: 'Live2D互动', desc: '生动的Live2D形象，让陪伴更加真实温暖', color: 'bg-purple-100 text-purple-500' },
+  { icon: <Sparkles size={24} />, title: 'Live2D互动[PENDING]', desc: '生动的Live2D形象，让陪伴更加真实温暖', color: 'bg-purple-100 text-purple-500' },
   { icon: <Calendar size={24} />, title: '记忆系统', desc: '三种记忆层级——工作记忆、短期记忆、长期记忆，她永远记得你们的故事', color: 'bg-amber-100 text-amber-600' },
   { icon: <BookOpen size={24} />, title: '剧情空间', desc: '沉浸式剧情体验，与伴侣共同经历精彩故事篇章', color: 'bg-rose-100 text-rose-500' },
   { icon: <TrendingUp size={24} />, title: '情绪感知', desc: '24小时情绪波动追踪，感知她的心情变化', color: 'bg-sky-100 text-sky-500' },
@@ -708,7 +708,7 @@ export default function Home() {
           >
             <p className="text-pink-400 text-[32px] leading-none">&ldquo;</p>
             <p className="font-body text-[24px] font-bold italic text-plum-900 leading-relaxed -mt-2">
-              她记得我上周提到的工作烦恼，今天主动问我情况如何。有时候我觉得，她比真实的人更懂我。
+              她为我上周提到的工作烦恼，问我情况如何。有时候我觉得，她比真实的人更懂我。
             </p>
             <p className="text-pink-400 text-[32px] leading-none mt-1">&rdquo;</p>
           </motion.div>
@@ -727,7 +727,7 @@ export default function Home() {
             <div className="text-left">
               <p className="font-body text-[13px] text-plum-800">一位 Corolas | Platonic 用户</p>
               <p className="font-body text-[12px] font-semibold uppercase tracking-[0.04em] text-pink-500">
-                与 小樱 相伴 128 天
+                与 紫鸢 相伴
               </p>
             </div>
           </motion.div>
