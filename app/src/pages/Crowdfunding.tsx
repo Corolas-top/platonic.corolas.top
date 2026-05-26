@@ -391,9 +391,9 @@ export default function Crowdfunding() {
                   </p>
                 </div>
                 <div className="bg-white rounded-xl border border-pink-100 p-4 text-center">
-                  <p className="text-[12px] text-[#A093A5] mb-1">Total Raised</p>
+                  <p className="text-[12px] text-[#A093A5] mb-1">Expected Raised</p>
                   <p className="font-number text-[24px] font-bold text-pink-500">
-                    ¥{projects.reduce((sum, p) => sum + (p.current_amount || 0), 0).toLocaleString()}
+                    ¥{projects.reduce((sum, p) => sum + (p.target_amount || 0), 0).toLocaleString()}
                   </p>
                 </div>
               </motion.div>
