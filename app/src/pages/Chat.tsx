@@ -89,6 +89,7 @@ const quickReplies = [
   '今天心情很好呢～',
   '想听听你的故事',
   '最近有什么好玩的吗？',
+  '你喜欢什么样的音乐？',
 ];
 
 /** Typing dots - isolated perpetual animation */
