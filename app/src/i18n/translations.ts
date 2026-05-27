@@ -105,6 +105,10 @@ export const translations: Record<Language, Record<string, string>> = {
     'dashboard.comingsoon': 'Coming Soon',
     'dashboard.consoleTitle': 'Console',
     'dashboard.moodFluctuations': 'Mood Fluctuations',
+    'dashboard.retry': 'Retry',
+    'dashboard.loginPrompt': 'Log in to view your companion data, intimacy level, energy balance, and more',
+    'dashboard.goLogin': 'Go to Login',
+    'dashboard.goCreate': 'Create Companion',
 
     /* ── Memory ── */
     'memory.title': 'Memories',
@@ -338,6 +342,10 @@ export const translations: Record<Language, Record<string, string>> = {
     'dashboard.comingsoon': '即将上线',
     'dashboard.consoleTitle': '控制台',
     'dashboard.moodFluctuations': '情绪波动',
+    'dashboard.retry': '重试',
+    'dashboard.loginPrompt': '登录后可以查看你的伴侣数据、好感度、电量等信息',
+    'dashboard.goLogin': '去登录',
+    'dashboard.goCreate': '创建伴侣',
 
     /* ── Memory ── */
     'memory.title': '记忆',
@@ -570,7 +578,11 @@ export const translations: Record<Language, Record<string, string>> = {
     'dashboard.energyRemaining': '残りのエネルギー',
     'dashboard.comingsoon': '近日公開',
     'dashboard.consoleTitle': 'コンソール',
-    'dashboard.moodFluctuations': '気分の変化'
+    'dashboard.moodFluctuations': '気分の変化',
+    'dashboard.retry': '再試行',
+    'dashboard.loginPrompt': 'ログインして、パートナーのデータ、親密度、エネルギー残高などを確認しましょう',
+    'dashboard.goLogin': 'ログインへ',
+    'dashboard.goCreate': 'パートナーを作成',
 
     /* ── Memory ── */
     'memory.title': 'メモリー',
@@ -803,7 +815,11 @@ export const translations: Record<Language, Record<string, string>> = {
     'dashboard.energyRemaining': '남은 에너지',
     'dashboard.comingsoon': '곧 출시',
     'dashboard.consoleTitle': '콘솔',
-    'dashboard.moodFluctuations': '기분 변화'
+    'dashboard.moodFluctuations': '기분 변화',
+    'dashboard.retry': '재시도',
+    'dashboard.loginPrompt': '로그인하여 파트너의 데이터, 친밀도, 에너지 잔액 등을 확인하세요',
+    'dashboard.goLogin': '로그인으로',
+    'dashboard.goCreate': '파트너 생성',
 
     /* ── Memory ── */
     'memory.title': '메모리',

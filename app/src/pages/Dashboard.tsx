@@ -196,7 +196,7 @@ function ErrorState({ message, onRetry }: { message: string; onRetry: () => void
         className="flex items-center gap-2 px-5 py-2.5 rounded-xl accent-gradient text-white text-[13px] font-body font-semibold hover:brightness-110 transition-all duration-150"
       >
         <RefreshCw size={14} />
-        重试
+        {t('dashboard.retry')}
       </button>
     </div>
   );
@@ -211,14 +211,14 @@ function LoginPrompt() {
       <LogIn size={48} className="text-pink-300 mb-4" />
       <p className="text-[18px] text-[#2D1B2E] font-body font-semibold mb-2">{t('common.pleaseLogin')}</p>
       <p className="text-[13px] text-[#A093A5] font-body mb-6 text-center">
-        登录后可以查看你的伴侣数据、好感度、电量等信息
+        {t('dashboard.loginPrompt')}
       </p>
       <button
         onClick={() => navigate('/auth')}
         className="flex items-center gap-2 px-6 py-3 rounded-xl accent-gradient text-white text-[14px] font-body font-semibold hover:brightness-110 transition-all duration-150"
       >
         <LogIn size={16} />
-        去登录
+        {t('dashboard.goLogin')}
       </button>
     </div>
   );
@@ -240,7 +240,7 @@ function EmptyCompanionState() {
         className="flex items-center gap-2 px-6 py-3 rounded-xl accent-gradient text-white text-[14px] font-body font-semibold hover:brightness-110 transition-all duration-150"
       >
         <Sparkles size={16} />
-        创建伴侣
+        {t('dashboard.goCreate')}
       </button>
     </div>
   );
