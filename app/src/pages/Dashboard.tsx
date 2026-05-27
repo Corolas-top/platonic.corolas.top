@@ -250,6 +250,7 @@ function EmptyCompanionState() {
 function BigFiveRadar({ companion, isLoading }: { companion?: Companion | null; isLoading: boolean }) {
   const [hoveredTrait, setHoveredTrait] = useState<number | null>(null);
   const [animated, setAnimated] = useState(false);
+  const { t } = useI18n();
 
   const traitData: TraitData[] = useMemo(() => {
     if (companion) {
