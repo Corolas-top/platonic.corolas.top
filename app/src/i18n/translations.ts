@@ -87,6 +87,10 @@ export const translations: Record<Language, Record<string, string>> = {
     'chat.panelCollapse': 'Collapse Panel',
     'chat.panelExpand': 'Expand Panel',
     'chat.emotionTag': 'AI-detected emotion',
+    'chat.quickReply1': 'Feeling great today~',
+    'chat.quickReply2': 'I want to hear your story',
+    'chat.quickReply3': 'Anything fun recently?',
+    'chat.quickReply4': 'What kind of music do you like?',
 
     /* ── Dashboard ── */
     'dashboard.noCompanion': 'No companion yet',
@@ -335,6 +339,10 @@ export const translations: Record<Language, Record<string, string>> = {
     'chat.panelCollapse': '收起面板',
     'chat.panelExpand': '展开面板',
     'chat.emotionTag': 'AI感知的情绪',
+    'chat.quickReply1': '今天心情很好呢～',
+    'chat.quickReply2': '想听听你的故事',
+    'chat.quickReply3': '最近有什么好玩的吗？',
+    'chat.quickReply4': '你喜欢什么样的音乐？',
 
     /* ── Dashboard ── */
     'dashboard.noCompanion': '还没有伴侣',
@@ -583,6 +591,10 @@ export const translations: Record<Language, Record<string, string>> = {
     'chat.panelCollapse': 'パネルを閉じる',
     'chat.panelExpand': 'パネルを開く',
     'chat.emotionTag': 'AI検出の感情',
+    'chat.quickReply1': '今日はとてもいい気分～',
+    'chat.quickReply2': 'あなたの話を聞きたい',
+    'chat.quickReply3': '最近何か面白いことあった？',
+    'chat.quickReply4': 'どんな音楽が好き？',
 
     /* ── Dashboard ── */
     'dashboard.noCompanion': 'パートナーがまだいません',
@@ -831,6 +843,10 @@ export const translations: Record<Language, Record<string, string>> = {
     'chat.panelCollapse': '패널 접기',
     'chat.panelExpand': '패널 펼치기',
     'chat.emotionTag': 'AI 감지 감정',
+    'chat.quickReply1': '오늘 기분이 정말 좋네요~',
+    'chat.quickReply2': '당신의 이야기를 듣고 싶어요',
+    'chat.quickReply3': '최근에 재미있는 일 있었나요?',
+    'chat.quickReply4': '어떤 음악을 좋아하나요?',
 
     /* ── Dashboard ── */
     'dashboard.noCompanion': '아직 파트너가 없습니다',
