@@ -79,6 +79,7 @@ function DramaCoverImage({ drama, className }: { drama: DramaItem; className?: s
 /* ─── Login Banner ─── */
 function AuthBanner() {
   const navigate = useNavigate();
+  const { t } = useI18n();
 
   return (
     <motion.div
