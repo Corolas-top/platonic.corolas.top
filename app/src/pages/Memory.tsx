@@ -358,7 +358,7 @@ export default function Memory() {
                 text-pink-500 bg-white border border-pink-200
                 hover:bg-pink-100 transition-all duration-150 active:scale-95"
             >
-              回到今天
+              {t('memory.backToday')}
             </button>
           </motion.div>
 
@@ -506,7 +506,7 @@ export default function Memory() {
               <div className="w-5 h-5 rounded-full bg-pink-400 flex items-center justify-center">
                 <span className="text-[8px] text-white font-bold">今</span>
               </div>
-              <span className="text-[13px] text-[#6B5B6E]">今天</span>
+              <span className="text-[13px] text-[#6B5B6E]">{t('memory.today')}</span>
             </div>
           </motion.div>
         </div>
