@@ -87,7 +87,6 @@ export const translations: Record<Language, Record<string, string>> = {
     'chat.panelCollapse': 'Collapse Panel',
     'chat.panelExpand': 'Expand Panel',
     'chat.emotionTag': 'AI-detected emotion',
-    'chat.energyLow': 'Energy is low, recharge to keep the conversation going',
 
     /* ── Dashboard ── */
     'dashboard.noCompanion': 'No companion yet',
@@ -153,6 +152,7 @@ export const translations: Record<Language, Record<string, string>> = {
     'drama.inProgress': 'In Progress',
     'drama.peoplePlayed': 'players',
     'drama.freeUnlock': 'Free Unlock',
+    'drama.typeInScene': 'Type your lines in the drama scenes',
 
     /* ── Settings ── */
     'settings.title': 'Settings',
@@ -334,7 +334,6 @@ export const translations: Record<Language, Record<string, string>> = {
     'chat.panelCollapse': '收起面板',
     'chat.panelExpand': '展开面板',
     'chat.emotionTag': 'AI感知的情绪',
-    'chat.energyLow': '电量不足，请先充值以继续对话',
 
     /* ── Dashboard ── */
     'dashboard.noCompanion': '还没有伴侣',
@@ -400,6 +399,7 @@ export const translations: Record<Language, Record<string, string>> = {
     'drama.inProgress': '进行中',
     'drama.peoplePlayed': '人体验',
     'drama.freeUnlock': '免费解锁',
+    'drama.typeInScene': '在剧情中输入你的台词',
 
     /* ── Settings ── */
     'settings.title': '设置',
@@ -581,7 +581,6 @@ export const translations: Record<Language, Record<string, string>> = {
     'chat.panelCollapse': 'パネルを閉じる',
     'chat.panelExpand': 'パネルを開く',
     'chat.emotionTag': 'AI検出の感情',
-    'chat.energyLow': 'エネルギーが不足しています。チャージして会話を続けましょう',
 
     /* ── Dashboard ── */
     'dashboard.noCompanion': 'パートナーがまだいません',
@@ -647,6 +646,7 @@ export const translations: Record<Language, Record<string, string>> = {
     'drama.inProgress': '進行中',
     'drama.peoplePlayed': 'プレイヤー',
     'drama.freeUnlock': '無料アンロック',
+    'drama.typeInScene': 'ドラマのシーンであなたのセリフを入力してください',
 
     /* ── Settings ── */
     'settings.title': '設定',
@@ -828,7 +828,6 @@ export const translations: Record<Language, Record<string, string>> = {
     'chat.panelCollapse': '패널 접기',
     'chat.panelExpand': '패널 펼치기',
     'chat.emotionTag': 'AI 감지 감정',
-    'chat.energyLow': '에너지가 부족합니다. 충전하여 대화를 계속하세요',
 
     /* ── Dashboard ── */
     'dashboard.noCompanion': '아직 파트너가 없습니다',
@@ -894,6 +893,7 @@ export const translations: Record<Language, Record<string, string>> = {
     'drama.inProgress': '진행 중',
     'drama.peoplePlayed': '플레이어',
     'drama.freeUnlock': '묶 해제',
+    'drama.typeInScene': '드라마 장면에서 대사를 입력하세요',
 
     /* ── Settings ── */
     'settings.title': '설정',

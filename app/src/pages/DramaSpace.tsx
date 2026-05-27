@@ -138,7 +138,7 @@ export default function DramaSpace() {
     if (!text || isStreaming || !sessionId) return;
 
     if (energy < 30) {
-      setError({t('chat.energyLow')} || '能量不足，请先充值');
+      setError(t('chat.energyLow') || '能量不足，请先充值');
       return;
     }
 
