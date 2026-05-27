@@ -171,6 +171,7 @@ export const translations: Record<Language, Record<string, string>> = {
     'drama.freeUnlock': 'Free Unlock',
     'drama.typeInScene': 'Type your lines in the drama scenes',
     'drama.immersive': 'Immersive Drama',
+    'drama.restartConfirm': 'Restarting will clear all chat history for this drama. Are you sure?',
 
     /* ── Settings ── */
     'settings.title': 'Settings',
@@ -453,6 +454,7 @@ export const translations: Record<Language, Record<string, string>> = {
     'drama.freeUnlock': '免费解锁',
     'drama.typeInScene': '在剧情中输入你的台词',
     'drama.immersive': '沉浸式剧情',
+    'drama.restartConfirm': '重新开始将清空该剧本的所有聊天记录，确定吗？',
 
     /* ── Settings ── */
     'settings.title': '设置',
@@ -735,6 +737,7 @@ export const translations: Record<Language, Record<string, string>> = {
     'drama.freeUnlock': '無料アンロック',
     'drama.typeInScene': 'ドラマのシーンであなたのセリフを入力してください',
     'drama.immersive': '没入型ドラマ',
+    'drama.restartConfirm': '再開すると、このドラマのすべてのチャット履歴が消去されます。よろしいですか？',
 
     /* ── Settings ── */
     'settings.title': '設定',
@@ -1017,6 +1020,7 @@ export const translations: Record<Language, Record<string, string>> = {
     'drama.freeUnlock': '묶 해제',
     'drama.typeInScene': '드라마 장면에서 대사를 입력하세요',
     'drama.immersive': '몰입형 드라마',
+    'drama.restartConfirm': '재시작하면 이 드라마의 모든 채팅 기록이 삭제됩니다. 계속하시겠습니까?',
 
     /* ── Settings ── */
     'settings.title': '설정',

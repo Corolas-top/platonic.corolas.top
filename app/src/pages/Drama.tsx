@@ -90,7 +90,7 @@ function AuthBanner() {
       <Sparkles size={20} className="text-pink-400 flex-shrink-0" />
       <div className="flex-1">
         <p className="text-[13px] text-[#6B5B6E] font-body">
-          登录后可以解锁并参与剧情互动。
+          {t('drama.loginToUnlock')}
         </p>
       </div>
       <div className="flex items-center gap-2">
@@ -99,14 +99,14 @@ function AuthBanner() {
           className="px-4 py-2 rounded-xl text-[13px] font-body font-medium text-pink-500 border border-pink-200 hover:bg-pink-100 transition-all duration-150 flex items-center gap-1.5"
         >
           <LogIn size={14} />
-          登录
+          {t('common.login')}
         </button>
         <button
           onClick={() => navigate('/auth')}
           className="px-4 py-2 rounded-xl text-[13px] font-body font-medium text-white accent-gradient hover:brightness-110 transition-all duration-150 flex items-center gap-1.5"
         >
           <UserPlus size={14} />
-          创建账户
+          {t('common.register')}
         </button>
       </div>
     </motion.div>
@@ -300,7 +300,7 @@ export default function Drama() {
 
   /* ── Handle restart drama (with confirmation dialog) ── */
   const handleRestart = async (dramaId: string) => {
-    if (!confirm('重新开始将清空该剧本的所有聊天记录，确定吗？')) return;
+    if (!confirm(t('drama.restartConfirm'))) return;
     try {
       const { data: { session } } = await supabase.auth.getSession();
       const token = session?.access_token;
