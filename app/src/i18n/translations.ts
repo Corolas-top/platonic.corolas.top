@@ -560,6 +560,8 @@ export const translations: Record<Language, Record<string, string>> = {
     'dashboard.recentTx': '最近の取引',
     'dashboard.mood': '気分',
     'dashboard.moodNow': '現在の気分',
+    'dashboard.energyTooltip': 'エネルギーはパートナーとのチャットや機能のアンロックに使用されます',
+    'dashboard.energyRemaining': '残りのエネルギー',
 
     /* ── Memory ── */
     'memory.title': 'メモリー',
@@ -788,6 +790,8 @@ export const translations: Record<Language, Record<string, string>> = {
     'dashboard.recentTx': '최근 거래',
     'dashboard.mood': '기분',
     'dashboard.moodNow': '현재 기분',
+    'dashboard.energyTooltip': '에너지는 파트너와의 채팅과 기능 잠금 해제에 사용됩니다',
+    'dashboard.energyRemaining': '남은 에너지',
 
     /* ── Memory ── */
     'memory.title': '메모리',
