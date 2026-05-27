@@ -22,6 +22,7 @@ import DramaSpace from './pages/DramaSpace'
 import Payment from './pages/Payment'
 import Settings from './pages/Settings'
 import Crowdfunding from './pages/Crowdfunding'
+import Achievements from './pages/Achievements'
 import { Spinner } from './components/ui/spinner'
 
 /**
@@ -108,6 +109,7 @@ export default function App() {
           <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
           <Route path="/payment" element={<ProtectedRoute><Payment /></ProtectedRoute>} />
           <Route path="/crowdfunding" element={<ProtectedRoute><Crowdfunding /></ProtectedRoute>} />
+          <Route path="/achievements" element={<ProtectedRoute><Achievements /></ProtectedRoute>} />
 
           {/* Companion routes - require both authentication AND a companion */}
           <Route path="/dashboard" element={<CompanionRoute><Dashboard /></CompanionRoute>} />
