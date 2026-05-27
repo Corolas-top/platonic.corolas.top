@@ -129,6 +129,7 @@ function CountdownTimer({
 /** Login prompt for unauthenticated users */
 function LoginPrompt() {
   const navigate = useNavigate();
+  const { t } = useI18n();
 
   return (
     <motion.div
@@ -141,10 +142,10 @@ function LoginPrompt() {
       <div className="relative z-10 text-center">
         <Zap size={32} className="text-white/80 mx-auto mb-4" />
         <h3 className="font-body text-[20px] font-bold text-white mb-2">
-          登录后查看电量余额
+          {t('payment.loginPrompt.title')}
         </h3>
         <p className="font-body text-[14px] text-white/70 mb-6">
-          请登录以查看您的电量余额和充值记录
+          {t('payment.loginPrompt.description')}
         </p>
         <div className="flex items-center justify-center gap-3">
           <button
@@ -152,14 +153,14 @@ function LoginPrompt() {
             className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-white text-pink-500 font-body font-semibold text-[14px] hover:bg-pink-50 transition-all duration-150"
           >
             <LogIn size={16} />
-            登录
+            {t('common.login')}
           </button>
           <button
             onClick={() => navigate('/auth')}
             className="flex items-center gap-2 px-6 py-2.5 rounded-xl border border-white/40 text-white font-body font-semibold text-[14px] hover:bg-white/10 transition-all duration-150"
           >
             <UserPlus size={16} />
-            创建账户
+            {t('common.register')}
           </button>
         </div>
       </div>
@@ -319,7 +320,7 @@ export default function Payment() {
             </div>
             <div className="rounded-2xl bg-white border border-pink-100 shadow-md p-8 text-center">
               <p className="text-[14px] text-muted-plum font-body">
-                登录后查看您的交易记录
+                {t('payment.loginPrompt.transactionHistory')}
               </p>
             </div>
           </motion.div>
@@ -366,7 +367,7 @@ export default function Payment() {
             {/* Label */}
             <div className="flex items-center gap-2 mb-2">
               <Zap size={24} className="text-white/80" />
-              <span className="font-body text-[15px] text-white/80">当前电量余额</span>
+              <span className="font-body text-[15px] text-white/80">{t('payment.currentEnergyBalance')}</span>
             </div>
 
             {/* Balance Number */}
@@ -377,7 +378,7 @@ export default function Payment() {
 
             {/* Sub-info */}
             <p className="font-body text-[13px] text-white/70 mb-4">
-              大约可支持 {(energy / 100).toFixed(0)} 次普通对话
+              {t('payment.energySupportEstimate')} {(energy / 50).toFixed(0)} {t('payment.conversationTimes')}
             </p>
 
             {/* Progress bar - based on energy balance (10000 = full) */}
@@ -391,11 +392,11 @@ export default function Payment() {
                 />
               </div>
             </div>
-            <p className="font-body text-[12px] text-white/60 mb-6">{Math.round((energy / 10000) * 100)}% 能量储备</p>
+            <p className="font-body text-[12px] text-white/60 mb-6">{Math.round((energy / 10000) * 100)}% {t('payment.energyStorage')}</p>
 
             {/* CTA */}
             <p className="font-body text-[13px] text-white/70 text-right">
-              电量不足时，充值即可继续与伴侣畅聊
+              {t('payment.energyLowSuggestion')}
             </p>
           </div>
         </motion.div>

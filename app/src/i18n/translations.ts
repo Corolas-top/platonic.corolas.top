@@ -224,6 +224,14 @@ export const translations: Record<Language, Record<string, string>> = {
     'payment.history': 'Payment History',
     'payment.success': 'Payment Successful',
     'payment.failed': 'Payment Failed',
+    'payment.loginPrompt.title': 'Log in to view energy balance',
+    'payment.loginPrompt.description': 'Log in to view your energy balance and recharge history',
+    'payment.loginPrompt.transactionHistory': 'Log in to view your transaction history',
+    'payment.energyBalance': 'Current Energy Balance',
+    'payment.energyLowSuggestion': 'When energy is low, recharge to keep chatting with your companion',
+    'payment.energySupportEstimate': 'Approximately supports',
+    'payment.conversationTimes': 'conversations',
+    'payment.energyStorage': 'Energy Storage',
 
     /* ── Crowdfunding ── */
     'crowdfunding.title': 'Crowdfunding',
@@ -489,6 +497,14 @@ export const translations: Record<Language, Record<string, string>> = {
     'payment.history': '充值记录',
     'payment.success': '充值成功',
     'payment.failed': '充值失败',
+    'payment.loginPrompt.title': '登录后查看能量余额',
+    'payment.loginPrompt.description': '登录后可以查看你的能量余额和充值记录',
+    'payment.loginPrompt.transactionHistory': '登录后查看你的交易记录',
+    'payment.energyBalance': '当前能量余额',
+    'payment.energyLowSuggestion': '能量不足时，充值即可继续与伴侣畅聊',
+    'payment.energySupportEstimate': '大约可支持',
+    'payment.conversationTimes': '次普通对话',
+    'payment.energyStorage': '能量储备',
 
     /* ── Crowdfunding ── */
     'crowdfunding.title': '众筹中心',
@@ -754,6 +770,14 @@ export const translations: Record<Language, Record<string, string>> = {
     'payment.history': '支払い履歴',
     'payment.success': 'チャージ成功',
     'payment.failed': 'チャージ失敗',
+    'payment.loginPrompt.title': 'エネルギー残高を見るにはログインしてください',
+    'payment.loginPrompt.description': 'ログインしてエネルギー残高とチャージ履歴を確認しましょう',
+    'payment.loginPrompt.transactionHistory': 'ログインして取引履歴を確認しましょう',
+    'payment.energyBalance': '現在のエネルギー残高',
+    'payment.energyLowSuggestion': 'エネルギーが不足しているときは、チャージしてパートナーとの会話を続けましょう',
+    'payment.energySupportEstimate': '約',
+    'payment.conversationTimes': '回の会話をサポート',
+    'payment.energyStorage': 'エネルギー貯蔵',
 
     /* ── Crowdfunding ── */
     'crowdfunding.title': 'クラウドファンディング',
@@ -1019,6 +1043,14 @@ export const translations: Record<Language, Record<string, string>> = {
     'payment.history': '결제 내역',
     'payment.success': '충전 성공',
     'payment.failed': '충전 실패',
+    'payment.loginPrompt.title': '로그인 후 에너지 잔액 보기',
+    'payment.loginPrompt.description': '로그인하여 에너지 잔액과 충전 내역을 확인하세요',
+    'payment.loginPrompt.transactionHistory': '로그인 후 거래 내역 보기',
+    'payment.energyBalance': '현재 에너지 잔액',
+    'payment.energyLowSuggestion': '에너지가 부족할 때는 충전하여 파트너와의 대화를 계속하세요',
+    'payment.energySupportEstimate': '약',
+    'payment.conversationTimes': '회 대화 지원',
+    'payment.energyStorage': '에너지 저장',
 
     /* ── Crowdfunding ── */
     'crowdfunding.title': '크라우드펀딩',
