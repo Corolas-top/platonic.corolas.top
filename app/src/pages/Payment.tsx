@@ -553,10 +553,10 @@ export default function Payment() {
           <div className="rounded-2xl bg-white border border-pink-100 shadow-md overflow-hidden">
             {/* Header Row */}
             <div className="hidden sm:grid sm:grid-cols-4 px-5 py-3 bg-pink-50 text-[12px] font-semibold font-body text-muted-plum uppercase tracking-wider">
-              <span>日期</span>
-              <span>套餐</span>
-              <span>金额</span>
-              <span>状态</span>
+              <span>{t('payment.date')}</span>
+              <span>{t('payment.plan')}</span>
+              <span>{t('payment.amount')}</span>
+              <span>{t('payment.status')}</span>
             </div>
 
             {/* Transaction Rows */}
@@ -584,12 +584,12 @@ export default function Payment() {
                   <div>
                     {tx.status === 'completed' ? (
                       <span className="inline-flex items-center px-3 py-1 rounded-full bg-green-100 text-green-700 text-[11px] font-semibold font-body">
-                        已完成
+                        {t('payment.completed')}
                       </span>
                     ) : (
                       <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-yellow-100 text-yellow-700 text-[11px] font-semibold font-body">
                         <Loader2 size={10} className="animate-spin" />
-                        处理中
+                        {t('payment.processing')}
                       </span>
                     )}
                   </div>
@@ -598,7 +598,7 @@ export default function Payment() {
             ) : (
               <div className="px-5 py-8 text-center">
                 <p className="text-[14px] text-muted-plum font-body">
-                  暂无交易记录
+                  {t('payment.noTransactions')}
                 </p>
               </div>
             )}
@@ -689,13 +689,13 @@ export default function Payment() {
                     {t('payment.success')}
                   </h3>
                   <p className="font-body text-[13px] text-muted-plum mb-6">
-                    电量已充值到您的账户
+                    {t('payment.successDescription')}
                   </p>
                   <button
                     onClick={handleCloseModal}
                     className="px-8 py-2.5 rounded-xl accent-gradient text-white font-body font-semibold transition-all hover:brightness-110 hover:shadow-glow"
                   >
-                    完成
+                    {t('payment.finished')}
                   </button>
                 </motion.div>
               )}
