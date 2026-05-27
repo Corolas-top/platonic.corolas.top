@@ -681,7 +681,7 @@ function EnergyCard({ energy, transactions, isLoading }: { energy?: number; tran
             <span className="text-[11px] text-[#A093A5]">?</span>
           </div>
           <div className="absolute right-0 bottom-full mb-2 w-48 bg-white rounded-xl shadow-lg border border-pink-100 p-3 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-20">
-            <p className="text-[12px] text-[#6B5B6E] font-body">电量用于与伴侣对话和解锁功能</p>
+            <p className="text-[12px] text-[#6B5B6E] font-body">{t('dashboard.energyTooltip')}</p>
           </div>
         </div>
       </div>
@@ -693,7 +693,7 @@ function EnergyCard({ energy, transactions, isLoading }: { energy?: number; tran
         </span>
         <Zap size={24} className="text-[#D4A574]" />
       </div>
-      <p className="text-[13px] text-[#A093A5] font-body mb-4">剩余电量</p>
+      <p className="text-[13px] text-[#A093A5] font-body mb-4">{t('dashboard.energyRemaining')}</p>
 
       {/* Recent Transactions */}
       {transactions.length > 0 && (

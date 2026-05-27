@@ -100,6 +100,8 @@ export const translations: Record<Language, Record<string, string>> = {
     'dashboard.recentTx': 'Recent Transactions',
     'dashboard.mood': 'Mood',
     'dashboard.moodNow': 'Current mood',
+    'dashboard.energyTooltip': 'Energy is used for chatting with your companion and unlocking features',
+    'dashboard.energyRemaining': 'Energy Remaining',
 
     /* ── Memory ── */
     'memory.title': 'Memories',
@@ -328,6 +330,8 @@ export const translations: Record<Language, Record<string, string>> = {
     'dashboard.recentTx': '最近消费',
     'dashboard.mood': '情绪',
     'dashboard.moodNow': '当前心情',
+    'dashboard.energyTooltip': '电量用于与伴侣对话和解锁功能',
+    'dashboard.energyRemaining': '剩余电量',
 
     /* ── Memory ── */
     'memory.title': '记忆',
