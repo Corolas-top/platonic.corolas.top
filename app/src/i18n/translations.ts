@@ -108,6 +108,8 @@ export const translations: Record<Language, Record<string, string>> = {
     'dashboard.loginPrompt': 'Log in to view your companion data, intimacy level, energy balance, and more',
     'dashboard.goLogin': 'Go to Login',
     'dashboard.goCreate': 'Create Companion',
+    'dashboard.personalityProfile': 'Personality Profile',
+    'dashboard.personalityProfileDesc': 'Based on the Big Five personality model',
 
     /* ── Memory ── */
     'memory.title': 'Memories',
@@ -344,6 +346,8 @@ export const translations: Record<Language, Record<string, string>> = {
     'dashboard.loginPrompt': '登录后可以查看你的伴侣数据、好感度、电量等信息',
     'dashboard.goLogin': '去登录',
     'dashboard.goCreate': '创建伴侣',
+    'dashboard.personalityProfile': '人格画像',
+    'dashboard.personalityProfileDesc': '基于 Big Five 人格模型',
 
     /* ── Memory ── */
     'memory.title': '记忆',
@@ -580,6 +584,8 @@ export const translations: Record<Language, Record<string, string>> = {
     'dashboard.loginPrompt': 'ログインして、パートナーのデータ、親密度、エネルギー残高などを確認しましょう',
     'dashboard.goLogin': 'ログインへ',
     'dashboard.goCreate': 'パートナーを作成',
+    'dashboard.personalityProfile': '性格プロフィール',
+    'dashboard.personalityProfileDesc': 'ビッグファイブ性格モデルに基づく',
 
     /* ── Memory ── */
     'memory.title': 'メモリー',
@@ -816,6 +822,8 @@ export const translations: Record<Language, Record<string, string>> = {
     'dashboard.loginPrompt': '로그인하여 파트너의 데이터, 친밀도, 에너지 잔액 등을 확인하세요',
     'dashboard.goLogin': '로그인으로',
     'dashboard.goCreate': '파트너 생성',
+    'dashboard.personalityProfile': '성격 프로필',
+    'dashboard.personalityProfileDesc': '빅파이브 성격 모델 기반',
 
     /* ── Memory ── */
     'memory.title': '메모리',

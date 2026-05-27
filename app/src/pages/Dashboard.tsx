@@ -340,14 +340,14 @@ function BigFiveRadar({ companion, isLoading }: { companion?: Companion | null; 
       <div className="flex items-center justify-between mb-1">
         <div className="flex items-center gap-2">
           <Sparkles size={16} className="text-pink-400" />
-          <h3 className="font-body text-[22px] font-bold text-[#2D1B2E]">人格画像</h3>
+          <h3 className="font-body text-[22px] font-bold text-[#2D1B2E]">{t('dashboard.personalityProfile')}</h3>
         </div>
         <div className="flex items-center gap-2">
           <span className="text-[13px] text-pink-500 font-body">{companionName}</span>
           <img src={avatarUrl} alt={companionName} className="w-6 h-6 rounded-full object-cover" />
         </div>
       </div>
-      <p className="text-[12px] text-[#A093A5] font-body mb-5">基于 Big Five 人格模型</p>
+      <p className="text-[12px] text-[#A093A5] font-body mb-5">{t('dashboard.personalityProfileDesc')}</p>
 
       {/* Radar Chart */}
       <div className="flex justify-center relative">
