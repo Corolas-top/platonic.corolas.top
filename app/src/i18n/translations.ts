@@ -104,6 +104,7 @@ export const translations: Record<Language, Record<string, string>> = {
     'dashboard.energyRemaining': 'Energy Remaining',
     'dashboard.comingsoon': 'Coming Soon',
     'dashboard.consoleTitle': 'Console',
+    'dashboard.moodFluctuations': 'Mood Fluctuations',
 
     /* ── Memory ── */
     'memory.title': 'Memories',
@@ -336,6 +337,7 @@ export const translations: Record<Language, Record<string, string>> = {
     'dashboard.energyRemaining': '剩余电量',
     'dashboard.comingsoon': '即将上线',
     'dashboard.consoleTitle': '控制台',
+    'dashboard.moodFluctuations': '情绪波动',
 
     /* ── Memory ── */
     'memory.title': '记忆',
@@ -568,6 +570,7 @@ export const translations: Record<Language, Record<string, string>> = {
     'dashboard.energyRemaining': '残りのエネルギー',
     'dashboard.comingsoon': '近日公開',
     'dashboard.consoleTitle': 'コンソール',
+    'dashboard.moodFluctuations': '気分の変化'
 
     /* ── Memory ── */
     'memory.title': 'メモリー',
@@ -800,6 +803,7 @@ export const translations: Record<Language, Record<string, string>> = {
     'dashboard.energyRemaining': '남은 에너지',
     'dashboard.comingsoon': '곧 출시',
     'dashboard.consoleTitle': '콘솔',
+    'dashboard.moodFluctuations': '기분 변화'
 
     /* ── Memory ── */
     'memory.title': '메모리',

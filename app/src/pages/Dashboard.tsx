@@ -862,7 +862,7 @@ function MoodSparkline({
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
           <TrendingUp size={16} className="text-pink-400" />
-          <h3 className="font-body text-[22px] font-bold text-[#2D1B2E]">情绪波动</h3>
+          <h3 className="font-body text-[22px] font-bold text-[#2D1B2E]">{t('dashboard.moodFluctuations')}</h3>
         </div>
         <div className="flex items-center gap-1.5">
           <span className="w-2 h-2 rounded-full bg-green-400" />
