@@ -110,6 +110,8 @@ export const translations: Record<Language, Record<string, string>> = {
     'dashboard.goCreate': 'Create Companion',
     'dashboard.personalityProfile': 'Personality Profile',
     'dashboard.personalityProfileDesc': 'Based on the Big Five personality model',
+    'dashboard.affectionPoints': 'affection points',
+    'dashboard.tilNextStageNeed': 'To reach the next stage, still need',
 
     /* ── Memory ── */
     'memory.title': 'Memories',
@@ -348,6 +350,8 @@ export const translations: Record<Language, Record<string, string>> = {
     'dashboard.goCreate': '创建伴侣',
     'dashboard.personalityProfile': '人格画像',
     'dashboard.personalityProfileDesc': '基于 Big Five 人格模型',
+    'dashboard.affectionPoints': '点好感度',
+    'dashboard.tilNextStageNeed': '距离下一阶段还需',
 
     /* ── Memory ── */
     'memory.title': '记忆',
@@ -586,6 +590,8 @@ export const translations: Record<Language, Record<string, string>> = {
     'dashboard.goCreate': 'パートナーを作成',
     'dashboard.personalityProfile': '性格プロフィール',
     'dashboard.personalityProfileDesc': 'ビッグファイブ性格モデルに基づく',
+    'dashboard.affectionPoints': 'の好感度が必要です',
+    'dashboard.tilNextStageNeed': '次の段階までには、あと',
 
     /* ── Memory ── */
     'memory.title': 'メモリー',
@@ -824,6 +830,8 @@ export const translations: Record<Language, Record<string, string>> = {
     'dashboard.goCreate': '파트너 생성',
     'dashboard.personalityProfile': '성격 프로필',
     'dashboard.personalityProfileDesc': '빅파이브 성격 모델 기반',
+    'dashboard.affectionPoints': '의 친밀도가 더 필요합니다',
+    'dashboard.tilNextStageNeed': '다음 단계까지는 ',
 
     /* ── Memory ── */
     'memory.title': '메모리',

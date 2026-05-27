@@ -552,7 +552,7 @@ function MilestoneProgress({ intimacy, stages, isLoading }: { intimacy?: Intimac
       {/* Progress Bar */}
       <div className="mb-5">
         <p className="text-[13px] text-[#6B5B6E] font-body mb-2">
-          {currentProgress}% — 距离下一阶段还需 {Math.max(0, 100 - currentProgress)} 点好感度
+          {currentProgress}% — {t('dashboard.tilNextStageNeed')} {Math.max(0, 100 - currentProgress)} {t('dashboard.affectionPoints')}
         </p>
         <div className="h-3 bg-pink-50 rounded-full overflow-hidden">
           <motion.div
