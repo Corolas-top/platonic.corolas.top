@@ -261,6 +261,9 @@ export const translations: Record<Language, Record<string, string>> = {
     /* ── Plaza ── */
     'plaza.title': 'Companion Plaza',
     'plaza.create': 'Create My Companion',
+    'plaza.search': 'Search companions by name...',
+    'plaza.subtitle': 'Choose a soul to start your journey.',
+    'plaza.filter': 'Filter',
 
     /* ── Customize ── */
     'customize.title': 'Create Personal Companion',
@@ -555,6 +558,9 @@ export const translations: Record<Language, Record<string, string>> = {
     /* ── Plaza ── */
     'plaza.title': '伴侣广场',
     'plaza.create': '创建我的伴侣',
+    'plaza.search': '按名字搜索伴侣...',
+    'plaza.subtitle': '选择一个灵魂，开始你的旅程.',
+    'plaza.filter': '筛选',
 
     /* ── Customize ── */
     'customize.title': '创建个人伴侣',
@@ -849,6 +855,9 @@ export const translations: Record<Language, Record<string, string>> = {
     /* ── Plaza ── */
     'plaza.title': 'パートナープラザ',
     'plaza.create': 'マイパートナーを作成',
+    ''plaza.search': '名前でパートナーを検索...',
+    'plaza.subtitle': '魂を選んで、旅を始めましょう.',
+    'plaza.filter': 'フィルター',
 
     /* ── Customize ── */
     'customize.title': 'パーソナルパートナー作成',
@@ -1143,6 +1152,9 @@ export const translations: Record<Language, Record<string, string>> = {
     /* ── Plaza ── */
     'plaza.title': '파트너 광장',
     'plaza.create': '내 파트너 생성',
+    'plaza.search': '이름으로 파트너 검색...',
+    'plaza.subtitle': '영혼을 선택하고 여정을 시작하세요.',
+    'plaza.filter': '필터',
 
     /* ── Customize ── */
     'customize.title': '퍼스널 파트너 생성',

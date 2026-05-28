@@ -599,7 +599,7 @@ export default function Plaza() {
               <Users size={24} className="text-pink-400" />
               <h2 className="font-body text-[28px] font-bold text-[#2D1B2E]">{t('plaza.title')}</h2>
             </div>
-            <p className="text-[13px] text-[#6B5B6E] font-body">选择一个灵魂，开始你的旅程</p>
+            <p className="text-[13px] text-[#6B5B6E] font-body">{t('plaza.subtitle')}</p>
           </motion.div>
 
           {/* Right: Create Custom Companion + Search + Filter */}
@@ -625,7 +625,7 @@ export default function Plaza() {
               <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#A093A5]" />
               <input
                 type="text"
-                placeholder="搜索伴侣名称..."
+                placeholder={t('plaza.search')}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="w-[220px] pl-9 pr-4 py-2.5 rounded-xl border border-pink-100 bg-white text-[13px] font-body text-[#2D1B2E] placeholder:text-[#A093A5] focus:outline-none focus:border-pink-400 focus:shadow-glow transition-all duration-200"
@@ -638,7 +638,7 @@ export default function Plaza() {
               className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl border border-pink-100 bg-white text-[13px] font-body text-[#6B5B6E] hover:bg-pink-50 transition-colors duration-150"
             >
               <SlidersHorizontal size={16} />
-              <span>筛选</span>
+              <span>{t('common.filter')}</span>
             </button>
 
             {/* Sort Dropdown */}
