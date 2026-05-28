@@ -638,12 +638,12 @@ export default function Plaza() {
               className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl border border-pink-100 bg-white text-[13px] font-body text-[#6B5B6E] hover:bg-pink-50 transition-colors duration-150"
             >
               <SlidersHorizontal size={16} />
-              <span>{t('common.filter')}</span>
+              <span>{t('plaza.filter')}</span>
             </button>
 
             {/* Sort Dropdown */}
             <button className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl border border-pink-100 bg-white text-[13px] font-body text-[#6B5B6E] hover:bg-pink-50 transition-colors duration-150">
-              <span>推荐</span>
+              <span>{t('plaza.recommend')}</span>
               <ChevronDown size={14} />
             </button>
           </motion.div>
@@ -714,8 +714,8 @@ export default function Plaza() {
             animate={{ opacity: 1 }}
           >
             <Search size={48} className="text-pink-200 mb-4" />
-            <p className="text-[#6B5B6E] font-body text-[16px] mb-2">没有找到符合条件的伴侣</p>
-            <p className="text-[#A093A5] font-body text-[13px]">试试其他筛选条件吧</p>
+            <p className="text-[#6B5B6E] font-body text-[16px] mb-2">{t('plaza.noFitCompanionsFound')}</p>
+            <p className="text-[#A093A5] font-body text-[13px]">{t('plaza.tryOtherFilters')}</p>
           </motion.div>
         )}
 
@@ -729,9 +729,9 @@ export default function Plaza() {
           >
             <button className="flex items-center gap-2 px-6 py-3 rounded-xl border border-pink-200 bg-pink-50 text-pink-500 text-[13px] font-body font-medium hover:bg-pink-100 transition-colors duration-150">
               <ChevronDown size={16} />
-              加载更多
+              {t('plaza.loadMore')}
             </button>
-            <p className="text-[12px] text-[#A093A5] font-body mt-3">已展示全部伴侣</p>
+            <p className="text-[12px] text-[#A093A5] font-body mt-3">{t('plaza.allCompanionsShown')}</p>
           </motion.div>
         )}
       </div>
@@ -773,7 +773,7 @@ export default function Plaza() {
             >
               {/* Header */}
               <div className="flex items-center justify-between p-6 border-b border-pink-50">
-                <h3 className="font-body text-[22px] font-bold text-[#2D1B2E]">筛选伴侣</h3>
+                <h3 className="font-body text-[22px] font-bold text-[#2D1B2E]">{t('plaza.filterCompanions')}</h3>
                 <button
                   onClick={() => setShowFilterDrawer(false)}
                   className="w-8 h-8 rounded-full hover:bg-pink-50 flex items-center justify-center transition-colors"
@@ -786,9 +786,9 @@ export default function Plaza() {
               <div className="flex-1 overflow-y-auto p-6 space-y-6">
                 {/* Personality Type */}
                 <div>
-                  <p className="text-[13px] font-body font-semibold text-[#2D1B2E] mb-3">性格类型</p>
+                  <p className="text-[13px] font-body font-semibold text-[#2D1B2E] mb-3">{t('plaza.characterType')}</p>
                   <div className="space-y-2">
-                    {['温柔型', '活泼型', '知性型', '神秘型'].map((type) => (
+                    {['温柔型', '活泼型', '知性型', '神秘型', '敏感型', '傲娇型'].map((type) => (
                       <label key={type} className="flex items-center gap-3 cursor-pointer group">
                         <div
                           className={cn(
@@ -847,13 +847,13 @@ export default function Plaza() {
                   }}
                   className="flex-1 py-3 rounded-xl border border-pink-100 text-[#6B5B6E] text-[13px] font-body font-medium hover:bg-pink-50 transition-colors"
                 >
-                  重置
+                  {t('plaza.resetFilter')}
                 </button>
                 <button
                   onClick={() => setShowFilterDrawer(false)}
                   className="flex-1 py-3 rounded-xl accent-gradient text-white text-[13px] font-body font-medium hover:brightness-110 transition-all"
                 >
-                  应用
+                  {t('plaza.applyFilter')}
                 </button>
               </div>
             </motion.div>

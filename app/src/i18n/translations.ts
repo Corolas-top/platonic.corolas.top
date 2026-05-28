@@ -264,6 +264,15 @@ export const translations: Record<Language, Record<string, string>> = {
     'plaza.search': 'Search companions by name...',
     'plaza.subtitle': 'Choose a soul to start your journey.',
     'plaza.filter': 'Filter',
+    'plaza.recommend': 'Recommend',
+    'plaza.characterType': 'Character Type',
+    'plaza.resetFilter': 'Reset',
+    'plaza.applyFilter': 'Apply',
+    'plaza.noFitCompanionsFound': 'No companions found matching the criteria.',
+    'plaza.tryOtherFilters': 'Try adjusting your filters to find more companions.',
+    'plaza.loadMore': 'Load More',
+    'plaza.allCompanionsShown': 'All companions are shown',
+    'plaza.filterCompanions': 'Filter Companions',
 
     /* ── Customize ── */
     'customize.title': 'Create Personal Companion',
@@ -561,6 +570,15 @@ export const translations: Record<Language, Record<string, string>> = {
     'plaza.search': '按名字搜索伴侣...',
     'plaza.subtitle': '选择一个灵魂，开始你的旅程.',
     'plaza.filter': '筛选',
+    'plaza.recommend': '推荐',
+    'plaza.characterType': '性格类型',
+    'plaza.resetFilter': '重置',
+    'plaza.applyFilter': '应用',
+    'plaza.noFitCompanionsFound': '没有找到符合条件的伴侣。',
+    'plaza.tryOtherFilters': '试着调整筛选条件，找到更多符合条件的伴侣。',
+    'plaza.loadMore': '加载更多',
+    'plaza.allCompanionsShown': '已展示全部伴侣',
+    'plaza.filterCompanions': '筛选伴侣',
 
     /* ── Customize ── */
     'customize.title': '创建个人伴侣',
@@ -858,6 +876,15 @@ export const translations: Record<Language, Record<string, string>> = {
     'plaza.search': '名前でパートナーを検索...',
     'plaza.subtitle': '魂を選んで、旅を始めましょう.',
     'plaza.filter': 'フィルター',
+    'plaza.recommend': 'おすすめ',
+    'plaza.characterType': '性格タイプ',
+    'plaza.resetFilter': 'リセット',
+    'plaza.applyFilter': '適用',
+    'plaza.noFitCompanionsFound': '条件に合うパートナーが見つかりませんでした。',
+    'plaza.tryOtherFilters': 'フィルター条件を調整して、条件に合うパートナーをもっと見つけましょう。',
+    'plaza.loadMore': 'もっと読み込む',
+    'plaza.allCompanionsShown': 'すべてのパートナーを表示',
+    'plaza.filterCompanions': 'パートナーをフィルタリング',
 
     /* ── Customize ── */
     'customize.title': 'パーソナルパートナー作成',
@@ -1155,6 +1182,15 @@ export const translations: Record<Language, Record<string, string>> = {
     'plaza.search': '이름으로 파트너 검색...',
     'plaza.subtitle': '영혼을 선택하고 여정을 시작하세요.',
     'plaza.filter': '필터',
+    'plaza.recommend': '추천',
+    'plaza.characterType': '성격 유형',
+    'plaza.resetFilter': '리셋',
+    'plaza.applyFilter': '적용',
+    'plaza.noFitCompanionsFound': '조건에 맞는 파트너를 찾을 수 없습니다.',
+    'plaza.tryOtherFilters': '필터 조건을 조정하여 조건에 맞는 더 많은 파트너를 찾아보세요.',
+    'plaza.loadMore': '더 불러오기',
+    'plaza.allCompanionsShown': '모든 파트너 표시',
+    'plaza.filterCompanions': '파트너 필터링',
 
     /* ── Customize ── */
     'customize.title': '퍼스널 파트너 생성',
