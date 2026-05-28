@@ -173,6 +173,14 @@ export const translations: Record<Language, Record<string, string>> = {
     'drama.typeInScene': 'Type your lines in the drama scenes',
     'drama.immersive': 'Immersive Drama',
     'drama.restartConfirm': 'Restarting will clear all chat history for this drama. Are you sure?',
+    'drama.dramaTotal': '',
+    'drama.dramaCounts': 'dramas in total',
+    'drama.enterStory': 'Enter Drama',
+    'drama.startExperience': 'Start Experience',
+    'drama.continueExperience': 'Continue Experience',
+    'drama.restart': 'Restart',
+    'drama.notStarted': 'Not Started',
+    'drama.totalExperiencedDramas': 'Total Dramas Experienced',
 
     /* ── Settings ── */
     'settings.title': 'Settings',
@@ -479,6 +487,14 @@ export const translations: Record<Language, Record<string, string>> = {
     'drama.typeInScene': '在剧情中输入你的台词',
     'drama.immersive': '沉浸式剧情',
     'drama.restartConfirm': '重新开始将清空该剧本的所有聊天记录，确定吗？',
+    'drama.dramaTotal': '共',
+    'drama.dramaCounts': '个剧本',
+    'drama.enterStory': '进入剧情',
+    'drama.startExperience': '开始体验',
+    'drama.continueExperience': '继续体验',
+    'drama.restart': '重新开始',
+    'drama.notStarted': '未开始',
+    'drama.totalExperiencedDramas': '总体验剧情'
 
     /* ── Settings ── */
     'settings.title': '设置',
@@ -785,6 +801,14 @@ export const translations: Record<Language, Record<string, string>> = {
     'drama.typeInScene': 'ドラマのシーンであなたのセリフを入力してください',
     'drama.immersive': '没入型ドラマ',
     'drama.restartConfirm': '再開すると、このドラマのすべてのチャット履歴が消去されます。よろしいですか？',
+    'drama.dramaTotal': '全',
+    'drama.dramaCounts': '本のドラマ',
+    'drama.enterStory': 'ドラマに入る',
+    'drama.startExperience': '体験開始',
+    'drama.continueExperience': '体験を続ける',
+    'drama.restart': '再開',
+    'drama.notStarted': '未開始',
+    'drama.totalExperiencedDramas': '総体験ドラマ',
 
     /* ── Settings ── */
     'settings.title': '設定',
@@ -1091,6 +1115,14 @@ export const translations: Record<Language, Record<string, string>> = {
     'drama.typeInScene': '드라마 장면에서 대사를 입력하세요',
     'drama.immersive': '몰입형 드라마',
     'drama.restartConfirm': '재시작하면 이 드라마의 모든 채팅 기록이 삭제됩니다. 계속하시겠습니까?',
+    'drama.dramaTotal': '총',
+    'drama.dramaCounts': '편의 드라마',
+    'drama.enterStory': '드라마에 입장하기',
+    'drama.startExperience': '체험 시작',
+    'drama.continueExperience': '체험 계속하기',
+    'drama.restart': '재시작',
+    'drama.notStarted': '미시작',
+    'drama.totalExperiencedDramas': '총 체험한 드라마',
 
     /* ── Settings ── */
     'settings.title': '설정',

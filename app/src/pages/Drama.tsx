@@ -357,7 +357,7 @@ export default function Drama() {
             animate={{ opacity: 1 }}
             transition={{ delay: 0.2 }}
           >
-            共 {dramas.length} 个剧本
+            {t('drama.dramaTotal')} {dramas.length} {t('drama.dramaCounts')}
           </motion.span>
         </motion.div>
 
@@ -580,7 +580,7 @@ export default function Drama() {
                               accent-gradient hover:brightness-110 transition-all duration-150
                               shadow-sm active:scale-95"
                           >
-                            进入剧情
+                            {t('drama.enterStory')}
                           </button>
                         </div>
                       </div>
@@ -605,7 +605,7 @@ export default function Drama() {
                 <div className="bg-white rounded-2xl border border-pink-100 p-5">
                   <div className="flex items-center gap-2 mb-2">
                     <BookOpen size={18} className="text-pink-400" />
-                    <span className="text-[13px] text-[#6B5B6E]">总体验剧情</span>
+                    <span className="text-[13px] text-[#6B5B6E]">{t('drama.totalExperiencedDramas')}</span>
                   </div>
                   <span className="font-number text-[32px] font-bold text-[#2D1B2E]">
                     {sessions.length}
@@ -623,7 +623,7 @@ export default function Drama() {
                 <div className="bg-white rounded-2xl border border-pink-100 p-5">
                   <div className="flex items-center gap-2 mb-2">
                     <Sparkles size={18} className="text-pink-400" />
-                    <span className="text-[13px] text-[#6B5B6E]">未开始</span>
+                    <span className="text-[13px] text-[#6B5B6E]">{t('drama.notStarted')}</span>
                   </div>
                   <span className="font-number text-[32px] font-bold text-[#2D1B2E]">
                     {sessions.filter((s) => s.status === 'not_started').length}
@@ -730,12 +730,12 @@ export default function Drama() {
                             {session.status === 'active' ? (
                               <>
                                 <Play size={14} />
-                                继续剧情
+                                {t('drama.continueExperience')}
                               </>
                             ) : (
                               <>
                                 <Sparkles size={14} />
-                                开始体验
+                                {t('drama.startExperience')}
                               </>
                             )}
                           </button>
@@ -748,7 +748,7 @@ export default function Drama() {
                               transition-all duration-150 flex items-center gap-1.5 active:scale-95"
                           >
                             <RotateCcw size={14} />
-                            重新开始
+                            {t('drama.restart')}
                           </button>
                         </div>
                       </div>
