@@ -371,50 +371,59 @@ export default function Settings() {
     loadContentSettings();
   }, []);
 
-  async function loadUserData() {
-    try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user) {
-        setEmail(user.email || '');
-        setUsername(user.user_metadata?.username || user.email?.split('@')[0] || 'User');
-
-        // Get profile
-        const { data: profile } = await supabase.from('profiles')
-          .select('*')
-          .eq('id', user.id)
-          .single();
-        if (profile) {
-          const savedLang = (profile.language as Language) || localStorage.getItem('language') as Language || 'en';
-          setLanguage(savedLang);
-          setTimezone(profile.timezone || 'Asia/Shanghai');
-          setRegisteredAt(profile.created_at
-            ? new Date(profile.created_at).toLocaleDateString('zh-CN')
-            : '');
-          // If has companion, load companion info
-          if (profile.status === 'HAS_COMPANION') {
-            const { data: companion } = await supabase.from('companions')
-              .select('id, nickname, name, avatar_url')
-              .eq('user_id', user.id)
-              .single();
-            if (companion) {
-              setCompanionName(companion.nickname || companion.name);
-              setCompanionId(companion.id);
-              if (companion.avatar_url) setAvatar(companion.avatar_url);
-            }
-          }
-        } else {
-          const savedLang = localStorage.getItem('language') as Language;
-          if (savedLang && LANGUAGES.some(l => l.code === savedLang)) {
-            setLanguage(savedLang);
-          }
-        }
-      }
-    } catch (e) {
-      console.error('加载用户数据失败:', e);
-    } finally {
+async function loadUserData() {
+  try {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
       setLoading(false);
+      return;
     }
+
+    setEmail(user.email || '');
+    setUsername(user.user_metadata?.username || user.email?.split('@')[0] || 'User');
+
+    // Get profile info
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('id', user.id)
+      .single();
+
+    if (profile) {
+      const savedLang = (profile.language as Language) || localStorage.getItem('language') as Language || 'zh';
+      setLanguage(savedLang);
+      setTimezone(profile.timezone || 'Asia/Shanghai');
+      setRegisteredAt(
+        profile.created_at
+          ? new Date(profile.created_at).toLocaleDateString('zh-CN')
+          : ''
+      );
+    } else {
+      const savedLang = localStorage.getItem('language') as Language;
+      if (savedLang && LANGUAGES.some(l => l.code === savedLang)) {
+        setLanguage(savedLang);
+      }
+    }
+
+    // Get companion info
+    const { data: companion } = await supabase
+      .from('companions')
+      .select('id, nickname, name, avatar_url')
+      .eq('user_id', user.id)
+      .maybeSingle();
+
+    if (companion) {
+      setCompanionName(companion.nickname || companion.name);
+      setCompanionId(companion.id);
+      if (companion.avatar_url) setAvatar(companion.avatar_url);
+    }
+
+  } catch (e) {
+    console.error('加载用户数据失败:', e);
+  } finally {
+    setLoading(false);
   }
+}
 
   async function loadNotificationSettings() {
     // notification_settings table has no columns yet - use defaults
