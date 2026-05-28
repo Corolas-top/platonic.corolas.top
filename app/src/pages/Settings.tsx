@@ -383,6 +383,7 @@ export default function Settings() {
           .select('*')
           .eq('id', user.id)
           .single();
+
         if (profile) {
           const savedLang = (profile.language as Language) || localStorage.getItem('language') as Language || 'en';
           setLanguage(savedLang);
@@ -395,7 +396,7 @@ export default function Settings() {
             const { data: companion } = await supabase.from('companions')
               .select('id, nickname, name, avatar_url')
               .eq('user_id', user.id)
-              .single();
+              .maybeSingle();
             if (companion) {
               setCompanionName(companion.nickname || companion.name);
               setCompanionId(companion.id);
