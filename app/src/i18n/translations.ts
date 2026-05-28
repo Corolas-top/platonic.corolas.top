@@ -855,7 +855,7 @@ export const translations: Record<Language, Record<string, string>> = {
     /* ── Plaza ── */
     'plaza.title': 'パートナープラザ',
     'plaza.create': 'マイパートナーを作成',
-    ''plaza.search': '名前でパートナーを検索...',
+    'plaza.search': '名前でパートナーを検索...',
     'plaza.subtitle': '魂を選んで、旅を始めましょう.',
     'plaza.filter': 'フィルター',
 
