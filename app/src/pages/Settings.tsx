@@ -394,7 +394,7 @@ export default function Settings() {
           // If has companion, load companion info
           if (profile.status === 'HAS_COMPANION') {
             const { data: companion } = await supabase.from('companions')
-              .select('id, nickname, name, avatar_url')
+              .select('id, nickname, avatar_url')
               .eq('user_id', user.id)
               .maybeSingle();
             if (companion) {
