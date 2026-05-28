@@ -1086,7 +1086,7 @@ function PreviewPanel({ companion }: { companion?: Companion | null }) {
   const [currentTime, setCurrentTime] = useState('');
   const { t } = useI18n();
   const companionName = companion?.nickname || '伴侣';
-  const avatarUrl = companion?.avatar_url || '/companion-1.jpg';
+  const avatarUrl = companion?.avatar_url || '/companion-female-ziyuan.jpg';
 
   useEffect(() => {
     const update = () => {
