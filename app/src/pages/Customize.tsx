@@ -882,7 +882,7 @@ export default function Customize() {
                         </AnimatePresence>
                       </motion.div>
 
-                      {/* Bio / 个性签名 */}
+                      {/* Bio */}
                       <motion.div variants={staggerItem} className="mb-6">
                         <label className="block text-xs font-semibold uppercase tracking-wider text-plum-900 mb-2">
                           {t('customize.bio')}
