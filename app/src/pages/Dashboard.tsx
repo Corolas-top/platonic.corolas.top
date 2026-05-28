@@ -271,7 +271,7 @@ function BigFiveRadar({ companion, isLoading }: { companion?: Companion | null; 
     ];
   }, [companion]);
 
-  const companionName = companion?.nickname || '伴侣';
+  const companionName = companion?.nickname || 'Companion';
   const avatarUrl = companion?.avatar_url || '/default-avatar.jpg';
 
   useEffect(() => {
@@ -498,6 +498,7 @@ function getPersonalitySummary(traits: TraitData[]): string {
   const highTraits = traits.filter(t => t.value >= 60);
   if (highTraits.length === 0) return '性格温和，充满魅力';
   const names = highTraits.map(t => t.name);
+  const { t } = useI18n();
   const map: Record<string, string> = {
     '开放性': '富有想象力',
     '尽责性': '自律认真',
@@ -775,22 +776,22 @@ function MoodSparkline({
           pts.push({
             x: hour / 24,
             y: base,
-            label: mood.occ_label || '平静',
+            label: mood.occ_label || 'Calm',
             time: `${String(hour).padStart(2, '0')}:00`,
           });
         }
         return {
           dataPoints: pts,
-          currentMoodLabel: mood.occ_label || '平静',
+          currentMoodLabel: mood.occ_label || 'Calm',
         };
       }
       // No data at all
       return {
         dataPoints: [
-          { x: 0, y: 60, label: '平静', time: '00:00' },
-          { x: 1, y: 60, label: '平静', time: '24:00' },
+          { x: 0, y: 60, label: 'Calm', time: '00:00' },
+          { x: 1, y: 60, label: 'Calm', time: '24:00' },
         ],
-        currentMoodLabel: '平静',
+        currentMoodLabel: 'Calm',
       };
     }
 
@@ -810,7 +811,7 @@ function MoodSparkline({
 
     return {
       dataPoints: pts,
-      currentMoodLabel: pts[pts.length - 1]?.label || '平静',
+      currentMoodLabel: pts[pts.length - 1]?.label || 'Calm',
     };
   }, [messages, mood]);
 
@@ -965,7 +966,7 @@ function MoodSparkline({
       <div className="mt-3 flex items-center justify-between text-[12px] font-body text-[#6B5B6E]">
         <span>{t('dashboard.moodNow')}：{currentMoodLabel}</span>
         <div className="flex gap-3">
-          <span className="text-[#A093A5]">强度：{mood?.intensity || 50}/100</span>
+          <span className="text-[#A093A5]">{t('dashboard.intensity')}：{mood?.intensity || 50}/100</span>
         </div>
       </div>
     </motion.div>

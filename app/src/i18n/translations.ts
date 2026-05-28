@@ -123,6 +123,7 @@ export const translations: Record<Language, Record<string, string>> = {
     'dashboard.goMemoryDesc': 'Review your precious memories with your companion',
     'dashboard.goDrama': 'Experience Drama',
     'dashboard.goDramaDesc': 'Experience various dramas to enrich your relationship with your companion',
+    'dashboard.intensity': 'Intensity',
 
     /* ── Memory ── */
     'memory.title': 'Memories',
@@ -414,6 +415,7 @@ export const translations: Record<Language, Record<string, string>> = {
     'dashboard.goMemoryDesc': '回顾你和伴侣的珍贵回忆',
     'dashboard.goDrama': '体验剧情',
     'dashboard.goDramaDesc': '体验各种剧情，让与伴侣的关系更加丰富多彩',
+    'dashboard.intensity': '强度',
 
     /* ── Memory ── */
     'memory.title': '记忆',
@@ -705,6 +707,7 @@ export const translations: Record<Language, Record<string, string>> = {
     'dashboard.goMemoryDesc': 'あなたとパートナーの思い出を振り返りましょう',
     'dashboard.goDrama': 'ドラマを体験',
     'dashboard.goDramaDesc': 'パートナーと一緒にドラマを楽しみましょう',
+    'dashboard.intensity': '強度',
 
     /* ── Memory ── */
     'memory.title': 'メモリー',
@@ -996,6 +999,7 @@ export const translations: Record<Language, Record<string, string>> = {
     'dashboard.goMemoryDesc': '파트너와의 소중한 추억을 돌아보세요',
     'dashboard.goDrama': '드라마 체험',
     'dashboard.goDramaDesc': '다양한 드라마를 체험하며 파트너와의 관계를 더욱 풍부하게 만들어보세요',
+    'dashboard.intensity': '강도',
 
     /* ── Memory ── */
     'memory.title': '메모리',
