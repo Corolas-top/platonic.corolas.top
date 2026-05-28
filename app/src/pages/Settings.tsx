@@ -1014,8 +1014,7 @@ export default function Settings() {
             <div className="flex items-start gap-3 p-3 mb-4 rounded-xl bg-amber-50 border border-amber-100">
               <AlertTriangle size={16} className="text-amber-500 flex-shrink-0 mt-0.5" />
               <p className="font-body text-[12px] text-amber-700 leading-relaxed">
-                每个账号只能拥有一个伴侣。释放当前伴侣后，您可以创建新的伴侣。
-                此操作将删除所有与当前伴侣相关的回忆数据，且不可撤销。
+                {t('settings.deleteCompanionWarning')}
               </p>
             </div>
 

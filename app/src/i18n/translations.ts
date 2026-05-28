@@ -212,6 +212,7 @@ export const translations: Record<Language, Record<string, string>> = {
     'settings.updated': 'Last updated: January 1, 2026',
     'settings.passwordComingSoon': 'Password change feature coming soon',
     'settings.releaseCanCreateNew': 'After releasing, you can meet/create a new companion.',
+    'settings.deleteCompanionWarning': 'Each account can only have one companion. Releasing your current companion will allow you to create a new one. This action will delete all memory data related to the current companion and cannot be undone.',
 
     /* ── Achievement ── */
     'achievement.title': 'Achievements',
@@ -505,6 +506,7 @@ export const translations: Record<Language, Record<string, string>> = {
     'settings.updated': '本政策最后更新于 2026年1月1日',
     'settings.passwordComingSoon': '修改密码功能即将推出',
     'settings.releaseCanCreateNew': '释放后你可以认识/创建一个新的伴侣。',
+    'settings.deleteCompanionWarning': '每个账号只能拥有一个伴侣。释放当前伴侣后，您可以创建新的伴侣。此操作将删除所有与当前伴侣相关的回忆数据，且不可撤销。',
 
     /* ── Achievement ── */
     'achievement.title': '成就',
@@ -798,6 +800,7 @@ export const translations: Record<Language, Record<string, string>> = {
     'settings.updated': '最終更新: 2026年1月1日',
     'settings.passwordComingSoon': 'パスワード変更機能は近日公開予定',
     'settings.releaseCanCreateNew': '解放後は新しいパートナーを知る/作成することができます。',
+    'settings.deleteCompanionWarning': '各アカウントは1人のパートナーしか持てません。現在のパートナーを解放すると、新しいパートナーを作成できます。この操作は現在のパートナーに関連するすべての記憶データを削除し、元に戻せません。',
 
     /* ── Achievement ── */
     'achievement.title': '実績',
@@ -1091,6 +1094,7 @@ export const translations: Record<Language, Record<string, string>> = {
     'settings.updated': '최종 업데이트: 2026년 1월 1일',
     'settings.passwordComingSoon': '비밀번호 변경 기능이 곧 출시됩니다',
     'settings.releaseCanCreateNew': '해제 후에는 새로운 파트너를 알고/생성할 수 있습니다.',
+    'settings.deleteCompanionWarning': '각 계정은 하나의 파트너만 가질 수 있습니다. 현재 파트너를 해제하면 새로운 파트너를 생성할 수 있습니다. 이 작업은 현재 파트너와 관련된 모든 기억 데이터를 삭제하며, 되돌릴 수 없습니다.',
 
     /* ── Achievement ── */
     'achievement.title': '업적',
