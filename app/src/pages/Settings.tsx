@@ -593,6 +593,7 @@ export default function Settings() {
               { label: t('settings.registered'), value: registeredAt },
               {
                 label: t('settings.companion'),
+                action: true,
                 value: (
                   <span className="flex items-center gap-1">
                     {companionName || t('settings.companionNone')}
