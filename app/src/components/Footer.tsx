@@ -37,7 +37,7 @@ export default function Footer() {
 
           {/* Col 2: Product links */}
           <div className="flex flex-col gap-3">
-            <h4 className="text-white text-sm font-semibold mb-1">Product</h4>
+            <h4 className="text-pink text-sm font-semibold mb-1">Product</h4>
             {productLinks.map((link) => (
               <button
                 key={link.label}
@@ -51,7 +51,7 @@ export default function Footer() {
 
           {/* Col 3: Resources */}
           <div className="flex flex-col gap-3">
-            <h4 className="text-white text-sm font-semibold mb-1">Resources</h4>
+            <h4 className="text-pink text-sm font-semibold mb-1">Resources</h4>
             {resourceLinks.map((link) => (
               <button
                 key={link.label}
@@ -65,7 +65,7 @@ export default function Footer() {
 
           {/* Col 4: Contact */}
           <div className="flex flex-col gap-3">
-            <h4 className="text-white text-sm font-semibold mb-1">Contact Us</h4>
+            <h4 className="text-pink text-sm font-semibold mb-1">Contact Us</h4>
             <a
               href="mailto:corolar@corolas.top"
               className="text-sm text-sidebar-text/80 hover:text-pink-200 transition-colors"
