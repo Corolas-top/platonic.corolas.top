@@ -181,6 +181,12 @@ export const translations: Record<Language, Record<string, string>> = {
     'drama.restart': 'Restart',
     'drama.notStarted': 'Not Started',
     'drama.totalExperiencedDramas': 'Total Dramas Experienced',
+    'drama.messageCounts': 'messages',
+    'drama.dramainProgress': 'Drama in progress, click to continue experience',
+    'drama.dramanotStarted': 'Drama not started, click to start experience',
+    'drama.noDramasRecords': 'No drama records yet',
+    'drama.noDramasRecordsDesc': 'Go to the drama plaza to choose a drama and start experiencing',
+    'drama.goDramaPlaza': 'Go to Drama Plaza',
 
     /* ── Settings ── */
     'settings.title': 'Settings',
@@ -495,6 +501,12 @@ export const translations: Record<Language, Record<string, string>> = {
     'drama.restart': '重新开始',
     'drama.notStarted': '未开始',
     'drama.totalExperiencedDramas': '总体验剧情',
+    'drama.messageCounts': '条对话',
+    'drama.dramainProgress': '剧情进行中，点击继续体验',
+    'drama.dramanotStarted': '剧情未开始，点击开始体验',
+    'drama.noDramasRecords': '暂无剧情记录',
+    'drama.noDramasRecordsDesc': '去剧情广场选择一个剧本，开始体验',
+    'drama.goDramaPlaza': '去剧情广场',
 
     /* ── Settings ── */
     'settings.title': '设置',
@@ -809,6 +821,12 @@ export const translations: Record<Language, Record<string, string>> = {
     'drama.restart': '再開',
     'drama.notStarted': '未開始',
     'drama.totalExperiencedDramas': '総体験ドラマ',
+    'drama.messageCounts': '件の対話',
+    'drama.dramainProgress': 'ドラマ進行中、クリックして体験を続ける',
+    'drama.dramanotStarted': 'ドラマ未開始、クリックして体験を始める',
+    'drama.noDramasRecords': 'ドラマの記録がありません',
+    'drama.noDramasRecordsDesc': 'ドラマプラザに行って、ドラマを選んで体験を始めましょう',
+    'drama.goDramaPlaza': 'ドラマプラザへ',
 
     /* ── Settings ── */
     'settings.title': '設定',
@@ -1123,6 +1141,12 @@ export const translations: Record<Language, Record<string, string>> = {
     'drama.restart': '재시작',
     'drama.notStarted': '미시작',
     'drama.totalExperiencedDramas': '총 체험한 드라마',
+    'drama.messageCounts': '건의 대화',
+    'drama.dramainProgress': '드라마 진행 중, 클릭하여 체험을 계속하세요',
+    'drama.dramanotStarted': '드라마 미시작, 클릭하여 체험을 시작하세요',
+    'drama.noDramasRecords': '드라마 기록이 없습니다',
+    'drama.noDramasRecordsDesc': '드라마 광장에 가서 드라마를 선택하고 체험을 시작하세요',
+    'drama.goDramaPlaza': '드라마 광장으로',
 
     /* ── Settings ── */
     'settings.title': '설정',

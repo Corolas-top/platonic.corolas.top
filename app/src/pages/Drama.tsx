@@ -646,14 +646,14 @@ export default function Drama() {
                   animate={{ opacity: 1 }}
                 >
                   <BookOpen size={48} className="text-pink-200 mx-auto mb-4" />
-                  <p className="text-[16px] text-[#6B5B6E] font-body mb-2">还没有剧情记录</p>
-                  <p className="text-[13px] text-[#A093A5] mb-6">去剧本广场选择一个剧本开始体验吧</p>
+                  <p className="text-[16px] text-[#6B5B6E] font-body mb-2">{t('drama.noDramasRecords')}</p>
+                  <p className="text-[13px] text-[#A093A5] mb-6">{t('drama.noDramasRecordsDesc')}</p>
                   <button
                     onClick={() => setActiveView('plaza')}
                     className="px-6 py-2.5 rounded-xl text-[14px] font-semibold text-white
                       accent-gradient hover:brightness-110 transition-all duration-150 shadow-sm active:scale-95"
                   >
-                    去剧本广场
+                    {t('drama.goDramaPlaza')}
                   </button>
                 </motion.div>
               )}
@@ -701,7 +701,7 @@ export default function Drama() {
                           <div className="flex items-center gap-4 text-[12px] text-[#A093A5]">
                             <span className="flex items-center gap-1">
                               <MessageCircle size={12} />
-                              {session.message_count} 条对话
+                              {session.message_count} {t('drama.messageCounts')}
                             </span>
                             <span className="flex items-center gap-1">
                               <Clock size={12} />
@@ -715,8 +715,8 @@ export default function Drama() {
                         {/* Status hint */}
                         <p className="text-[13px] text-[#6B5B6E]">
                           {session.status === 'active'
-                            ? '剧情进行中，点击继续体验'
-                            : '剧本尚未开始，点击开始体验'}
+                            ? t('drama.dramainProgress') 
+                            : t('drama.dramanotStarted') }
                         </p>
 
                         {/* Actions: Continue + Restart */}
