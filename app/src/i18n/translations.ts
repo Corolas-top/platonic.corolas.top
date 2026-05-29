@@ -6,7 +6,7 @@
 
 export type Language = 'en' | 'zh' | 'ja' | 'ko';
 
-export const translations: Record<<Language, Record<string, string>> = {
+export const translations: Record<Language, Record<string, string>> = {
   /* ─── English (default) ─── */
   en: {
     /* ── Common ── */
