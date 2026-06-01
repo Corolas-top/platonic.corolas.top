@@ -395,6 +395,7 @@ export default function Settings() {
           const savedLang = (profile.language as Language) || localStorage.getItem('language') as Language || 'en';
           setLanguage(savedLang);
           setTimezone(profile.timezone || 'Asia/Shanghai');
+          setUsername(profile.nickname || 'User');
           setRegisteredAt(profile.created_at
             ? new Date(profile.created_at).toLocaleDateString('zh-CN')
             : '');
