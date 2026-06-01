@@ -808,10 +808,10 @@ function SignupStep2({
 /* ------------------------------------------------------------------ */
 
 export default function Auth() {
-  const [mode, setMode] = useState<<AuthMode>('login');
+  const [mode, setMode] = useState<AuthMode>('login');
   const [tabDirection, setTabDirection] = useState(1);
   const [stepDirection, setStepDirection] = useState(1);
-  const [signupStep, setSignupStep] = useState<<SignupStep>(1);
+  const [signupStep, setSignupStep] = useState<SignupStep>(1);
   const [signupForm, setSignupForm] = useState({
     username: '',
     email: '',
