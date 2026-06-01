@@ -528,7 +528,7 @@ function SignupStep1({
 }) {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
-  const [touched, setTouched] = useState<<Record<string, boolean>>({});
+  const [touched, setTouched] = useState<Record<string, boolean>>({});
 
   const passwordsMatch =
     formData.confirmPassword.length > 0 && formData.password === formData.confirmPassword;
