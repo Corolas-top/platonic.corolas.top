@@ -23,7 +23,7 @@ const sidebarRoutes = [
   '/payment',
   '/crowdfunding',
   '/customize',
-  '/achievements',
+  '/achievement',
 ];
 
 export default function Layout({ children }: { children: React.ReactNode }) {
