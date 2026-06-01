@@ -100,14 +100,15 @@ const personalityPresets: { label: string; values: BigFive; color: string }[] = 
 
 const storyPrompts = [
   '她在一个樱花小镇长大，从小就喜欢画画和做甜点...',
-  '她是一名热爱星空的天文学者，在山顶观测站工作...',
+  '他是一名热爱星空的天文学者，在山顶观测站工作...',
   '她曾经环游世界，现在想要安定下来，开一家咖啡馆...',
-  '她是一位神秘的图书馆管理员，拥有不为人知的故事...',
+  '他是一位神秘的图书馆管理员，拥有不为人知的故事...',
 ];
 
 const avatarOptions = [
-  '/companion-female-xiaoying.jpg', '/companion-female-lingshuang.jpg', '/companion-female-yinyue.jpg',
+  '/companion-female-cindy.png', '/companion-female-lilith.png', '/companion-female-yinyue.jpg',
   '/companion-female-yanxia.jpg', '/companion-female-ziyuan.jpg', '/companion-female-qingkong.jpg',
+  '/companion-male-xiaolin.png', '/companion-male-heyan.png', '/companion-male-nuonuo.png'
 ];
 
 const genderOptions = [
