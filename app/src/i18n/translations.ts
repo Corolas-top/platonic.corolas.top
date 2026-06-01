@@ -367,6 +367,7 @@ export const translations: Record<Language, Record<string, string>> = {
     'customize.birthday': 'Birthday',
     'customize.languagePreference': 'Language Preference',
     'customize.avatar': 'Avatar',
+    'customize.petType': 'Pet Type',
 
     /* ── Footer ── */
     'footer.tagline': 'AI virtual companion, warming every lonely soul',
@@ -789,6 +790,7 @@ export const translations: Record<Language, Record<string, string>> = {
     'customize.birthday': '生日',
     'customize.languagePreference': '语言偏好',
     'customize.avatar': '头像',
+    'customize.petType': '宠物类型',
 
     /* ── Footer ── */
     'footer.tagline': 'AI虚拟伴侣，温暖每一个孤独的灵魂',
@@ -1211,6 +1213,7 @@ export const translations: Record<Language, Record<string, string>> = {
     'customize.birthday': '誕生日',
     'customize.languagePreference': '言語の好み',
     'customize.avatar': 'アバター',
+    'customize.petType': 'ペットの種類',
 
     /* ── Footer ── */
     'footer.tagline': 'AIバーチャルパートナー、孤独な魂を温める',
@@ -1632,6 +1635,7 @@ export const translations: Record<Language, Record<string, string>> = {
     'customize.birthday': '생일',
     'customize.languagePreference': '언어 선호도',
     'customize.avatar': '아바타',
+    'customize.petType': '펫 종류',
 
     /* ── Footer ── */
     'footer.tagline': 'AI 가상 파트너, 외로운 영혼을 따뜻하게',

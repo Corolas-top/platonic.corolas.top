@@ -919,7 +919,7 @@ export default function Customize() {
                       {form.petName && (
                         <motion.div variants={staggerItem} className="mb-6">
                           <label className="block text-xs font-semibold uppercase tracking-wider text-plum-900 mb-2">
-                            宠物类型
+                            {t('customize.petType')}
                           </label>
                           <div className="flex flex-wrap gap-2">
                             {petTypeOptions.map((type) => (
