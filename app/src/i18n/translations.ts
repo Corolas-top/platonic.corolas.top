@@ -362,6 +362,11 @@ export const translations: Record<Language, Record<string, string>> = {
     'customize.personalityOpenHigh': 'Curious & Creative',
     'customize.personalityOpenLow': 'Practical & Conservative',
     'customize.personalityPrompt': 'Need inspiration? Click for hints',
+    'customize.successMessage': ' is ready, heading to home page...',
+    'customize.age': 'Age',
+    'customize.birthday': 'Birthday',
+    'customize.languagePreference': 'Language Preference',
+    'customize.avatar': 'Avatar',
 
     /* ── Footer ── */
     'footer.tagline': 'AI virtual companion, warming every lonely soul',
@@ -779,6 +784,11 @@ export const translations: Record<Language, Record<string, string>> = {
     'customize.personalityOpenHigh': '好奇求知',
     'customize.personalityOpenLow': '务实保守',
     'customize.personalityPrompt': '需要灵感？点击获取提示',
+    'customize.successMessage': '已经准备好了，正在前往主页...', 
+    'customize.age': '年龄',
+    'customize.birthday': '生日',
+    'customize.languagePreference': '语言偏好',
+    'customize.avatar': '头像',
 
     /* ── Footer ── */
     'footer.tagline': 'AI虚拟伴侣，温暖每一个孤独的灵魂',
@@ -1196,6 +1206,11 @@ export const translations: Record<Language, Record<string, string>> = {
     'customize.personalityOpenHigh': '好奇心旺盛',
     'customize.personalityOpenLow': '実務的',
     'customize.personalityPrompt': 'インスピレーションが必要？クリックしてヒントを取得',
+    'customize.successMessage': '準備ができました。ホームページに移動しています...',
+    'customize.age': '年齢',
+    'customize.birthday': '誕生日',
+    'customize.languagePreference': '言語の好み',
+    'customize.avatar': 'アバター',
 
     /* ── Footer ── */
     'footer.tagline': 'AIバーチャルパートナー、孤独な魂を温める',
@@ -1612,6 +1627,11 @@ export const translations: Record<Language, Record<string, string>> = {
     'customize.personalityOpenHigh': '호기심 많은',
     'customize.personalityOpenLow': '실용적인',
     'customize.personalityPrompt': '영감이 필요하신가요? 힌트를 얻으려면 클릭',
+    'customize.successMessage': '준비가 되었습니다. 홈 페이지로 이동합니다...',
+    'customize.age': '나이',
+    'customize.birthday': '생일',
+    'customize.languagePreference': '언어 선호도',
+    'customize.avatar': '아바타',
 
     /* ── Footer ── */
     'footer.tagline': 'AI 가상 파트너, 외로운 영혼을 따뜻하게',

@@ -477,7 +477,7 @@ export default function Customize() {
             transition={{ delay: 0.6 }}
             className="text-plum-800 text-lg"
           >
-            {form.nickname || '你的伴侣'}已经准备好了，正在前往主页...
+            {form.nickname || '你的伴侣'} {t('customize.successMessage')}
           </motion.p>
         </motion.div>
       </div>
@@ -615,7 +615,7 @@ export default function Customize() {
                       {/* Age */}
                       <motion.div variants={staggerItem} className="mb-6">
                         <label className="block text-xs font-semibold uppercase tracking-wider text-plum-900 mb-2">
-                          年龄
+                          {t('customize.age')}
                         </label>
                         <input
                           type="number"
@@ -630,7 +630,7 @@ export default function Customize() {
                       {/* Birthday: Month & Day */}
                       <motion.div variants={staggerItem} className="mb-6">
                         <label className="block text-xs font-semibold uppercase tracking-wider text-plum-900 mb-2">
-                          生日
+                          {t('customize.birthday')}
                         </label>
                         <div className="flex gap-3">
                           <select
@@ -657,7 +657,7 @@ export default function Customize() {
                       {/* Language */}
                       <motion.div variants={staggerItem} className="mb-6">
                         <label className="block text-xs font-semibold uppercase tracking-wider text-plum-900 mb-2">
-                          语言偏好
+                          {t('customize.languagePreference')}
                         </label>
                         <div className="flex gap-3">
                           {languageOptions.map((lang) => (
@@ -680,7 +680,7 @@ export default function Customize() {
                       {/* Avatar selection */}
                       <motion.div variants={staggerItem}>
                         <label className="block text-xs font-semibold uppercase tracking-wider text-plum-900 mb-3">
-                          头像
+                          {t('customize.avatar')}
                         </label>
                         <div className="grid grid-cols-3 gap-3">
                           {avatarOptions.map((avatar, i) => (
