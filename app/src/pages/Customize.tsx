@@ -123,7 +123,7 @@ const languageOptions = [
   { value: 'ko', label: '한국어' },
 ];
 
-const petTypeOptions = ['猫', '狗', '兔子', '鸟', '仓鼠', '龙猫', '狐狸', '自定义'];
+const petTypeOptions = ['猫', '狗', '兔子', '鸟', '仓鼠', '龙猫', '狐狸', '自定义', '宠物功能实际未开启，仅供选择展示'];
 
 const months = Array.from({ length: 12 }, (_, i) => i + 1);
 const days = Array.from({ length: 31 }, (_, i) => i + 1);
